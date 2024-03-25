@@ -53,7 +53,7 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
             search::getNegamaxBestMoveAndEval(board,depth,data,eval,bestMove,eval);
             if (bestMove != SEARCH_FAILED_MOVE_CODE)
                 bestMoveFromPrevious = bestMove;
-            if (eval == MATE_VALUE) // mate pruning. We find the fastest mate.
+            if (eval == hce::MATE_VALUE) // mate pruning. We find the fastest mate.
                 break;
         }
         catch (const search::SearchCancelledException& e) {

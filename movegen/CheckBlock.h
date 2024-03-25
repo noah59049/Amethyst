@@ -1,3 +1,3 @@
 #pragma once
 #include "../Typedefs.h"
-bitboard lookupCheckResponses(int kingSquare, int pieceSquare);
+bitboard_t lookupCheckResponses(int kingSquare, int pieceSquare);

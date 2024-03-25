@@ -10,7 +10,7 @@
 using namespace bitmasks;
 using std::vector;
 
-bitboard calculateRookBlockerSquaresManual (const int kingSquare, int rookSquare) {
+bitboard_t calculateRookBlockerSquaresManual (const int kingSquare, int rookSquare) {
     int LEFT = -8;
     int RIGHT = 8;
     int UP = 1;
@@ -34,7 +34,7 @@ bitboard calculateRookBlockerSquaresManual (const int kingSquare, int rookSquare
         assert(false);
     }
 
-    bitboard blockerSquares = 0ULL;
+    bitboard_t blockerSquares = 0ULL;
     do {
         blockerSquares |= 1ULL << rookSquare;
         rookSquare += dsquare;
@@ -42,7 +42,7 @@ bitboard calculateRookBlockerSquaresManual (const int kingSquare, int rookSquare
     return blockerSquares;
 }
 
-bitboard calculateBishopBlockerSquaresManual (const int kingSquare, int bishopSquare) {
+bitboard_t calculateBishopBlockerSquaresManual (const int kingSquare, int bishopSquare) {
     if (((getMagicBishopAttackedSquares(bishopSquare,0ULL) >> kingSquare) & 1ULL) == 0ULL)
         return ENTIRE_BOARD;
 
@@ -70,7 +70,7 @@ bitboard calculateBishopBlockerSquaresManual (const int kingSquare, int bishopSq
             directionToKing = DOWNLEFT;
     }
 
-    bitboard blockerSquares = 0ULL;
+    bitboard_t blockerSquares = 0ULL;
     do {
         blockerSquares |= 1ULL << bishopSquare;
         bishopSquare += directionToKing;
@@ -78,8 +78,8 @@ bitboard calculateBishopBlockerSquaresManual (const int kingSquare, int bishopSq
     return blockerSquares;
 } // end getBishopBlockerSquares
 
-vector<bitboard> getBishopBlockerButterfly () {
-    vector<bitboard> butterflyBoard(4096);
+vector<bitboard_t> getBishopBlockerButterfly () {
+    vector<bitboard_t> butterflyBoard(4096);
     for (int kingSquare = 0; kingSquare < 64; kingSquare++) {
         for (int bishopSquare = 0; bishopSquare < 64; bishopSquare++) {
             butterflyBoard[kingSquare * 64 + bishopSquare] = calculateBishopBlockerSquaresManual(kingSquare,bishopSquare);
@@ -88,8 +88,8 @@ vector<bitboard> getBishopBlockerButterfly () {
     return butterflyBoard;
 }
 
-vector<bitboard> getRookBlockerButterfly () {
-    vector<bitboard> butterflyBoard(4096);
+vector<bitboard_t> getRookBlockerButterfly () {
+    vector<bitboard_t> butterflyBoard(4096);
     for (int kingSquare = 0; kingSquare < 64; kingSquare++) {
         for (int rookSquare = 0; rookSquare < 64; rookSquare++) {
             butterflyBoard[kingSquare * 64 + rookSquare] = calculateRookBlockerSquaresManual(kingSquare,rookSquare);
@@ -98,24 +98,23 @@ vector<bitboard> getRookBlockerButterfly () {
     return butterflyBoard;
 }
 
-const static vector<bitboard> BISHOP_BLOCKER_BUTTERFLY = getBishopBlockerButterfly();
-const static vector<bitboard> ROOK_BLOCKER_BUTTERFLY = getRookBlockerButterfly();
+const static vector<bitboard_t> BISHOP_BLOCKER_BUTTERFLY = getBishopBlockerButterfly();
+const static vector<bitboard_t> ROOK_BLOCKER_BUTTERFLY = getRookBlockerButterfly();
 
-// TODONE: Inline these once the project is more finalized
-inline bitboard lookupBishopCheckResponses(int kingSquare, int bishopSquare) {
+inline bitboard_t lookupBishopCheckResponses(int kingSquare, int bishopSquare) {
     return BISHOP_BLOCKER_BUTTERFLY[kingSquare * 64 + bishopSquare];
 }
-inline bitboard lookupRookCheckResponses(int kingSquare, int rookSquare) {
+inline bitboard_t lookupRookCheckResponses(int kingSquare, int rookSquare) {
     return ROOK_BLOCKER_BUTTERFLY[kingSquare * 64 + rookSquare];
 }
 
-bitboard getManualCheckResponses(int kingSquare, int pieceSquare) {
-    bitboard queenCheckBlockSquares = lookupBishopCheckResponses(kingSquare,pieceSquare) & lookupRookCheckResponses(kingSquare,pieceSquare);
+bitboard_t getManualCheckResponses(int kingSquare, int pieceSquare) {
+    bitboard_t queenCheckBlockSquares = lookupBishopCheckResponses(kingSquare,pieceSquare) & lookupRookCheckResponses(kingSquare,pieceSquare);
     return queenCheckBlockSquares == ENTIRE_BOARD ? 1ULL << pieceSquare : queenCheckBlockSquares;
 }
 
 struct CheckResponsesButterfly {
-    bitboard butterfly[4096];
+    bitboard_t butterfly[4096];
 
     CheckResponsesButterfly () {
         for (int kingSquare = 0; kingSquare < 64; kingSquare++) {
@@ -129,6 +128,6 @@ struct CheckResponsesButterfly {
 const static CheckResponsesButterfly CHECK_RESPONSES_BUTTERFLY = CheckResponsesButterfly();
 
 // This is the only function we have that is in the header file
-bitboard lookupCheckResponses(int kingSquare, int pieceSquare) {
+bitboard_t lookupCheckResponses(int kingSquare, int pieceSquare) {
     return CHECK_RESPONSES_BUTTERFLY.butterfly[kingSquare * 64 + pieceSquare];
 }

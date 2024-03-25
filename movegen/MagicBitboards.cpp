@@ -10,11 +10,11 @@ using namespace std;
 /////////////////////   Part 1: Calculating attacked squares    /////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
 
-bitboard getKingAttackedSquares (const int square) {
+bitboard_t getKingAttackedSquares (const int square) {
     const int rank = square % 8;
     const int file = square / 8;
 
-    bitboard attackedSquares = 0ULL;
+    bitboard_t attackedSquares = 0ULL;
 
     for (int dx = -1; dx <= 1; dx++) {
         for (int dy = -1; dy <= 1; dy++) {
@@ -29,12 +29,12 @@ bitboard getKingAttackedSquares (const int square) {
     return attackedSquares;
 }
 
-bitboard getKnightAttackedSquares (const int square) {
-    const bitboard startSquare = 1ULL << square;
+bitboard_t getKnightAttackedSquares (const int square) {
+    const bitboard_t startSquare = 1ULL << square;
     const int rank = square % 8;
     const int file = square / 8;
 
-    bitboard attackedSquares = 0ULL;
+    bitboard_t attackedSquares = 0ULL;
 
     // Check forwards moves (from white's perspective)
     if (rank < 7) {
@@ -72,18 +72,18 @@ bitboard getKnightAttackedSquares (const int square) {
     return attackedSquares;
 }
 
-bitboard getRookAttackedSquares (const int square) {
+bitboard_t getRookAttackedSquares (const int square) {
     const int rank = square % 8;
     const int file = square / 8;
 
     return (A_FILE << (file * 8) | FIRST_RANK << rank) - (1ULL << square);
 }
 
-bitboard getBishopAttackedSquares (const int square) {
+bitboard_t getBishopAttackedSquares (const int square) {
     const int rank = square % 8;
     const int file = square / 8;
 
-    bitboard attackedSquares = 0ULL;
+    bitboard_t attackedSquares = 0ULL;
 
     for (int dx : {-1,1}) {
         for (int dy : {-1,1}) {
@@ -100,27 +100,27 @@ bitboard getBishopAttackedSquares (const int square) {
     return attackedSquares;
 }
 
-bitboard getRookPotentialBlockers (int square) {
+bitboard_t getRookPotentialBlockers (int square) {
     const int rank = square % 8;
     const int file = square / 8;
 
-    const bitboard fileBlockers = A_FILE << (file * 8) & INNER_RANKS;
-    const bitboard rankBlockers = (FIRST_RANK << rank) & INNER_FILES;
+    const bitboard_t fileBlockers = A_FILE << (file * 8) & INNER_RANKS;
+    const bitboard_t rankBlockers = (FIRST_RANK << rank) & INNER_FILES;
 
     return (fileBlockers | rankBlockers) & ~(1ULL << square);
 }
 
-bitboard getBishopPotentialBlockers (int square) {
+bitboard_t getBishopPotentialBlockers (int square) {
     return getBishopAttackedSquares(square) & INNER_36;
 }
 
-bitboard getBishopLegalMoves (int square, bitboard blockers) {
+bitboard_t getBishopLegalMoves (int square, bitboard_t blockers) {
     //assert(((blockers & getBishopPotentialBlockers(square)) == blockers));
     blockers &= getBishopPotentialBlockers(square);
     const int rank = square % 8;
     const int file = square / 8;
 
-    bitboard attackedSquares = 0ULL;
+    bitboard_t attackedSquares = 0ULL;
 
     for (int dx : {-1,1}) {
         for (int dy : {-1,1}) {
@@ -139,13 +139,13 @@ bitboard getBishopLegalMoves (int square, bitboard blockers) {
     return attackedSquares;
 }
 
-bitboard getRookLegalMoves (int square, bitboard blockers) {
+bitboard_t getRookLegalMoves (int square, bitboard_t blockers) {
     //assert(((blockers & getRookPotentialBlockers(square)) == blockers));
     blockers &= getRookPotentialBlockers(square);
     const int rank = square % 8;
     const int file = square / 8;
 
-    bitboard attackedSquares = 0ULL;
+    bitboard_t attackedSquares = 0ULL;
 
     int DXS[4] = {0,0,-1,1};
     int DYS[4] = {1,-1,0,0};
@@ -178,8 +178,8 @@ bitboard getRookLegalMoves (int square, bitboard blockers) {
 // Those are N-1 magics, so the magic numbers and relevant occupancy bits have been changed.
 // Those are copied from https://www.chessprogramming.org/Best_Magics_so_far
 
-// The rook magic bitboard tables take 713 KB of memory.
-// The bishop magic bitboard tables take 42 KB of memory.
+// The rook magic bitboard_t tables take 713 KB of memory.
+// The bishop magic bitboard_t tables take 42 KB of memory.
 
 // rook rellevant occupancy bits
 constexpr const static int rook_rellevant_bits[64] = {
@@ -227,7 +227,7 @@ constexpr const static int bishop_shifts[64] = {
         58, 59, 59, 59, 59, 59, 59, 58
 };
 
-constexpr const bitboard rook_magics[64] = {
+constexpr const bitboard_t rook_magics[64] = {
         0xa8002c000108020ULL,
         0x6c00049b0002001ULL,
         0x100200010090040ULL,
@@ -295,7 +295,7 @@ constexpr const bitboard rook_magics[64] = {
 };
 
 // bishop magic number
-constexpr const bitboard bishop_magics[64] = {
+constexpr const bitboard_t bishop_magics[64] = {
         0x89a1121896040240ULL,
         0x2004844802002010ULL,
         0x2068080051921000ULL,
@@ -362,7 +362,7 @@ constexpr const bitboard bishop_magics[64] = {
         0x40102000a0a60140ULL,
 };
 
-constexpr const bitboard ROOK_RELEVANT_BLOCKERS[64] = {282578800148862,
+constexpr const bitboard_t ROOK_RELEVANT_BLOCKERS[64] = {282578800148862,
                                                        565157600297596,
                                                        1130315200595066,
                                                        2260630401190006,
@@ -427,7 +427,7 @@ constexpr const bitboard ROOK_RELEVANT_BLOCKERS[64] = {282578800148862,
                                                        4485655873561051136,
                                                        9115426935197958144};
 
-constexpr const bitboard BISHOP_RELEVANT_BLOCKERS[64] = {18049651735527936,
+constexpr const bitboard_t BISHOP_RELEVANT_BLOCKERS[64] = {18049651735527936,
                                                          70506452091904,
                                                          275415828992,
                                                          1075975168,
@@ -496,23 +496,23 @@ constexpr const bitboard BISHOP_RELEVANT_BLOCKERS[64] = {18049651735527936,
 /////////////////////       Part 3: Attack square tables        /////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
 
-vector<bitboard> getKingAttackedSquaresTable () {
-    vector<bitboard> kingAttackedSquaresTable(64);
+vector<bitboard_t> getKingAttackedSquaresTable () {
+    vector<bitboard_t> kingAttackedSquaresTable(64);
     for (int square = 0; square < 64; square++) {
         kingAttackedSquaresTable[square] = getKingAttackedSquares(square);
     }
     return kingAttackedSquaresTable;
 }
 
-vector<bitboard> getKnightAttackedSquaresTable () {
-    vector<bitboard> knightAttackedSquaresTable(64);
+vector<bitboard_t> getKnightAttackedSquaresTable () {
+    vector<bitboard_t> knightAttackedSquaresTable(64);
     for (int square = 0; square < 64; square++) {
         knightAttackedSquaresTable[square] = getKnightAttackedSquares(square);
     }
     return knightAttackedSquaresTable;
 }
 
-vector<bitboard> getAllSubBitsOf (bitboard original) {
+vector<bitboard_t> getAllSubBitsOf (bitboard_t original) {
     // This function has been bug tested and is correct
     // Having good variable names for this function is almost impossible because it just has so many things that mean different things.
     // Step 1: Find the 1 bits
@@ -524,7 +524,7 @@ vector<bitboard> getAllSubBitsOf (bitboard original) {
             oneBits.push_back(i);
         }
     }
-    bitboard remainingBits = original;
+    bitboard_t remainingBits = original;
     int index = 0;
     while (remainingBits != 0ULL) {
         int smallestOneBit = log2ll(remainingBits & -remainingBits);
@@ -534,10 +534,10 @@ vector<bitboard> getAllSubBitsOf (bitboard original) {
     }
 
     // Step 2: Construct all possibilities
-    vector<bitboard> possibilities(1 << bitCount);
+    vector<bitboard_t> possibilities(1 << bitCount);
     for (index = 0; index < possibilities.size(); index++) {
         // For every 1 bit in index, OR the thing from oneBits
-        bitboard subBits = 0ULL;
+        bitboard_t subBits = 0ULL;
         for (int bit = 0; bit < bitCount; bit++) {
             if (((index >> bit) & 1) == 1)
                 subBits |= 1L << oneBits[bit];
@@ -547,7 +547,7 @@ vector<bitboard> getAllSubBitsOf (bitboard original) {
     return possibilities;
 } // end getAllSubBitsOf
 
-int bitCount (const bitboard number) {
+int bitCount (const bitboard_t number) {
     // Could be made faster with __builtin_popcountll, but I don't want to rewrite legacy code.
     int bitCount = 0;
     for (int i = 0; i < 64; i++) {
@@ -558,13 +558,13 @@ int bitCount (const bitboard number) {
     return bitCount;
 }
 
-vector<bitboard> getRookMagicBitboardTable(int startSquare, bitboard magicNumber, int numBits) {
-    //bitboard numBits = bitCount(getRookPotentialBlockers(startSquare));
-    vector<bitboard> magicBitboardTable(1 << numBits);
+vector<bitboard_t> getRookMagicBitboardTable(int startSquare, bitboard_t magicNumber, int numBits) {
+    //bitboard_t numBits = bitCount(getRookPotentialBlockers(startSquare));
+    vector<bitboard_t> magicBitboardTable(1 << numBits);
 
-    for (bitboard blockersMask : getAllSubBitsOf(getRookPotentialBlockers(startSquare))) {
-        bitboard result = getRookLegalMoves(startSquare,blockersMask);
-        bitboard bucket = (blockersMask * magicNumber) >> (64 - numBits);
+    for (bitboard_t blockersMask : getAllSubBitsOf(getRookPotentialBlockers(startSquare))) {
+        bitboard_t result = getRookLegalMoves(startSquare,blockersMask);
+        bitboard_t bucket = (blockersMask * magicNumber) >> (64 - numBits);
         assert(magicBitboardTable[bucket] == 0ULL or magicBitboardTable[bucket] == result);
         magicBitboardTable[bucket] = result;
     }
@@ -572,12 +572,12 @@ vector<bitboard> getRookMagicBitboardTable(int startSquare, bitboard magicNumber
     return magicBitboardTable;
 }
 
-vector<bitboard> getBishopMagicBitboardTable(int startSquare, bitboard magicNumber, int numBits) {
-    vector<bitboard> magicBitboardTable(1 << numBits);
+vector<bitboard_t> getBishopMagicBitboardTable(int startSquare, bitboard_t magicNumber, int numBits) {
+    vector<bitboard_t> magicBitboardTable(1 << numBits);
 
-    for (bitboard blockersMask : getAllSubBitsOf(getBishopPotentialBlockers(startSquare))) {
-        bitboard result = getBishopLegalMoves(startSquare,blockersMask);
-        bitboard bucket = (blockersMask * magicNumber) >> (64 - numBits);
+    for (bitboard_t blockersMask : getAllSubBitsOf(getBishopPotentialBlockers(startSquare))) {
+        bitboard_t result = getBishopLegalMoves(startSquare,blockersMask);
+        bitboard_t bucket = (blockersMask * magicNumber) >> (64 - numBits);
         assert(magicBitboardTable[bucket] == 0ULL or magicBitboardTable[bucket] == result);
         magicBitboardTable[bucket] = result;
     }
@@ -586,66 +586,66 @@ vector<bitboard> getBishopMagicBitboardTable(int startSquare, bitboard magicNumb
 }
 
 // A 2D vector is not the fastest way to do this, but I will optimize it later.
-vector<vector<bitboard>> getRookMagicBitboardTable() {
-    vector<vector<bitboard>> table(64);
+vector<vector<bitboard_t>> getRookMagicBitboardTable() {
+    vector<vector<bitboard_t>> table(64);
     for (int square = 0; square < 64; square++) {
         int bits = rook_rellevant_bits[square];
-        bitboard magic = rook_magics[square];
+        bitboard_t magic = rook_magics[square];
         table[square] = getRookMagicBitboardTable(square,magic,bits);
     }
     return table;
 }
 
-vector<vector<bitboard>> getBishopMagicBitboardTable() {
-    vector<vector<bitboard>> table(64);
+vector<vector<bitboard_t>> getBishopMagicBitboardTable() {
+    vector<vector<bitboard_t>> table(64);
     for (int square = 0; square < 64; square++) {
         int bits = bishop_rellevant_bits[square];
-        bitboard magic = bishop_magics[square];
+        bitboard_t magic = bishop_magics[square];
         table[square] = getBishopMagicBitboardTable(square,magic,bits);
     }
     return table;
 }
 
-const vector<vector<bitboard>> ROOK_MAGIC_BITBOARD_TABLE = getRookMagicBitboardTable();
-const vector<vector<bitboard>> BISHOP_MAGIC_BITBOARD_TABLE = getBishopMagicBitboardTable();
-const vector<bitboard> KING_ATTACKED_SQUARES_TABLE = getKingAttackedSquaresTable();
-const vector<bitboard> KNIGHT_ATTACKED_SQUARES_TABLE = getKnightAttackedSquaresTable();
+const vector<vector<bitboard_t>> ROOK_MAGIC_BITBOARD_TABLE = getRookMagicBitboardTable();
+const vector<vector<bitboard_t>> BISHOP_MAGIC_BITBOARD_TABLE = getBishopMagicBitboardTable();
+const vector<bitboard_t> KING_ATTACKED_SQUARES_TABLE = getKingAttackedSquaresTable();
+const vector<bitboard_t> KNIGHT_ATTACKED_SQUARES_TABLE = getKnightAttackedSquaresTable();
 
 /////////////////////////////////////////////////////////////////////////////////////
 /////////////////////           Part 4: Magic lookups           /////////////////////
 /////////////////////////////////////////////////////////////////////////////////////
 
-bitboard getMagicKingAttackedSquares (const int startingSquare) {
+bitboard_t getMagicKingAttackedSquares (const int startingSquare) {
     return KING_ATTACKED_SQUARES_TABLE[startingSquare];
 }
 
-inline bitboard getMagicKnightAttackedSquares(const int startingSquare) {
+inline bitboard_t getMagicKnightAttackedSquares(const int startingSquare) {
     return KNIGHT_ATTACKED_SQUARES_TABLE[startingSquare];
 }
 
-inline bitboard getMagicBishopAttackedSquares (const int startingSquare, bitboard allPieces) {
+inline bitboard_t getMagicBishopAttackedSquares (const int startingSquare, bitboard_t allPieces) {
     allPieces &= BISHOP_RELEVANT_BLOCKERS[startingSquare];
     return BISHOP_MAGIC_BITBOARD_TABLE[startingSquare][(allPieces * bishop_magics[startingSquare]) >> bishop_shifts[startingSquare]];
 }
 
-inline bitboard getMagicRookAttackedSquares (const int startingSquare, bitboard allPieces) {
+inline bitboard_t getMagicRookAttackedSquares (const int startingSquare, bitboard_t allPieces) {
     allPieces &= ROOK_RELEVANT_BLOCKERS[startingSquare];
     return ROOK_MAGIC_BITBOARD_TABLE[startingSquare][(allPieces * rook_magics[startingSquare]) >> rook_shifts[startingSquare]];
 }
 
-inline bitboard calcMagicQueenAttackedSquares (const int startingSquare, const bitboard allPieces) {
+inline bitboard_t calcMagicQueenAttackedSquares (const int startingSquare, const bitboard_t allPieces) {
     return getMagicRookAttackedSquares(startingSquare, allPieces) | getMagicBishopAttackedSquares(startingSquare,allPieces);
 }
 
-bitboard getWhitePawnAttackedSquares(const int startingSquare) {
+bitboard_t getWhitePawnAttackedSquares(const int startingSquare) {
     return ((512ULL << startingSquare) & NOT_A_FILE) | (((1ULL << (startingSquare)) >> 7) & NOT_H_FILE);
 }
 
-bitboard getBlackPawnAttackedSquares(const int startingSquare) {
+bitboard_t getBlackPawnAttackedSquares(const int startingSquare) {
     return ((128ULL << startingSquare) & NOT_A_FILE) | (((1ULL << (startingSquare)) >> 9) & NOT_H_FILE);
 }
 
-bitboard getMagicWhiteAttackedSquares (const int pieceType, const int startingSquare, const bitboard allPieces) {
+bitboard_t getMagicWhiteAttackedSquares (const int pieceType, const int startingSquare, const bitboard_t allPieces) {
     switch(pieceType) {
         case QUEEN_CODE: return calcMagicQueenAttackedSquares(startingSquare,allPieces);
         case ROOK_CODE: return getMagicRookAttackedSquares(startingSquare,allPieces);
@@ -656,7 +656,7 @@ bitboard getMagicWhiteAttackedSquares (const int pieceType, const int startingSq
     }
 }
 
-bitboard getMagicBlackAttackedSquares (const int pieceType, const int startingSquare, const bitboard allPieces) {
+bitboard_t getMagicBlackAttackedSquares (const int pieceType, const int startingSquare, const bitboard_t allPieces) {
     switch(pieceType) {
         case QUEEN_CODE: return calcMagicQueenAttackedSquares(startingSquare,allPieces);
         case ROOK_CODE: return getMagicRookAttackedSquares(startingSquare,allPieces);
@@ -673,9 +673,9 @@ bitboard getMagicBlackAttackedSquares (const int pieceType, const int startingSq
 
 constexpr const static unsigned long EMPTY_BISHOP_ATTACKED_SQUARES[64] = {9241421688590303744ULL, 36099303471056128ULL, 141012904249856ULL, 550848566272ULL, 6480472064ULL, 1108177604608ULL, 283691315142656ULL, 72624976668147712ULL, 4620710844295151618ULL, 9241421688590368773ULL, 36099303487963146ULL, 141017232965652ULL, 1659000848424ULL, 283693466779728ULL, 72624976676520096ULL, 145249953336262720ULL, 2310355422147510788ULL, 4620710844311799048ULL, 9241421692918565393ULL, 36100411639206946ULL, 424704217196612ULL, 72625527495610504ULL, 145249955479592976ULL, 290499906664153120ULL, 1155177711057110024ULL, 2310355426409252880ULL, 4620711952330133792ULL, 9241705379636978241ULL, 108724279602332802ULL, 145390965166737412ULL, 290500455356698632ULL, 580999811184992272ULL, 577588851267340304ULL, 1155178802063085600ULL, 2310639079102947392ULL, 4693335752243822976ULL, 9386671504487645697ULL, 326598935265674242ULL, 581140276476643332ULL, 1161999073681608712ULL, 288793334762704928ULL, 577868148797087808ULL, 1227793891648880768ULL, 2455587783297826816ULL, 4911175566595588352ULL, 9822351133174399489ULL, 1197958188344280066ULL, 2323857683139004420ULL, 144117404414255168ULL, 360293502378066048ULL, 720587009051099136ULL, 1441174018118909952ULL, 2882348036221108224ULL, 5764696068147249408ULL, 11529391036782871041ULL, 4611756524879479810ULL, 567382630219904ULL, 1416240237150208ULL, 2833579985862656ULL, 5667164249915392ULL, 11334324221640704ULL, 22667548931719168ULL, 45053622886727936ULL, 18049651735527937ULL};
 constexpr const static unsigned long EMPTY_ROOK_ATTACKED_SQUARES[64] = {72340172838076926ULL, 144680345676153597ULL, 289360691352306939ULL, 578721382704613623ULL, 1157442765409226991ULL, 2314885530818453727ULL, 4629771061636907199ULL, 9259542123273814143ULL, 72340172838141441ULL, 144680345676217602ULL, 289360691352369924ULL, 578721382704674568ULL, 1157442765409283856ULL, 2314885530818502432ULL, 4629771061636939584ULL, 9259542123273813888ULL, 72340172854657281ULL, 144680345692602882ULL, 289360691368494084ULL, 578721382720276488ULL, 1157442765423841296ULL, 2314885530830970912ULL, 4629771061645230144ULL, 9259542123273748608ULL, 72340177082712321ULL, 144680349887234562ULL, 289360695496279044ULL, 578721386714368008ULL, 1157442769150545936ULL, 2314885534022901792ULL, 4629771063767613504ULL, 9259542123257036928ULL, 72341259464802561ULL, 144681423712944642ULL, 289361752209228804ULL, 578722409201797128ULL, 1157443723186933776ULL, 2314886351157207072ULL, 4629771607097753664ULL, 9259542118978846848ULL, 72618349279904001ULL, 144956323094725122ULL, 289632270724367364ULL, 578984165983651848ULL, 1157687956502220816ULL, 2315095537539358752ULL, 4629910699613634624ULL, 9259541023762186368ULL, 143553341945872641ULL, 215330564830528002ULL, 358885010599838724ULL, 645993902138460168ULL, 1220211685215703056ULL, 2368647251370188832ULL, 4665518383679160384ULL, 9259260648297103488ULL, 18302911464433844481ULL, 18231136449196065282ULL, 18087586418720506884ULL, 17800486357769390088ULL, 17226286235867156496ULL, 16077885992062689312ULL, 13781085504453754944ULL, 9187484529235886208ULL};
-bitboard getEmptyBoardMagicBishopAttackedSquares (const int startingSquare) {
+bitboard_t getEmptyBoardMagicBishopAttackedSquares (const int startingSquare) {
     return EMPTY_BISHOP_ATTACKED_SQUARES[startingSquare];
 }
-bitboard getEmptyBoardMagicRookAttackedSquares (const int startingSquare) {
+bitboard_t getEmptyBoardMagicRookAttackedSquares (const int startingSquare) {
     return EMPTY_ROOK_ATTACKED_SQUARES[startingSquare];
 }
