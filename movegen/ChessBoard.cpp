@@ -34,9 +34,9 @@ void ChessBoard::manuallyInitializeZobristCode() {
     zobristCode ^= zobrist::BLACK_KING_CODES[blackKingPosition];
     // Step 5: Piece positions
     for (int pieceType = QUEEN_CODE; pieceType <= PAWN_CODE; pieceType++) {
-        bitboard whitePiecesRemaining = whitePieceTypes[pieceType];
-        bitboard thisWhitePieceMask;
-        bitboard thisWhitePieceSquare;
+        bitboard_t whitePiecesRemaining = whitePieceTypes[pieceType];
+        bitboard_t thisWhitePieceMask;
+        bitboard_t thisWhitePieceSquare;
         while (whitePiecesRemaining != 0ULL) {
             thisWhitePieceMask = whitePiecesRemaining & -whitePiecesRemaining;
             whitePiecesRemaining -= thisWhitePieceMask;
@@ -44,9 +44,9 @@ void ChessBoard::manuallyInitializeZobristCode() {
             zobristCode ^= zobrist::WHITE_PIECE_TYPE_CODES[pieceType][thisWhitePieceSquare];
         }
 
-        bitboard blackPiecesRemaining = blackPieceTypes[pieceType];
-        bitboard thisBlackPieceMask;
-        bitboard thisBlackPieceSquare;
+        bitboard_t blackPiecesRemaining = blackPieceTypes[pieceType];
+        bitboard_t thisBlackPieceMask;
+        bitboard_t thisBlackPieceSquare;
         while (blackPiecesRemaining != 0ULL) {
             thisBlackPieceMask = blackPiecesRemaining & -blackPiecesRemaining;
             blackPiecesRemaining -= thisBlackPieceMask;
@@ -269,8 +269,8 @@ move_t ChessBoard::getCaptureMove(const int startSquare, const int endSquare) co
 
 void ChessBoard::updateDrawByInsufficientMaterial() {
     // Scenario 1: K vs K, K + B vs K, or each side has bishops and they are all on the same color.
-    bitboard allWhitePiecesExceptKings = allWhitePieces - (1ULL << whiteKingPosition);
-    bitboard allBlackPiecesExceptKings = allBlackPieces - (1ULL << blackKingPosition);
+    bitboard_t allWhitePiecesExceptKings = allWhitePieces - (1ULL << whiteKingPosition);
+    bitboard_t allBlackPiecesExceptKings = allBlackPieces - (1ULL << blackKingPosition);
     if (allWhitePiecesExceptKings == whitePieceTypes[BISHOP_CODE] and
         allBlackPiecesExceptKings == blackPieceTypes[BISHOP_CODE] and (
                 ((allWhitePiecesExceptKings | allBlackPiecesExceptKings) & DARK_SQUARES) == DARK_SQUARES or
@@ -328,7 +328,7 @@ string ChessBoard::toString() const {
         string row = "+---+---+---+---+---+---+---+---+\n|";
         for (int file = 0; file < 8; file++) {
             int square = 8 * file + rank;
-            bitboard squareMask = 1ULL << square;
+            bitboard_t squareMask = 1ULL << square;
 
             // Find what the piece is
             if (whiteKingPosition == square) {
@@ -370,12 +370,12 @@ string ChessBoard::toString() const {
 }
 
 uint8_t ChessBoard::calculatePieceGivingCheck() const {
-    bitboard allPieces = allWhitePieces | allBlackPieces;
+    bitboard_t allPieces = allWhitePieces | allBlackPieces;
 
     uint8_t checker = NOT_IN_CHECK_CODE;
 
     if (isItWhiteToMove) {
-        //bitboard blackPiecesGivingCheck;
+        //bitboard_t blackPiecesGivingCheck;
         // Step 1: Pawns
         // Captures towards the a-file
         if ((((blackPieceTypes[PAWN_CODE] & NOT_A_FILE) >> (whiteKingPosition + 9)) & 1ULL) == 1ULL)
@@ -384,12 +384,12 @@ uint8_t ChessBoard::calculatePieceGivingCheck() const {
         else if (((((blackPieceTypes[PAWN_CODE] & NOT_H_FILE) << 7) >> whiteKingPosition) & 1ULL) == 1ULL)
             checker = whiteKingPosition - 7;
 
-        bitboard blackKnightsGivingCheck =
+        bitboard_t blackKnightsGivingCheck =
                 getMagicKnightAttackedSquares(whiteKingPosition) & blackPieceTypes[KNIGHT_CODE];
         if (blackKnightsGivingCheck != 0ULL)
             checker = log2ll(blackKnightsGivingCheck);
 
-        bitboard blackRooksGivingCheck = getMagicRookAttackedSquares(whiteKingPosition, allPieces) &
+        bitboard_t blackRooksGivingCheck = getMagicRookAttackedSquares(whiteKingPosition, allPieces) &
                                               (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]);
         if (blackRooksGivingCheck != 0ULL) {
             if (checker == NOT_IN_CHECK_CODE) {
@@ -400,7 +400,7 @@ uint8_t ChessBoard::calculatePieceGivingCheck() const {
                 return DOUBLE_CHECK_CODE;
         }
 
-        bitboard blackBishopsGivingCheck = getMagicBishopAttackedSquares(whiteKingPosition, allPieces) &
+        bitboard_t blackBishopsGivingCheck = getMagicBishopAttackedSquares(whiteKingPosition, allPieces) &
                                                 (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]);
         if (blackBishopsGivingCheck != 0ULL) {
             if (checker == NOT_IN_CHECK_CODE)
@@ -412,7 +412,7 @@ uint8_t ChessBoard::calculatePieceGivingCheck() const {
         return checker;
     } // end if it is white to move
     else {
-        bitboard whitePiecesLeft;
+        bitboard_t whitePiecesLeft;
         // Step 1: Pawns
         // Captures towards the a-file
         if (((((whitePieceTypes[PAWN_CODE] & NOT_A_FILE) >> 7) >> blackKingPosition) & 1ULL) == 1ULL)
@@ -421,12 +421,12 @@ uint8_t ChessBoard::calculatePieceGivingCheck() const {
         else if (((((whitePieceTypes[PAWN_CODE] & NOT_H_FILE) << 9) >> blackKingPosition) & 1ULL) == 1ULL)
             checker = blackKingPosition - 9;
 
-        bitboard whiteKnightsGivingCheck =
+        bitboard_t whiteKnightsGivingCheck =
                 getMagicKnightAttackedSquares(blackKingPosition) & whitePieceTypes[KNIGHT_CODE];
         if (whiteKnightsGivingCheck != 0ULL)
             checker = log2ll(whiteKnightsGivingCheck);
 
-        bitboard whiteRooksGivingCheck = getMagicRookAttackedSquares(blackKingPosition, allPieces) &
+        bitboard_t whiteRooksGivingCheck = getMagicRookAttackedSquares(blackKingPosition, allPieces) &
                                               (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]);
         if (whiteRooksGivingCheck != 0ULL) {
             if (checker == NOT_IN_CHECK_CODE) {
@@ -437,7 +437,7 @@ uint8_t ChessBoard::calculatePieceGivingCheck() const {
                 return DOUBLE_CHECK_CODE;
         }
 
-        bitboard whiteBishopsGivingCheck = getMagicBishopAttackedSquares(blackKingPosition, allPieces) &
+        bitboard_t whiteBishopsGivingCheck = getMagicBishopAttackedSquares(blackKingPosition, allPieces) &
                                                 (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
         if (whiteBishopsGivingCheck != 0ULL) {
             if (checker == NOT_IN_CHECK_CODE)
@@ -454,17 +454,17 @@ void ChessBoard::updatePieceGivingCheck() {
     pieceGivingCheck = calculatePieceGivingCheck();
 }
 
-bitboard ChessBoard::calculateWhiteAttackedSquares() const {
+bitboard_t ChessBoard::calculateWhiteAttackedSquares() const {
     // AKA: Squares where black can't move their king
     // This includes pinned pieces
     // This includes squares with the player's pieces
     // So if white has an unprotected knight, the square with the knight is not attacked because black can take that knight
     // However, if white has two knights protecting each other, they will both be included because black can't take either knight.
-    bitboard attackedSquares = getMagicKingAttackedSquares(whiteKingPosition);
-    bitboard meaningfulBlockers = (allWhitePieces | allBlackPieces) - (1ULL << blackKingPosition);
+    bitboard_t attackedSquares = getMagicKingAttackedSquares(whiteKingPosition);
+    bitboard_t meaningfulBlockers = (allWhitePieces | allBlackPieces) - (1ULL << blackKingPosition);
 
-    bitboard whitePiecesRemaining;
-    bitboard thisWhitePiece;
+    bitboard_t whitePiecesRemaining;
+    bitboard_t thisWhitePiece;
 
     for (int pieceType = QUEEN_CODE; pieceType <= KNIGHT_CODE; pieceType++) {
         whitePiecesRemaining = whitePieceTypes[pieceType];
@@ -483,17 +483,17 @@ bitboard ChessBoard::calculateWhiteAttackedSquares() const {
     return attackedSquares;
 }
 
-bitboard ChessBoard::calculateBlackAttackedSquares() const {
+bitboard_t ChessBoard::calculateBlackAttackedSquares() const {
     // AKA: Squares where white can't move their king
     // This includes pinned pieces
     // This includes squares with the player's pieces
     // So if white has an unprotected knight, the square with the knight is not attacked because black can take that knight
     // However, if white has two knights protecting each other, they will both be included because black can't take either knight.
-    bitboard attackedSquares = getMagicKingAttackedSquares(blackKingPosition);
-    bitboard meaningfulBlockers = (allWhitePieces | allBlackPieces) - (1ULL << whiteKingPosition);
+    bitboard_t attackedSquares = getMagicKingAttackedSquares(blackKingPosition);
+    bitboard_t meaningfulBlockers = (allWhitePieces | allBlackPieces) - (1ULL << whiteKingPosition);
 
-    bitboard blackPiecesRemaining;
-    bitboard thisBlackPiece;
+    bitboard_t blackPiecesRemaining;
+    bitboard_t thisBlackPiece;
 
     for (int pieceType = QUEEN_CODE; pieceType <= KNIGHT_CODE; pieceType++) {
         blackPiecesRemaining = blackPieceTypes[pieceType];
@@ -848,10 +848,10 @@ void ChessBoard::makemove(move_t move) {
 
 } // end makemove method
 
-void ChessBoard::addLegalKingMoves (vector<move_t>& legalMoves, bitboard kingLegalEndSquares) const { // Not castling
-    const bitboard enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
+void ChessBoard::addLegalKingMoves (vector<move_t>& legalMoves, bitboard_t kingLegalEndSquares) const { // Not castling
+    const bitboard_t enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
     uint8_t myKingPosition = isItWhiteToMove ? whiteKingPosition : blackKingPosition;
-    bitboard thisKingLegalEndSquareMask;
+    bitboard_t thisKingLegalEndSquareMask;
     int thisKingLegalEndSquare;
     while (kingLegalEndSquares != 0ULL) {
         thisKingLegalEndSquareMask = kingLegalEndSquares & -kingLegalEndSquares;
@@ -864,8 +864,8 @@ void ChessBoard::addLegalKingMoves (vector<move_t>& legalMoves, bitboard kingLeg
     }
 }
 
-void ChessBoard::addCastling (vector<move_t>& legalMoves, const bitboard enemyAttackedSquares) const {
-    bitboard allPieces = allBlackPieces | allWhitePieces;
+void ChessBoard::addCastling (vector<move_t>& legalMoves, const bitboard_t enemyAttackedSquares) const {
+    bitboard_t allPieces = allBlackPieces | allWhitePieces;
     if (isItWhiteToMove) {
         if (canWhiteCastleShort and (enemyAttackedSquares & E1_F1_G1) == 0ULL and (allPieces & E1_THROUGH_H1) == E1_H1)
             legalMoves.push_back(WHITE_SHORT_CASTLE);
@@ -880,8 +880,8 @@ void ChessBoard::addCastling (vector<move_t>& legalMoves, const bitboard enemyAt
     }
 }
 
-void ChessBoard::addEnPassant (vector<move_t>& legalMoves, const bitboard effectiveEnemyBishops, const bitboard effectiveEnemyRooks) const {
-    const bitboard allPieces = allWhitePieces | allBlackPieces;
+void ChessBoard::addEnPassant (vector<move_t>& legalMoves, const bitboard_t effectiveEnemyBishops, const bitboard_t effectiveEnemyRooks) const {
+    const bitboard_t allPieces = allWhitePieces | allBlackPieces;
     if (pieceGivingCheck == NOT_IN_CHECK_CODE) {
         // Now we add en passant
         if (isItWhiteToMove) {
@@ -890,7 +890,7 @@ void ChessBoard::addEnPassant (vector<move_t>& legalMoves, const bitboard effect
                 // Consider left en passant
                 if (whichPawnMovedTwoSquares < 7) { // The pawn that pushed two squares is not on the h-file, so we can en passant left
                     int startSquare = 8 * whichPawnMovedTwoSquares + 12;
-                    bitboard allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 4)) - (1ULL << startSquare);
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 4)) - (1ULL << startSquare);
                     if (((whitePieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and
                         (getMagicBishopAttackedSquares(whiteKingPosition,allPiecesAfterCapture) & effectiveEnemyBishops) == 0ULL and
                         (getMagicRookAttackedSquares(whiteKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL) {
@@ -901,7 +901,7 @@ void ChessBoard::addEnPassant (vector<move_t>& legalMoves, const bitboard effect
                 // Consider right en passant
                 if (whichPawnMovedTwoSquares > 0) { // The pawn that pushed two squares is not on the a-file, so we can en passant right.
                     int startSquare = 8 * whichPawnMovedTwoSquares - 4;
-                    bitboard allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 4)) - (1ULL << startSquare);
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 4)) - (1ULL << startSquare);
                     if (((whitePieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and
                         (getMagicBishopAttackedSquares(whiteKingPosition,allPiecesAfterCapture) & effectiveEnemyBishops) == 0ULL and
                         (getMagicRookAttackedSquares(whiteKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL) {
@@ -916,7 +916,7 @@ void ChessBoard::addEnPassant (vector<move_t>& legalMoves, const bitboard effect
                 // Consider left en passant
                 if (whichPawnMovedTwoSquares < 7) { // The pawn that pushed two squares is not on the h-file, so we can en passant left
                     int startSquare = 8 * whichPawnMovedTwoSquares + 11;
-                    bitboard allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 3)) - (1ULL << startSquare);
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 3)) - (1ULL << startSquare);
                     if (((blackPieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and
                         (getMagicBishopAttackedSquares(blackKingPosition,allPiecesAfterCapture) & effectiveEnemyBishops) == 0ULL and
                         (getMagicRookAttackedSquares(blackKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL) {
@@ -927,7 +927,7 @@ void ChessBoard::addEnPassant (vector<move_t>& legalMoves, const bitboard effect
                 // Consider right en passant
                 if (whichPawnMovedTwoSquares > 0) { // The pawn that pushed two squares is not on the a-file, so we can en passant right.
                     int startSquare = 8 * whichPawnMovedTwoSquares - 5;
-                    bitboard allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 3)) - (1ULL << startSquare);
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 3)) - (1ULL << startSquare);
                     if (((blackPieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and
                         (getMagicBishopAttackedSquares(blackKingPosition,allPiecesAfterCapture) & effectiveEnemyBishops) == 0ULL and
                         (getMagicRookAttackedSquares(blackKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL) {
@@ -945,7 +945,7 @@ void ChessBoard::addEnPassant (vector<move_t>& legalMoves, const bitboard effect
                 // Left en passant
                 if (whichPawnMovedTwoSquares < 7) { // the pawn that pushed 2 squares is not the h-pawn, so we can en passant left.
                     int startSquare = 8 * whichPawnMovedTwoSquares + 12;
-                    bitboard allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 4)) - (1ULL << startSquare);\
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 4)) - (1ULL << startSquare);\
                 if (((whitePieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and (getMagicRookAttackedSquares(whiteKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL)
                         legalMoves.push_back((startSquare << 10) + (endSquare << 4) + EN_PASSANT_FLAG);
                 } // end if we can en passant left
@@ -953,7 +953,7 @@ void ChessBoard::addEnPassant (vector<move_t>& legalMoves, const bitboard effect
                 // Consider right en passant
                 if (whichPawnMovedTwoSquares > 0) { // The pawn that pushed two squares is not on the a-file, so we can en passant right.
                     int startSquare = 8 * whichPawnMovedTwoSquares - 4;
-                    bitboard allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 4)) - (1ULL << startSquare);
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 4)) - (1ULL << startSquare);
                     if (((whitePieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and (getMagicRookAttackedSquares(whiteKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL) {
                         legalMoves.push_back((startSquare << 10) + (endSquare << 4) + EN_PASSANT_FLAG);
                     } // end if this en passant doesn't reveal an attack on our king
@@ -966,7 +966,7 @@ void ChessBoard::addEnPassant (vector<move_t>& legalMoves, const bitboard effect
                 // Left en passant
                 if (whichPawnMovedTwoSquares < 7) { // the pawn that pushed 2 squares is not the h-pawn, so we can en passant left.
                     int startSquare = 8 * whichPawnMovedTwoSquares + 11;
-                    bitboard allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 3)) - (1ULL << startSquare);\
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 3)) - (1ULL << startSquare);\
                 if (((blackPieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and (getMagicRookAttackedSquares(blackKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL)
                         legalMoves.push_back((startSquare << 10) + (endSquare << 4) + EN_PASSANT_FLAG);
                 } // end if we can en passant left
@@ -974,7 +974,7 @@ void ChessBoard::addEnPassant (vector<move_t>& legalMoves, const bitboard effect
                 // Consider right en passant
                 if (whichPawnMovedTwoSquares > 0) { // The pawn that pushed two squares is not on the a-file, so we can en passant right.
                     int startSquare = 8 * whichPawnMovedTwoSquares - 5;
-                    bitboard allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 3)) - (1ULL << startSquare);
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 3)) - (1ULL << startSquare);
                     if (((blackPieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and (getMagicRookAttackedSquares(blackKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL) {
                         legalMoves.push_back((startSquare << 10) + (endSquare << 4) + EN_PASSANT_FLAG);
                     } // end if this en passant doesn't reveal an attack on our king
@@ -985,22 +985,22 @@ void ChessBoard::addEnPassant (vector<move_t>& legalMoves, const bitboard effect
 } // end addEnPassant method
 
 void ChessBoard::getLegalMoves (vector<move_t>& legalMoves) const {
-    const bitboard diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
-    const bitboard orthogonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicRookAttackedSquares(whiteKingPosition) : getEmptyBoardMagicRookAttackedSquares(blackKingPosition);
-    const bitboard effectiveEnemyBishops = isItWhiteToMove ? diagonalSquaresFromKing & (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) : diagonalSquaresFromKing & (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
-    const bitboard effectiveEnemyRooks = isItWhiteToMove ? orthogonalSquaresFromKing & (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) : orthogonalSquaresFromKing & (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]);
-    const bitboard enemyAttackedSquares = isItWhiteToMove ? calculateBlackAttackedSquares() : calculateWhiteAttackedSquares();
+    const bitboard_t diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
+    const bitboard_t orthogonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicRookAttackedSquares(whiteKingPosition) : getEmptyBoardMagicRookAttackedSquares(blackKingPosition);
+    const bitboard_t effectiveEnemyBishops = isItWhiteToMove ? diagonalSquaresFromKing & (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) : diagonalSquaresFromKing & (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t effectiveEnemyRooks = isItWhiteToMove ? orthogonalSquaresFromKing & (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) : orthogonalSquaresFromKing & (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t enemyAttackedSquares = isItWhiteToMove ? calculateBlackAttackedSquares() : calculateWhiteAttackedSquares();
     const uint8_t myKingPosition = isItWhiteToMove ? whiteKingPosition : blackKingPosition;
-    const bitboard myPieces = isItWhiteToMove ? allWhitePieces : allBlackPieces;
-    const bitboard enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
-    const bitboard allPieces = allWhitePieces | allBlackPieces;
+    const bitboard_t myPieces = isItWhiteToMove ? allWhitePieces : allBlackPieces;
+    const bitboard_t enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
+    const bitboard_t allPieces = allWhitePieces | allBlackPieces;
 
-    bitboard bishopPinnedPieces = 0ULL;
-    bitboard rookPinnedPieces = 0ULL;
+    bitboard_t bishopPinnedPieces = 0ULL;
+    bitboard_t rookPinnedPieces = 0ULL;
 
-    bitboard thisPinningPieceMask, interposingSquares, interposingOccupiedSquares;
+    bitboard_t thisPinningPieceMask, interposingSquares, interposingOccupiedSquares;
     int thisPinningPieceSquare;
-    bitboard effectiveEnemyBishops1 = effectiveEnemyBishops, effectiveEnemyRooks1 = effectiveEnemyRooks;
+    bitboard_t effectiveEnemyBishops1 = effectiveEnemyBishops, effectiveEnemyRooks1 = effectiveEnemyRooks;
     while (effectiveEnemyBishops1 != 0ULL) {
         thisPinningPieceMask = effectiveEnemyBishops1 & -effectiveEnemyBishops1;
         effectiveEnemyBishops1 -= thisPinningPieceMask;
@@ -1024,23 +1024,23 @@ void ChessBoard::getLegalMoves (vector<move_t>& legalMoves) const {
         // And we might have caught an opponent's piece that could give a discovered attack if it were their turn, but that won't affect anything.
     } // end while loop
 
-    const bitboard kingLegalEndSquares = getMagicKingAttackedSquares(myKingPosition) & ~enemyAttackedSquares & ~myPieces;
+    const bitboard_t kingLegalEndSquares = getMagicKingAttackedSquares(myKingPosition) & ~enemyAttackedSquares & ~myPieces;
     addLegalKingMoves(legalMoves,kingLegalEndSquares);
     if (pieceGivingCheck == DOUBLE_CHECK_CODE)
         return;
 
-    bitboard legalCheckBlockSquares = ENTIRE_BOARD;
+    bitboard_t legalCheckBlockSquares = ENTIRE_BOARD;
     addEnPassant(legalMoves,effectiveEnemyBishops,effectiveEnemyRooks);
     if (pieceGivingCheck == NOT_IN_CHECK_CODE)
         addCastling(legalMoves,enemyAttackedSquares);
     else
         legalCheckBlockSquares = lookupCheckResponses(myKingPosition,this->pieceGivingCheck);
 
-    bitboard piecesRemaining;
-    bitboard startSquareMask;
+    bitboard_t piecesRemaining;
+    bitboard_t startSquareMask;
     int startSquare;
-    bitboard legalEndSquares;
-    bitboard endSquareMask;
+    bitboard_t legalEndSquares;
+    bitboard_t endSquareMask;
     int endSquare;
 
     // Loop over all piece types, except pawns.
@@ -1068,7 +1068,7 @@ void ChessBoard::getLegalMoves (vector<move_t>& legalMoves) const {
         } // end while piecesRemaining is not 0
     } // end for loop over all piece types
 
-    const bitboard myPawns = isItWhiteToMove ? whitePieceTypes[PAWN_CODE] : blackPieceTypes[PAWN_CODE];
+    const bitboard_t myPawns = isItWhiteToMove ? whitePieceTypes[PAWN_CODE] : blackPieceTypes[PAWN_CODE];
     const int leftCaptureOffset = isItWhiteToMove ? 7 : 9;
     const int rightCaptureOffset = isItWhiteToMove ? 9 : 7; // but we are right shifting instead of left shifting
     const int pawnSinglePushOffset = isItWhiteToMove ? 1 : -1;
@@ -1146,22 +1146,22 @@ void ChessBoard::getLegalMoves (vector<move_t>& legalMoves) const {
 } // end getLegalMoves method
 
 bool ChessBoard::areThereLegalMoves () const {
-    const bitboard diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
-    const bitboard orthogonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicRookAttackedSquares(whiteKingPosition) : getEmptyBoardMagicRookAttackedSquares(blackKingPosition);
-    const bitboard effectiveEnemyBishops = isItWhiteToMove ? diagonalSquaresFromKing & (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) : diagonalSquaresFromKing & (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
-    const bitboard effectiveEnemyRooks = isItWhiteToMove ? orthogonalSquaresFromKing & (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) : orthogonalSquaresFromKing & (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]);
-    const bitboard enemyAttackedSquares = isItWhiteToMove ? calculateBlackAttackedSquares() : calculateWhiteAttackedSquares();
+    const bitboard_t diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
+    const bitboard_t orthogonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicRookAttackedSquares(whiteKingPosition) : getEmptyBoardMagicRookAttackedSquares(blackKingPosition);
+    const bitboard_t effectiveEnemyBishops = isItWhiteToMove ? diagonalSquaresFromKing & (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) : diagonalSquaresFromKing & (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t effectiveEnemyRooks = isItWhiteToMove ? orthogonalSquaresFromKing & (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) : orthogonalSquaresFromKing & (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t enemyAttackedSquares = isItWhiteToMove ? calculateBlackAttackedSquares() : calculateWhiteAttackedSquares();
     const uint8_t myKingPosition = isItWhiteToMove ? whiteKingPosition : blackKingPosition;
-    const bitboard myPieces = isItWhiteToMove ? allWhitePieces : allBlackPieces;
-    const bitboard enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
-    const bitboard allPieces = allWhitePieces | allBlackPieces;
+    const bitboard_t myPieces = isItWhiteToMove ? allWhitePieces : allBlackPieces;
+    const bitboard_t enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
+    const bitboard_t allPieces = allWhitePieces | allBlackPieces;
 
-    bitboard bishopPinnedPieces = 0ULL;
-    bitboard rookPinnedPieces = 0ULL;
+    bitboard_t bishopPinnedPieces = 0ULL;
+    bitboard_t rookPinnedPieces = 0ULL;
 
-    bitboard thisPinningPieceMask, interposingSquares, interposingOccupiedSquares;
+    bitboard_t thisPinningPieceMask, interposingSquares, interposingOccupiedSquares;
     int thisPinningPieceSquare;
-    bitboard effectiveEnemyBishops1 = effectiveEnemyBishops, effectiveEnemyRooks1 = effectiveEnemyRooks;
+    bitboard_t effectiveEnemyBishops1 = effectiveEnemyBishops, effectiveEnemyRooks1 = effectiveEnemyRooks;
     while (effectiveEnemyBishops1 != 0ULL) {
         thisPinningPieceMask = effectiveEnemyBishops1 & -effectiveEnemyBishops1;
         effectiveEnemyBishops1 -= thisPinningPieceMask;
@@ -1192,12 +1192,12 @@ bool ChessBoard::areThereLegalMoves () const {
     if (pieceGivingCheck == DOUBLE_CHECK_CODE)
         return false;
 
-    const bitboard legalCheckBlockSquares = pieceGivingCheck == NOT_IN_CHECK_CODE ? ENTIRE_BOARD : lookupCheckResponses(myKingPosition,this->pieceGivingCheck);
+    const bitboard_t legalCheckBlockSquares = pieceGivingCheck == NOT_IN_CHECK_CODE ? ENTIRE_BOARD : lookupCheckResponses(myKingPosition,this->pieceGivingCheck);
 
-    bitboard piecesRemaining;
-    bitboard startSquareMask;
+    bitboard_t piecesRemaining;
+    bitboard_t startSquareMask;
     int startSquare;
-    bitboard legalEndSquares;
+    bitboard_t legalEndSquares;
 
     // Loop over all piece types, except pawns.
     for (int pieceType = KNIGHT_CODE; pieceType >= QUEEN_CODE; pieceType--) {
@@ -1217,7 +1217,7 @@ bool ChessBoard::areThereLegalMoves () const {
         } // end while piecesRemaining is not 0
     } // end for loop over all piece types
 
-    const bitboard myPawns = isItWhiteToMove ? whitePieceTypes[PAWN_CODE] : blackPieceTypes[PAWN_CODE];
+    const bitboard_t myPawns = isItWhiteToMove ? whitePieceTypes[PAWN_CODE] : blackPieceTypes[PAWN_CODE];
     const int leftCaptureOffset = isItWhiteToMove ? 7 : 9;
     const int rightCaptureOffset = isItWhiteToMove ? 9 : 7; // but we are right shifting instead of left shifting
     const int pawnSinglePushOffset = isItWhiteToMove ? 1 : -1;
@@ -1256,22 +1256,22 @@ void ChessBoard::updateMates() {
 }
 
 void ChessBoard::getLegalCapturesOnly (std::vector<move_t>& captures) const {
-    const bitboard diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
-    const bitboard orthogonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicRookAttackedSquares(whiteKingPosition) : getEmptyBoardMagicRookAttackedSquares(blackKingPosition);
-    const bitboard effectiveEnemyBishops = isItWhiteToMove ? diagonalSquaresFromKing & (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) : diagonalSquaresFromKing & (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
-    const bitboard effectiveEnemyRooks = isItWhiteToMove ? orthogonalSquaresFromKing & (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) : orthogonalSquaresFromKing & (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]);
-    const bitboard enemyAttackedSquares = isItWhiteToMove ? calculateBlackAttackedSquares() : calculateWhiteAttackedSquares();
+    const bitboard_t diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
+    const bitboard_t orthogonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicRookAttackedSquares(whiteKingPosition) : getEmptyBoardMagicRookAttackedSquares(blackKingPosition);
+    const bitboard_t effectiveEnemyBishops = isItWhiteToMove ? diagonalSquaresFromKing & (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) : diagonalSquaresFromKing & (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t effectiveEnemyRooks = isItWhiteToMove ? orthogonalSquaresFromKing & (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) : orthogonalSquaresFromKing & (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t enemyAttackedSquares = isItWhiteToMove ? calculateBlackAttackedSquares() : calculateWhiteAttackedSquares();
     const uint8_t myKingPosition = isItWhiteToMove ? whiteKingPosition : blackKingPosition;
-    const bitboard myPieces = isItWhiteToMove ? allWhitePieces : allBlackPieces;
-    const bitboard enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
-    const bitboard allPieces = allWhitePieces | allBlackPieces;
+    const bitboard_t myPieces = isItWhiteToMove ? allWhitePieces : allBlackPieces;
+    const bitboard_t enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
+    const bitboard_t allPieces = allWhitePieces | allBlackPieces;
 
-    bitboard bishopPinnedPieces = 0ULL;
-    bitboard rookPinnedPieces = 0ULL;
+    bitboard_t bishopPinnedPieces = 0ULL;
+    bitboard_t rookPinnedPieces = 0ULL;
 
-    bitboard thisPinningPieceMask, interposingSquares, interposingOccupiedSquares;
+    bitboard_t thisPinningPieceMask, interposingSquares, interposingOccupiedSquares;
     int thisPinningPieceSquare;
-    bitboard effectiveEnemyBishops1 = effectiveEnemyBishops, effectiveEnemyRooks1 = effectiveEnemyRooks;
+    bitboard_t effectiveEnemyBishops1 = effectiveEnemyBishops, effectiveEnemyRooks1 = effectiveEnemyRooks;
     while (effectiveEnemyBishops1 != 0ULL) {
         thisPinningPieceMask = effectiveEnemyBishops1 & -effectiveEnemyBishops1;
         effectiveEnemyBishops1 -= thisPinningPieceMask;
@@ -1295,22 +1295,22 @@ void ChessBoard::getLegalCapturesOnly (std::vector<move_t>& captures) const {
         // And we might have caught an opponent's piece that could give a discovered attack if it were their turn, but that won't affect anything.
     } // end while loop
 
-    const bitboard kingLegalEndSquares = getMagicKingAttackedSquares(myKingPosition) & ~enemyAttackedSquares & enemyPieces;
+    const bitboard_t kingLegalEndSquares = getMagicKingAttackedSquares(myKingPosition) & ~enemyAttackedSquares & enemyPieces;
     addLegalKingMoves(captures,kingLegalEndSquares);
     addEnPassant(captures,effectiveEnemyBishops,effectiveEnemyRooks);
     if (pieceGivingCheck == DOUBLE_CHECK_CODE)
         return;
 
-    bitboard piecesRemaining;
-    bitboard startSquareMask;
+    bitboard_t piecesRemaining;
+    bitboard_t startSquareMask;
     int startSquare;
-    bitboard legalEndSquares;
-    bitboard endSquareMask;
+    bitboard_t legalEndSquares;
+    bitboard_t endSquareMask;
     int endSquare;
 
-    const bitboard legalCheckBlockSquares = pieceGivingCheck == NOT_IN_CHECK_CODE ? ENTIRE_BOARD : lookupCheckResponses(myKingPosition,this->pieceGivingCheck);
+    const bitboard_t legalCheckBlockSquares = pieceGivingCheck == NOT_IN_CHECK_CODE ? ENTIRE_BOARD : lookupCheckResponses(myKingPosition,this->pieceGivingCheck);
 
-    const bitboard myPawns = isItWhiteToMove ? whitePieceTypes[PAWN_CODE] : blackPieceTypes[PAWN_CODE];
+    const bitboard_t myPawns = isItWhiteToMove ? whitePieceTypes[PAWN_CODE] : blackPieceTypes[PAWN_CODE];
     const int leftCaptureOffset = isItWhiteToMove ? 7 : 9;
     const int rightCaptureOffset = isItWhiteToMove ? 9 : 7; // but we are right shifting instead of left shifting
 
@@ -1389,19 +1389,19 @@ int ChessBoard::getCaptureSEE (const int capturingPieceType, const move_t captur
     else
         blackSEEMask = 0;
 
-    bitboard squaresExceptStartSquare = ~(1ULL << startSquare);
-    bitboard effectiveAllPieces = (allWhitePieces | allBlackPieces) & squaresExceptStartSquare;
+    bitboard_t squaresExceptStartSquare = ~(1ULL << startSquare);
+    bitboard_t effectiveAllPieces = (allWhitePieces | allBlackPieces) & squaresExceptStartSquare;
 
-    bitboard effectiveWhiteBishops = (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
-    bitboard effectiveWhiteRooks = (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
-    bitboard effectiveBlackBishops = (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
-    bitboard effectiveBlackRooks = (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
+    bitboard_t effectiveWhiteBishops = (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
+    bitboard_t effectiveWhiteRooks = (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
+    bitboard_t effectiveBlackBishops = (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
+    bitboard_t effectiveBlackRooks = (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
 
-    bitboard whiteBlockers;
-    bitboard whiteAttackers;
-    bitboard blackBlockers;
-    bitboard blackAttackers;
-    bitboard thisPieceMask;
+    bitboard_t whiteBlockers;
+    bitboard_t whiteAttackers;
+    bitboard_t blackBlockers;
+    bitboard_t blackAttackers;
+    bitboard_t thisPieceMask;
     for (int pieceType = QUEEN_CODE; pieceType <= PAWN_CODE; pieceType++) {
         // white
         whiteBlockers = effectiveAllPieces & ~whitePieceTypes[pieceType];
@@ -1468,19 +1468,19 @@ int ChessBoard::getQuietSEE (const int movePieceType, const move_t quietMove) co
     else
         blackSEEMask = 0;
 
-    bitboard squaresExceptStartSquare = ~(1ULL << startSquare);
-    bitboard effectiveAllPieces = (allWhitePieces | allBlackPieces) & squaresExceptStartSquare;
+    bitboard_t squaresExceptStartSquare = ~(1ULL << startSquare);
+    bitboard_t effectiveAllPieces = (allWhitePieces | allBlackPieces) & squaresExceptStartSquare;
 
-    bitboard effectiveWhiteBishops = (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
-    bitboard effectiveWhiteRooks = (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
-    bitboard effectiveBlackBishops = (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
-    bitboard effectiveBlackRooks = (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
+    bitboard_t effectiveWhiteBishops = (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
+    bitboard_t effectiveWhiteRooks = (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
+    bitboard_t effectiveBlackBishops = (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
+    bitboard_t effectiveBlackRooks = (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
 
-    bitboard whiteBlockers;
-    bitboard whiteAttackers;
-    bitboard blackBlockers;
-    bitboard blackAttackers;
-    bitboard thisPieceMask;
+    bitboard_t whiteBlockers;
+    bitboard_t whiteAttackers;
+    bitboard_t blackBlockers;
+    bitboard_t blackAttackers;
+    bitboard_t thisPieceMask;
     for (int pieceType = QUEEN_CODE; pieceType <= PAWN_CODE; pieceType++) {
         // white
         whiteBlockers = effectiveAllPieces & ~whitePieceTypes[pieceType];
@@ -1532,7 +1532,7 @@ int ChessBoard::getQuietSEE (const int movePieceType, const move_t quietMove) co
 
 int ChessBoard::getQuietSEE (const move_t move) const {
     const int endSquare = move >> 4 & 63;
-    const bitboard endSquareMask = 1ULL << endSquare;
+    const bitboard_t endSquareMask = 1ULL << endSquare;
     int movingPieceType;
     if (isItWhiteToMove) {
         if (whiteKingPosition == endSquare)
@@ -1571,22 +1571,22 @@ int ChessBoard::getQuietSEE (const move_t move) const {
 } // end getQuietSEE
 
 void ChessBoard::getNonnegativeSEECapturesOnly (vector<move_t>& captures) const {
-    const bitboard diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
-    const bitboard orthogonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicRookAttackedSquares(whiteKingPosition) : getEmptyBoardMagicRookAttackedSquares(blackKingPosition);
-    const bitboard effectiveEnemyBishops = isItWhiteToMove ? diagonalSquaresFromKing & (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) : diagonalSquaresFromKing & (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
-    const bitboard effectiveEnemyRooks = isItWhiteToMove ? orthogonalSquaresFromKing & (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) : orthogonalSquaresFromKing & (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]);
-    const bitboard enemyAttackedSquares = isItWhiteToMove ? calculateBlackAttackedSquares() : calculateWhiteAttackedSquares();
+    const bitboard_t diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
+    const bitboard_t orthogonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicRookAttackedSquares(whiteKingPosition) : getEmptyBoardMagicRookAttackedSquares(blackKingPosition);
+    const bitboard_t effectiveEnemyBishops = isItWhiteToMove ? diagonalSquaresFromKing & (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) : diagonalSquaresFromKing & (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t effectiveEnemyRooks = isItWhiteToMove ? orthogonalSquaresFromKing & (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) : orthogonalSquaresFromKing & (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t enemyAttackedSquares = isItWhiteToMove ? calculateBlackAttackedSquares() : calculateWhiteAttackedSquares();
     const uint8_t myKingPosition = isItWhiteToMove ? whiteKingPosition : blackKingPosition;
-    const bitboard myPieces = isItWhiteToMove ? allWhitePieces : allBlackPieces;
-    const bitboard enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
-    const bitboard allPieces = allWhitePieces | allBlackPieces;
+    const bitboard_t myPieces = isItWhiteToMove ? allWhitePieces : allBlackPieces;
+    const bitboard_t enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
+    const bitboard_t allPieces = allWhitePieces | allBlackPieces;
 
-    bitboard bishopPinnedPieces = 0ULL;
-    bitboard rookPinnedPieces = 0ULL;
+    bitboard_t bishopPinnedPieces = 0ULL;
+    bitboard_t rookPinnedPieces = 0ULL;
 
-    bitboard thisPinningPieceMask, interposingSquares, interposingOccupiedSquares;
+    bitboard_t thisPinningPieceMask, interposingSquares, interposingOccupiedSquares;
     int thisPinningPieceSquare;
-    bitboard effectiveEnemyBishops1 = effectiveEnemyBishops, effectiveEnemyRooks1 = effectiveEnemyRooks;
+    bitboard_t effectiveEnemyBishops1 = effectiveEnemyBishops, effectiveEnemyRooks1 = effectiveEnemyRooks;
     while (effectiveEnemyBishops1 != 0ULL) {
         thisPinningPieceMask = effectiveEnemyBishops1 & -effectiveEnemyBishops1;
         effectiveEnemyBishops1 -= thisPinningPieceMask;
@@ -1610,22 +1610,22 @@ void ChessBoard::getNonnegativeSEECapturesOnly (vector<move_t>& captures) const 
         // And we might have caught an opponent's piece that could give a discovered attack if it were their turn, but that won't affect anything.
     } // end while loop
 
-    const bitboard kingLegalEndSquares = getMagicKingAttackedSquares(myKingPosition) & ~enemyAttackedSquares & enemyPieces;
+    const bitboard_t kingLegalEndSquares = getMagicKingAttackedSquares(myKingPosition) & ~enemyAttackedSquares & enemyPieces;
     addLegalKingMoves(captures,kingLegalEndSquares);
     addEnPassant(captures,effectiveEnemyBishops,effectiveEnemyRooks);
     if (pieceGivingCheck == DOUBLE_CHECK_CODE)
         return;
 
-    bitboard piecesRemaining;
-    bitboard startSquareMask;
+    bitboard_t piecesRemaining;
+    bitboard_t startSquareMask;
     int startSquare;
-    bitboard legalEndSquares;
-    bitboard endSquareMask;
+    bitboard_t legalEndSquares;
+    bitboard_t endSquareMask;
     int endSquare;
 
-    const bitboard legalCheckBlockSquares = pieceGivingCheck == NOT_IN_CHECK_CODE ? ENTIRE_BOARD : lookupCheckResponses(myKingPosition,this->pieceGivingCheck);
+    const bitboard_t legalCheckBlockSquares = pieceGivingCheck == NOT_IN_CHECK_CODE ? ENTIRE_BOARD : lookupCheckResponses(myKingPosition,this->pieceGivingCheck);
 
-    const bitboard myPawns = isItWhiteToMove ? whitePieceTypes[PAWN_CODE] : blackPieceTypes[PAWN_CODE];
+    const bitboard_t myPawns = isItWhiteToMove ? whitePieceTypes[PAWN_CODE] : blackPieceTypes[PAWN_CODE];
     const int leftCaptureOffset = isItWhiteToMove ? 7 : 9;
     const int rightCaptureOffset = isItWhiteToMove ? 9 : 7; // but we are right shifting instead of left shifting
 
@@ -1687,22 +1687,22 @@ void ChessBoard::getNonnegativeSEECapturesOnly (vector<move_t>& captures) const 
 } // end getNonnegativeSEECapturesOnly
 
 void ChessBoard::getLegalMoves (vector<move_t>& winningEqualCaptures, vector<move_t>& losingCaptures, vector<move_t>& nonCaptures) const {
-    const bitboard diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
-    const bitboard orthogonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicRookAttackedSquares(whiteKingPosition) : getEmptyBoardMagicRookAttackedSquares(blackKingPosition);
-    const bitboard effectiveEnemyBishops = isItWhiteToMove ? diagonalSquaresFromKing & (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) : diagonalSquaresFromKing & (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
-    const bitboard effectiveEnemyRooks = isItWhiteToMove ? orthogonalSquaresFromKing & (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) : orthogonalSquaresFromKing & (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]);
-    const bitboard enemyAttackedSquares = isItWhiteToMove ? calculateBlackAttackedSquares() : calculateWhiteAttackedSquares();
+    const bitboard_t diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
+    const bitboard_t orthogonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicRookAttackedSquares(whiteKingPosition) : getEmptyBoardMagicRookAttackedSquares(blackKingPosition);
+    const bitboard_t effectiveEnemyBishops = isItWhiteToMove ? diagonalSquaresFromKing & (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) : diagonalSquaresFromKing & (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t effectiveEnemyRooks = isItWhiteToMove ? orthogonalSquaresFromKing & (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) : orthogonalSquaresFromKing & (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t enemyAttackedSquares = isItWhiteToMove ? calculateBlackAttackedSquares() : calculateWhiteAttackedSquares();
     const uint8_t myKingPosition = isItWhiteToMove ? whiteKingPosition : blackKingPosition;
-    const bitboard myPieces = isItWhiteToMove ? allWhitePieces : allBlackPieces;
-    const bitboard enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
-    const bitboard allPieces = allWhitePieces | allBlackPieces;
+    const bitboard_t myPieces = isItWhiteToMove ? allWhitePieces : allBlackPieces;
+    const bitboard_t enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
+    const bitboard_t allPieces = allWhitePieces | allBlackPieces;
 
-    bitboard bishopPinnedPieces = 0ULL;
-    bitboard rookPinnedPieces = 0ULL;
+    bitboard_t bishopPinnedPieces = 0ULL;
+    bitboard_t rookPinnedPieces = 0ULL;
 
-    bitboard thisPinningPieceMask, interposingSquares, interposingOccupiedSquares;
+    bitboard_t thisPinningPieceMask, interposingSquares, interposingOccupiedSquares;
     int thisPinningPieceSquare;
-    bitboard effectiveEnemyBishops1 = effectiveEnemyBishops, effectiveEnemyRooks1 = effectiveEnemyRooks;
+    bitboard_t effectiveEnemyBishops1 = effectiveEnemyBishops, effectiveEnemyRooks1 = effectiveEnemyRooks;
     while (effectiveEnemyBishops1 != 0ULL) {
         thisPinningPieceMask = effectiveEnemyBishops1 & -effectiveEnemyBishops1;
         effectiveEnemyBishops1 -= thisPinningPieceMask;
@@ -1726,30 +1726,30 @@ void ChessBoard::getLegalMoves (vector<move_t>& winningEqualCaptures, vector<mov
         // And we might have caught an opponent's piece that could give a discovered attack if it were their turn, but that won't affect anything.
     } // end while loop
 
-    const bitboard kingLegalEndSquares = getMagicKingAttackedSquares(myKingPosition) & ~enemyAttackedSquares & ~myPieces;
-    const bitboard kingCaptureEndSquares = kingLegalEndSquares & enemyPieces;
-    const bitboard kingQuietEndSquares = kingLegalEndSquares - kingCaptureEndSquares;
+    const bitboard_t kingLegalEndSquares = getMagicKingAttackedSquares(myKingPosition) & ~enemyAttackedSquares & ~myPieces;
+    const bitboard_t kingCaptureEndSquares = kingLegalEndSquares & enemyPieces;
+    const bitboard_t kingQuietEndSquares = kingLegalEndSquares - kingCaptureEndSquares;
     addLegalKingMoves(winningEqualCaptures,kingCaptureEndSquares);
     addLegalKingMoves(nonCaptures,kingQuietEndSquares);
     if (pieceGivingCheck == DOUBLE_CHECK_CODE)
         return;
 
-    bitboard legalCheckBlockSquares = ENTIRE_BOARD;
+    bitboard_t legalCheckBlockSquares = ENTIRE_BOARD;
     addEnPassant(winningEqualCaptures,effectiveEnemyBishops,effectiveEnemyRooks);
     if (pieceGivingCheck == NOT_IN_CHECK_CODE)
         addCastling(nonCaptures,enemyAttackedSquares);
     else
         legalCheckBlockSquares = lookupCheckResponses(myKingPosition,this->pieceGivingCheck);
 
-    bitboard piecesRemaining;
-    bitboard startSquareMask;
+    bitboard_t piecesRemaining;
+    bitboard_t startSquareMask;
     int startSquare;
-    bitboard legalEndSquares;
-    bitboard endSquareMask;
+    bitboard_t legalEndSquares;
+    bitboard_t endSquareMask;
     int endSquare;
     move_t captureMove;
 
-    const bitboard myPawns = isItWhiteToMove ? whitePieceTypes[PAWN_CODE] : blackPieceTypes[PAWN_CODE];
+    const bitboard_t myPawns = isItWhiteToMove ? whitePieceTypes[PAWN_CODE] : blackPieceTypes[PAWN_CODE];
     const int leftCaptureOffset = isItWhiteToMove ? 7 : 9;
     const int rightCaptureOffset = isItWhiteToMove ? 9 : 7; // but we are right shifting instead of left shifting
     const int pawnSinglePushOffset = isItWhiteToMove ? 1 : -1;
@@ -1858,22 +1858,22 @@ void ChessBoard::getLegalMoves (vector<move_t>& winningEqualCaptures, vector<mov
 }
 
 void ChessBoard::getLegalMoves (vector<move_t>& winningEqualCaptures, vector<move_t>& losingCaptures, vector<move_t>& zeroSEEQuiets, vector<move_t>& negativeSEEQuiets) const {
-    const bitboard diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
-    const bitboard orthogonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicRookAttackedSquares(whiteKingPosition) : getEmptyBoardMagicRookAttackedSquares(blackKingPosition);
-    const bitboard effectiveEnemyBishops = isItWhiteToMove ? diagonalSquaresFromKing & (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) : diagonalSquaresFromKing & (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
-    const bitboard effectiveEnemyRooks = isItWhiteToMove ? orthogonalSquaresFromKing & (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) : orthogonalSquaresFromKing & (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]);
-    const bitboard enemyAttackedSquares = isItWhiteToMove ? calculateBlackAttackedSquares() : calculateWhiteAttackedSquares();
+    const bitboard_t diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
+    const bitboard_t orthogonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicRookAttackedSquares(whiteKingPosition) : getEmptyBoardMagicRookAttackedSquares(blackKingPosition);
+    const bitboard_t effectiveEnemyBishops = isItWhiteToMove ? diagonalSquaresFromKing & (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) : diagonalSquaresFromKing & (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t effectiveEnemyRooks = isItWhiteToMove ? orthogonalSquaresFromKing & (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) : orthogonalSquaresFromKing & (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t enemyAttackedSquares = isItWhiteToMove ? calculateBlackAttackedSquares() : calculateWhiteAttackedSquares();
     const uint8_t myKingPosition = isItWhiteToMove ? whiteKingPosition : blackKingPosition;
-    const bitboard myPieces = isItWhiteToMove ? allWhitePieces : allBlackPieces;
-    const bitboard enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
-    const bitboard allPieces = allWhitePieces | allBlackPieces;
+    const bitboard_t myPieces = isItWhiteToMove ? allWhitePieces : allBlackPieces;
+    const bitboard_t enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
+    const bitboard_t allPieces = allWhitePieces | allBlackPieces;
 
-    bitboard bishopPinnedPieces = 0ULL;
-    bitboard rookPinnedPieces = 0ULL;
+    bitboard_t bishopPinnedPieces = 0ULL;
+    bitboard_t rookPinnedPieces = 0ULL;
 
-    bitboard thisPinningPieceMask, interposingSquares, interposingOccupiedSquares;
+    bitboard_t thisPinningPieceMask, interposingSquares, interposingOccupiedSquares;
     int thisPinningPieceSquare;
-    bitboard effectiveEnemyBishops1 = effectiveEnemyBishops, effectiveEnemyRooks1 = effectiveEnemyRooks;
+    bitboard_t effectiveEnemyBishops1 = effectiveEnemyBishops, effectiveEnemyRooks1 = effectiveEnemyRooks;
     while (effectiveEnemyBishops1 != 0ULL) {
         thisPinningPieceMask = effectiveEnemyBishops1 & -effectiveEnemyBishops1;
         effectiveEnemyBishops1 -= thisPinningPieceMask;
@@ -1897,30 +1897,30 @@ void ChessBoard::getLegalMoves (vector<move_t>& winningEqualCaptures, vector<mov
         // And we might have caught an opponent's piece that could give a discovered attack if it were their turn, but that won't affect anything.
     } // end while loop
 
-    const bitboard kingLegalEndSquares = getMagicKingAttackedSquares(myKingPosition) & ~enemyAttackedSquares & ~myPieces;
-    const bitboard kingCaptureEndSquares = kingLegalEndSquares & enemyPieces;
-    const bitboard kingQuietEndSquares = kingLegalEndSquares - kingCaptureEndSquares;
+    const bitboard_t kingLegalEndSquares = getMagicKingAttackedSquares(myKingPosition) & ~enemyAttackedSquares & ~myPieces;
+    const bitboard_t kingCaptureEndSquares = kingLegalEndSquares & enemyPieces;
+    const bitboard_t kingQuietEndSquares = kingLegalEndSquares - kingCaptureEndSquares;
     addLegalKingMoves(winningEqualCaptures,kingCaptureEndSquares);
     addLegalKingMoves(zeroSEEQuiets,kingQuietEndSquares);
     if (pieceGivingCheck == DOUBLE_CHECK_CODE)
         return;
 
-    bitboard legalCheckBlockSquares = ENTIRE_BOARD;
+    bitboard_t legalCheckBlockSquares = ENTIRE_BOARD;
     addEnPassant(winningEqualCaptures,effectiveEnemyBishops,effectiveEnemyRooks);
     if (pieceGivingCheck == NOT_IN_CHECK_CODE)
         addCastling(zeroSEEQuiets,enemyAttackedSquares);
     else
         legalCheckBlockSquares = lookupCheckResponses(myKingPosition,this->pieceGivingCheck);
 
-    bitboard piecesRemaining;
-    bitboard startSquareMask;
+    bitboard_t piecesRemaining;
+    bitboard_t startSquareMask;
     int startSquare;
-    bitboard legalEndSquares;
-    bitboard endSquareMask;
+    bitboard_t legalEndSquares;
+    bitboard_t endSquareMask;
     int endSquare;
     move_t move;
 
-    const bitboard myPawns = isItWhiteToMove ? whitePieceTypes[PAWN_CODE] : blackPieceTypes[PAWN_CODE];
+    const bitboard_t myPawns = isItWhiteToMove ? whitePieceTypes[PAWN_CODE] : blackPieceTypes[PAWN_CODE];
     const int leftCaptureOffset = isItWhiteToMove ? 7 : 9;
     const int rightCaptureOffset = isItWhiteToMove ? 9 : 7; // but we are right shifting instead of left shifting
     const int pawnSinglePushOffset = isItWhiteToMove ? 1 : -1;
@@ -2091,7 +2091,8 @@ int ChessBoard::capturePerft (const int depth) const {
     return nodeCount;
 }
 
-float ChessBoard::getStaticEval () const {
+eval_t ChessBoard::getStaticEval () const {
+    using namespace hce;
     if (whiteWonByCheckmate)
         return MATE_VALUE;
     else if (blackWonByCheckmate)
@@ -2099,97 +2100,39 @@ float ChessBoard::getStaticEval () const {
     else if (drawByInsufficientMaterial or drawByStalemate)
         return 0;
 
-    int white_mg_material_eval = 0;
-    int white_eg_material_eval = 0;
-    int black_mg_material_eval = 0;
-    int black_eg_material_eval = 0;
-
-    int white_mg_placement_eval = 0;
-    int white_eg_placement_eval = 0;
-    int black_mg_placement_eval = 0;
-    int black_eg_placement_eval = 0;
-
-    bitboard piecesRemaining;
-    bitboard thisPieceMask;
+    // king PSTs
+    packed_eval_t packedScore = king_psts[whiteKingPosition] - king_psts[blackKingPosition ^ 7];
+    int phase = 0; // 24 = mg, 0 = mg
+    bitboard_t piecesRemaining;
+    bitboard_t thisPieceMask;
     int thisPieceSquare;
-
-    float white_mg_eval_weight;
-    float black_mg_eval_weight;
-
-    for (int pieceType = QUEEN_CODE; pieceType <= KNIGHT_CODE; pieceType++) {
-        // Add up white's pieces and placement (no pawns or kings)
+    for (int pieceType = QUEEN_CODE; pieceType < PAWN_CODE; pieceType++) {
+        // phase transition
+        phase += __builtin_popcountll(whitePieceTypes[pieceType] | blackPieceTypes[pieceType]) * PHASE_PIECE_VALUES[pieceType];
+        
+        // white PSTs
         piecesRemaining = whitePieceTypes[pieceType];
         while (piecesRemaining != 0ULL) {
             thisPieceMask = piecesRemaining & -piecesRemaining;
             piecesRemaining -= thisPieceMask;
             thisPieceSquare = log2ll(thisPieceMask);
-
-            white_mg_material_eval += mg_material_values[pieceType];
-            white_eg_material_eval += eg_material_values[pieceType];
-            white_mg_placement_eval += white_mg_placement_table[pieceType][thisPieceSquare];
-            white_eg_placement_eval += white_eg_placement_table[pieceType][thisPieceSquare];
+            packedScore += piece_type_psts[pieceType][thisPieceSquare];
         }
-
-        // Add up black's pieces and placement (no pawns or kings)
+        
+        // black PSTs
         piecesRemaining = blackPieceTypes[pieceType];
         while (piecesRemaining != 0ULL) {
             thisPieceMask = piecesRemaining & -piecesRemaining;
             piecesRemaining -= thisPieceMask;
             thisPieceSquare = log2ll(thisPieceMask);
-
-            black_mg_material_eval += mg_material_values[pieceType];
-            black_eg_material_eval += eg_material_values[pieceType];
-            black_mg_placement_eval += black_mg_placement_table[pieceType][thisPieceSquare];
-            black_eg_placement_eval += black_eg_placement_table[pieceType][thisPieceSquare];
+            packedScore -= piece_type_psts[pieceType][thisPieceSquare ^ 7];
         }
     }
-
-    // Notice that we haven't done the pawns yet. That is because we want to calculate the weights before doing the pawns.
-    // Because the number of pawns on the board doesn't affect whether we are in the middlegame or endgame.
-    white_mg_eval_weight = (black_mg_material_eval + black_eg_material_eval) / (mgeg_total_piece_value);
-    black_mg_eval_weight = (white_mg_material_eval + white_eg_material_eval) / (mgeg_total_piece_value);
-
-    // And NOW we calculate the pawns
-
-    // Step 5: pawns
-    piecesRemaining = whitePieceTypes[PAWN_CODE];
-    while (piecesRemaining != 0ULL) {
-        thisPieceMask = piecesRemaining & -piecesRemaining;
-        piecesRemaining -= thisPieceMask;
-        thisPieceSquare = log2ll(thisPieceMask);
-
-        white_mg_material_eval += mg_pawn_value;
-        white_eg_material_eval += eg_pawn_value;
-        white_mg_placement_eval += white_mg_pawn_table[thisPieceSquare];
-        white_eg_placement_eval += white_eg_pawn_table[thisPieceSquare];
-    }
-
-    // Step 5: pawns
-    piecesRemaining = blackPieceTypes[PAWN_CODE];
-    while (piecesRemaining != 0ULL) {
-        thisPieceMask = piecesRemaining & -piecesRemaining;
-        piecesRemaining -= thisPieceMask;
-        thisPieceSquare = log2ll(thisPieceMask);
-
-        black_mg_material_eval += mg_pawn_value;
-        black_eg_material_eval += eg_pawn_value;
-        black_mg_placement_eval += black_mg_pawn_table[thisPieceSquare];
-        black_eg_placement_eval += black_eg_pawn_table[thisPieceSquare];
-    }
-
-    // Step 6: Kings
-    white_mg_placement_eval += white_mg_king_table[whiteKingPosition];
-    white_eg_placement_eval += white_eg_king_table[whiteKingPosition];
-    black_mg_placement_eval += black_mg_king_table[blackKingPosition];
-    black_eg_placement_eval += black_eg_king_table[blackKingPosition];
-
-    float white_eval =  (white_mg_material_eval + white_mg_placement_eval) * white_mg_eval_weight + (white_eg_material_eval + white_eg_placement_eval) * (1 - white_mg_eval_weight);
-    float black_eval =  (black_mg_material_eval + black_mg_placement_eval) * black_mg_eval_weight + (black_eg_material_eval + black_eg_placement_eval) * (1 - black_mg_eval_weight);
-
-    return white_eval - black_eval;
+    
+    return getEvalFromPacked(packedScore,phase);
 } // end getStaticEval
 
-float ChessBoard::getNegaStaticEval () const {
+eval_t ChessBoard::getNegaStaticEval () const {
     if (isItWhiteToMove)
         return getStaticEval();
     else

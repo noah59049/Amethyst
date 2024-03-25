@@ -11,15 +11,15 @@ private:
     uint8_t whiteKingPosition;
     uint8_t blackKingPosition;
 
-    bitboard whitePieceTypes[5] = {1ULL << 24, (1ULL << 0) + (1ULL << 56), (1ULL << 16) + (1ULL << 40),
+    bitboard_t whitePieceTypes[5] = {1ULL << 24, (1ULL << 0) + (1ULL << 56), (1ULL << 16) + (1ULL << 40),
                                         (1ULL << 8) + (1ULL << 48), 0x0202020202020202ULL};
     // As initialized in default constructor to start up a new game.
-    bitboard allWhitePieces;
+    bitboard_t allWhitePieces;
 
-    bitboard blackPieceTypes[5] = {1ULL << 31, (1ULL << 7) + (1ULL << 63), (1ULL << 23) + (1ULL << 47),
+    bitboard_t blackPieceTypes[5] = {1ULL << 31, (1ULL << 7) + (1ULL << 63), (1ULL << 23) + (1ULL << 47),
                                         (1ULL << 15) + (1ULL << 55), 0x4040404040404040ULL};
     // As initialized in default constructor to start up a new game.
-    bitboard allBlackPieces;
+    bitboard_t allBlackPieces;
 
     /**
      * 0 if the a-pawn moved two squares, 4 if the e-pawn moved two squares, 7 if the h-pawn moved two squares, 255 if no pawn moved two squares.
@@ -51,12 +51,12 @@ private:
 
     // Part 4: Move generation
     move_t getCaptureMove(int startSquare, int endSquare) const;
-    bitboard calculateWhiteAttackedSquares() const;
-    bitboard calculateBlackAttackedSquares() const;
+    bitboard_t calculateWhiteAttackedSquares() const;
+    bitboard_t calculateBlackAttackedSquares() const;
     uint8_t calculatePieceGivingCheck() const;
-    void addCastling (std::vector<move_t>& legalMoves, bitboard enemyAttackedSquares) const;
-    void addEnPassant (std::vector<move_t>& legalMoves, bitboard effectiveEnemyBishops, bitboard effectiveEnemyRooks) const;
-    void addLegalKingMoves (std::vector<move_t>& legalMoves, bitboard kingLegalEndSquares) const;
+    void addCastling (std::vector<move_t>& legalMoves, bitboard_t enemyAttackedSquares) const;
+    void addEnPassant (std::vector<move_t>& legalMoves, bitboard_t effectiveEnemyBishops, bitboard_t effectiveEnemyRooks) const;
+    void addLegalKingMoves (std::vector<move_t>& legalMoves, bitboard_t kingLegalEndSquares) const;
 
     // Part 5: SEE
     int getCaptureSEE (int capturingPieceType, move_t captureMove) const;
@@ -133,7 +133,7 @@ public:
     bool getIsItWhiteToMove () const {
         return isItWhiteToMove;
     }
-    bitboard getAllBlackPieces () const {
+    bitboard_t getAllBlackPieces () const {
         return allBlackPieces;
     }
     bool isInCheck () const {
