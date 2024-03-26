@@ -2106,7 +2106,7 @@ eval_t ChessBoard::getStaticEval () const {
     bitboard_t piecesRemaining;
     bitboard_t thisPieceMask;
     int thisPieceSquare;
-    for (int pieceType = QUEEN_CODE; pieceType < PAWN_CODE; pieceType++) {
+    for (int pieceType = QUEEN_CODE; pieceType <= PAWN_CODE; pieceType++) {
         // phase transition
         phase += __builtin_popcountll(whitePieceTypes[pieceType] | blackPieceTypes[pieceType]) * PHASE_PIECE_VALUES[pieceType];
         
