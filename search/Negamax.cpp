@@ -10,13 +10,13 @@ float search::getNegaQuiescenceEval(const ChessBoard &board, float alpha, float 
     if (alpha >= beta)
         return beta;
 
-    vector<uint16_t> captures;
+    vector<move_t> captures;
     captures.reserve(5);
 
     board.getNonnegativeSEECapturesOnly(captures);
 
     float newscore;
-    for (uint16_t move: captures) {
+    for (move_t move: captures) {
         ChessBoard newBoard = board;
         newBoard.makemove(move);
         newscore = -getNegaQuiescenceEval(newBoard, -beta, -alpha);
@@ -39,9 +39,9 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
     if (board.isInCheck())
         depth++;
 
-    vector<uint16_t> winningEqualCaptures;
-    vector<uint16_t> losingCaptures;
-    vector<uint16_t> nonCaptures;
+    vector<move_t> winningEqualCaptures;
+    vector<move_t> losingCaptures;
+    vector<move_t> nonCaptures;
 
     // Check if our result is in the transposition table, plus add hash move if it is
     std::optional<TTValue> ttHashValue = data.transpositionTable.get(board.getZobristCode(),depth);
@@ -104,9 +104,9 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
 
     bool firstKillerMoveIsLegal = false;
     bool secondKillerMoveIsLegal = false;
-    const uint16_t firstKillerMove = data.killerMoves[depth].getFirstKillerMove();
-    const uint16_t secondKillerMove = data.killerMoves[depth].getSecondKillerMove();
-    for (const uint16_t move : nonCaptures) {
+    const move_t firstKillerMove = data.killerMoves[depth].getFirstKillerMove();
+    const move_t secondKillerMove = data.killerMoves[depth].getSecondKillerMove();
+    for (const move_t move : nonCaptures) {
         if (move == firstKillerMove) {
             firstKillerMoveIsLegal = true;
         }
@@ -128,9 +128,9 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
 
     float newscore;
     float bestscore = -INFINITY;
-    uint16_t bestmove = SEARCH_FAILED_MOVE_CODE;
+    move_t bestmove = SEARCH_FAILED_MOVE_CODE;
     bool improvedAlpha = false;
-    for (uint16_t move: winningEqualCaptures) {
+    for (move_t move: winningEqualCaptures) {
         ChessBoard newBoard = board;
         newBoard.makemove(move);
         numMovesSearched++;
@@ -176,13 +176,13 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
 }
 
 void search::getNegamaxBestMoveAndEval(const ChessBoard &board, const int depth, NegamaxData& data, const float aspirationWindowCenter,
-                               uint16_t &bestMove, float &eval) {
+                               move_t &bestMove, float &eval) {
     if (*data.isCancelled)
         throw SearchCancelledException();
 
-    vector<uint16_t> winningEqualCaptures;
-    vector<uint16_t> losingCaptures;
-    vector<uint16_t> nonCaptures;
+    vector<move_t> winningEqualCaptures;
+    vector<move_t> losingCaptures;
+    vector<move_t> nonCaptures;
     board.getLegalMoves(winningEqualCaptures, losingCaptures, nonCaptures);
 
     // Internal iterative deepening
@@ -210,9 +210,9 @@ void search::getNegamaxBestMoveAndEval(const ChessBoard &board, const int depth,
 
     float newscore;
     float alpha = startAlpha;
-    uint16_t bestmove = SEARCH_FAILED_MOVE_CODE;
+    move_t bestmove = SEARCH_FAILED_MOVE_CODE;
     while (alpha <= startAlpha or alpha >= beta) { // in other words, we leave this loop once we score inside the aspiration window.
-        for (uint16_t move: winningEqualCaptures) {
+        for (move_t move: winningEqualCaptures) {
             ChessBoard newBoard = board;
             newBoard.makemove(move);
             newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
@@ -247,7 +247,7 @@ void search::timeSearchFromFEN (const string& fenNotation, int maxDepth) {
         bool* isCancelled = new bool(false);
         RepetitionTable repetitionTable;
         NegamaxData data(isCancelled,repetitionTable,depth);
-        uint16_t bestMove = SEARCH_FAILED_MOVE_CODE;
+        move_t bestMove = SEARCH_FAILED_MOVE_CODE;
         getNegamaxBestMoveAndEval(board,depth,data,negaEval,bestMove,negaEval);
         string readableBestMove = board.moveToSAN(bestMove);
         delete isCancelled;
