@@ -36,9 +36,9 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
     // Set up search parameters
     int depth;
     float eval = board.getNegaStaticEval();
-    vector<uint16_t> moves;
+    vector<move_t> moves;
     board.getLegalMoves(moves);
-    uint16_t bestMoveFromPrevious = moves.at(0);
+    move_t bestMoveFromPrevious = moves.at(0);
     assert(!game->hasGameEnded());
     RepetitionTable repetitionTable(*game);
 
