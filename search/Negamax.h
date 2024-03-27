@@ -56,7 +56,7 @@ namespace search {
     float getNegamaxEval(const ChessBoard &board, int depth, float alpha, float beta, NegamaxData& data);
 
     void getNegamaxBestMoveAndEval(const ChessBoard &board, int depth, NegamaxData& data, float aspirationWindowCenter,
-                                   uint16_t &bestMove, float &eval);
+                                   move_t &bestMove, float &eval);
 
     void timeSearchFromFEN (const std::string& fenNotation, int maxDepth);
 

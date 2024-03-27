@@ -6,7 +6,7 @@
 struct TTValue {
     float lowerBoundEval;
     float upperBoundEval;
-    uint16_t hashMove;
+    move_t hashMove;
 };
 
 class TranspositionTable {

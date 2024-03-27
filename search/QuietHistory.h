@@ -6,15 +6,15 @@
 class QuietHistory {
 private:
     int cutoffCounts[4096]{};
-    inline int lookupMoveCutoffCount (uint16_t move) {
+    inline int lookupMoveCutoffCount (move_t move) {
         return cutoffCounts[move >> 4];
     }
 
-    void sortMovesByCutoffs(std::vector<uint16_t> &vec, int startIndex, int endIndex);
+    void sortMovesByCutoffs(std::vector<move_t> &vec, int startIndex, int endIndex);
 public:
     QuietHistory();
-    void recordKillerMove (uint16_t move);
+    void recordKillerMove (move_t move);
 
-    void sortMoves(std::vector<uint16_t>& quietMoves);
+    void sortMoves(std::vector<move_t>& quietMoves);
 
 };

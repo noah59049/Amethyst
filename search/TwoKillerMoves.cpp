@@ -1,5 +1,5 @@
 #include "TwoKillerMoves.h"
-void TwoKillerMoves::recordKillerMove(const uint16_t move) {
+void TwoKillerMoves::recordKillerMove(const move_t move) {
     if (firstKillerMove == NULL_KILLER_MOVE) {
         firstKillerMove = move;
     }
