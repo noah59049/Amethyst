@@ -70,19 +70,19 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
     }
 
     if (depth == 0)
-        return search::getNegaQuiescenceEval(board, alpha, beta);
+        return getNegaQuiescenceEval(board, alpha, beta);
     if (*data.isCancelled)
-        throw search::SearchCancelledException();
+        throw SearchCancelledException();
 
     // Null move pruning (technically null move reductions)
     if (board.canMakeNullMove()) {
         ChessBoard nmBoard = board;
         nmBoard.makeNullMove();
-        if (-search::getNegamaxEval(nmBoard, max(0,depth - NMP_REDUCTION),-beta - ZERO_WINDOW_RADIUS, -beta + ZERO_WINDOW_RADIUS, data) > beta) {
+        if (-getNegamaxEval(nmBoard, max(0,depth - NMP_REDUCTION),-beta - ZERO_WINDOW_RADIUS, -beta + ZERO_WINDOW_RADIUS, data) > beta) {
             // To guard against zugzwang, we do a search to depth - 4 without a null move, and if THAT causes a beta cutoff, then we return beta.
-            if (search::getNegamaxEval(board, max(0,depth - 4), beta - ZERO_WINDOW_RADIUS, beta + ZERO_WINDOW_RADIUS, data) > beta) {
+            if (getNegamaxEval(board, max(0,depth - 4), beta - ZERO_WINDOW_RADIUS, beta + ZERO_WINDOW_RADIUS, data) > beta) {
                 // We know we caused a beta cutoff, but we don't know what the best move is
-                data.transpositionTable.put(board.getZobristCode(),depth,{beta,INFINITY,SEARCH_FAILED_MOVE_CODE});
+                data.transpositionTable.put({beta,INFINITY,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
                 return beta;
             }
         }
@@ -137,11 +137,11 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
 
         // Late move reductions
         if (depth >= MIN_LMR_DEPTH and numMovesSearched > numMovesToNotReduce) {
-            float reducedScore = -search::getNegamaxEval(newBoard, depth - 2, -alpha - ZERO_WINDOW_RADIUS, -alpha + ZERO_WINDOW_RADIUS, data);
+            float reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - ZERO_WINDOW_RADIUS, -alpha + ZERO_WINDOW_RADIUS, data);
             if (reducedScore < alpha)
                 continue;
         }
-        newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
+        newscore = -getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
 
         if (newscore > bestscore) {
             bestscore = newscore;
@@ -160,17 +160,17 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
                     else
                         data.blackHHB.recordKillerMove(move);
                 }
-                data.transpositionTable.put(board.getZobristCode(),depth,{beta,INFINITY,move});
+                data.transpositionTable.put({beta,INFINITY,move,board.getZobristCode(),depth});
                 return beta;
             } // end if alpha > beta
         } // end if newscore > alpha
     } // end for loop over moves
     if (improvedAlpha) { // This is a PV node, and score is exact
-        data.transpositionTable.put(board.getZobristCode(),depth,{alpha,alpha,bestmove});
+        data.transpositionTable.put({alpha,alpha,bestmove,board.getZobristCode(),depth});
     }
     else { // None of the moves improved alpha. The score is an upper bound
         // Change implemented in Amethyst 43: At an All-Node, we don't add the "best move" to the transposition table because that's just noise
-        data.transpositionTable.put(board.getZobristCode(),depth,{-INFINITY,alpha,SEARCH_FAILED_MOVE_CODE});
+        data.transpositionTable.put({-INFINITY,alpha,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
     }
     return alpha;
 }
@@ -227,7 +227,7 @@ void search::getNegamaxBestMoveAndEval(const ChessBoard &board, const int depth,
         if (startAlpha < alpha and alpha < beta) {
             bestMove = bestmove;
             eval = alpha;
-            data.transpositionTable.put(board.getZobristCode(),depth,{alpha,alpha,bestmove});
+            data.transpositionTable.put({alpha,alpha,bestmove,board.getZobristCode(),depth});
         }
         else {
             // Search returned an evaluation outside the aspiration window

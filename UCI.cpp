@@ -95,7 +95,7 @@ void uciLoop () {
         if (command == "uci") {
             mutexPrint("id name Amethyst");
             mutexPrint("id author Noah Holbrook");
-            mutexPrint("option name Hash type spin default 1 min 1 max 1");
+            mutexPrint("option name Hash type spin default 32 min 1 max 1024");
             mutexPrint("option name Threads type spin default 1 min 1 max 1");
             mutexPrint("uciok");
         }
@@ -103,10 +103,16 @@ void uciLoop () {
             mutexPrint("readyok");
         }
         else if (command == "ucinewgame") {
-            // TODO: Implement this
+            // I don't need to do anything yet
         }
         else if (command.rfind("setoption",0) == 0) {
-            // TODO: Implement this
+            if (command.rfind("setoption name Hash value",0) == 0) {
+                stringstream ss(command);
+                string word;
+                for (int i = 0; i < 3; i++)
+                    ss >> word;
+                ss >> uci::HASH_MB;
+            }
         }
         else if (command.rfind("position",0) == 0) {
             stringstream ss(command);

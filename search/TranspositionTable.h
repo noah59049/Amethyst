@@ -1,25 +1,40 @@
 #pragma once
-#include <unordered_map>
 #include <vector>
 #include <optional>
 #include "../Typedefs.h"
+#include "../movegen/Flags.h"
+
 struct TTValue {
-    float lowerBoundEval;
-    float upperBoundEval;
-    move_t hashMove;
+    constexpr const static move_t TT_NULL_MOVE = 3120; //a4a4
+    const eval_t lowerBoundEval = NAN;
+    const eval_t upperBoundEval = NAN;
+    const move_t hashMove = TT_NULL_MOVE;
+    const zobrist_t zobristCode = 0;
+    const int depth = -1;
+    TTValue()=default;
+
+    TTValue& operator = (TTValue other) {
+        return *this;
+    }
+
+    [[nodiscard]] inline bool isNull() const {
+        return zobristCode == 0 and hashMove == TT_NULL_MOVE;
+    }
+
+    [[nodiscard]] inline bool isExact() const {
+        return lowerBoundEval == upperBoundEval;
+    }
 };
 
 class TranspositionTable {
 private:
-    constexpr const static float LOAD_FACTOR = 0.45;
-    constexpr const static int MAX_SIZE_PER_DEPTH = 1000000;
-
-    std::vector<std::unordered_map<zobrist_t,TTValue>> tables;
-
-    void extendToDepth(int depth);
+    std::vector<TTValue> buckets;
 
 public:
-    void put (zobrist_t zobristCode, int depth, const TTValue& value);
+    explicit TranspositionTable(int numBuckets) {
+        buckets = std::vector<TTValue>(numBuckets);
+    }
+    void put (TTValue value);
 
     std::optional<TTValue> get(zobrist_t zobristCode, int depth);
 

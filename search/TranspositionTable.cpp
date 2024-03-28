@@ -1,28 +1,27 @@
-//
-// Created by Noah Holbrook on 3/22/24.
-//
-
 #include "TranspositionTable.h"
 
-void TranspositionTable::extendToDepth(int depth) {
-    while (tables.size() <= depth) { // we want to extend so that it has indices 1 through depth
-        std::unordered_map<zobrist_t,TTValue> newTable;
-        newTable.max_load_factor(LOAD_FACTOR);
-        tables.push_back(newTable);
-    }
-} // end extendToDepth
-
-void TranspositionTable::put (const zobrist_t zobristCode, const int depth, const TTValue& value) {
-    extendToDepth(depth);
-    if (tables[depth].size() < MAX_SIZE_PER_DEPTH)
-        tables[depth][zobristCode] = value;
+void TranspositionTable::put (const TTValue value) {
+    size_t bucketIndex = value.zobristCode % buckets.size();
+    if (buckets.at(bucketIndex).isNull() or // always replace null values
+            buckets.at(bucketIndex).depth < value.depth or // replace lower depth with higher depth
+            (buckets.at(bucketIndex).depth == value.depth and // also replace equal depth
+            (!buckets.at(bucketIndex).isExact() or value.isExact()))) // as long as it's not replacing exact with inexact
+        buckets[bucketIndex] = value;
 }
 
 std::optional<TTValue> TranspositionTable::get(const zobrist_t zobristCode, const int depth) {
-    extendToDepth(depth);
-    auto myIterator = tables[depth].find(zobristCode); // actual type is std::unordered_map<zobrist_t, TTValue>::iterator
-    if (myIterator == tables[depth].end())
-        return std::nullopt;
+    size_t bucketIndex = zobristCode % buckets.size();
+    if (buckets.at(bucketIndex).zobristCode == zobristCode and buckets.at(bucketIndex).depth >= depth)
+        return buckets[bucketIndex];
     else
-        return {myIterator->second};
-} // end get method
+        return std::nullopt;
+}
+
+
+// For every zobrist code, it hashes to a bucket
+// When we do the get method: check that the zobrist code is actually the zobrist code we want
+// And check that the depth is >= the depth that we want
+// If it is, then get the result from the TT
+
+// If we put something in the TT
+// Then we do our replacement strategy

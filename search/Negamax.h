@@ -4,6 +4,7 @@
 #include "TranspositionTable.h"
 #include "TwoKillerMoves.h"
 #include "QuietHistory.h"
+#include "../UCI.h"
 namespace search {
     constexpr const static int KILLER_MAX_COUSIN_LEVEL = 2;
     constexpr const static int IID_DEPTH_DECREASE = 1;
@@ -21,24 +22,14 @@ namespace search {
     struct NegamaxData {
         const bool* isCancelled;
         RepetitionTable repetitionTable;
-        TranspositionTable transpositionTable;
+        TranspositionTable transpositionTable = TranspositionTable(uci::HASH_MB * 1000000 / 24);
         std::vector<TwoKillerMoves> killerMoves;
         QuietHistory whiteHHB;
         QuietHistory blackHHB;
 
-        NegamaxData(bool* isCancelled, const RepetitionTable& repetitionTable, const TranspositionTable& transpositionTable, const std::vector<TwoKillerMoves>& killerMoves, const QuietHistory& whiteHHB, const QuietHistory& blackHHB) {
-            this->isCancelled = isCancelled;
-            this->repetitionTable = repetitionTable;
-            this->transpositionTable = transpositionTable;
-            this->killerMoves = killerMoves;
-            this->whiteHHB = whiteHHB;
-            this->blackHHB = blackHHB;
-        }
-
         NegamaxData(bool* isCancelled, const RepetitionTable& repetitionTable, int depth) {
             this->isCancelled = isCancelled;
             this->repetitionTable = repetitionTable;
-            this->transpositionTable = TranspositionTable();
             this->killerMoves = std::vector<TwoKillerMoves>(depth + 1);
             this->whiteHHB = QuietHistory();
             this->blackHHB = QuietHistory();
