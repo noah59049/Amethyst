@@ -22,7 +22,7 @@ namespace search {
     struct NegamaxData {
         const bool* isCancelled;
         RepetitionTable repetitionTable;
-        TranspositionTable transpositionTable = TranspositionTable(uci::HASH_MB * 1000000 / 24);
+        TranspositionTable transpositionTable = TranspositionTable(uci::HASH_MB * 1000000 / int(sizeof(TTValue)));
         std::vector<TwoKillerMoves> killerMoves;
         QuietHistory whiteHHB;
         QuietHistory blackHHB;
