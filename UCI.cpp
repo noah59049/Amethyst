@@ -193,9 +193,9 @@ void uciLoop () {
                 // Step 0: Determine the movetime
                 if (movetime == 0) {
                     if (game.getCurrentPosition().getIsItWhiteToMove())
-                        movetime = wtime / 40 + winc;
+                        movetime = wtime / 40 + winc * 17 / 20;
                     else
-                        movetime = btime / 40 + binc;
+                        movetime = btime / 40 + binc * 17 / 20;
                 } // end if movetime == 0
 
                 // Step 1: Clean up the old pointers. We don't know if they're null or not
