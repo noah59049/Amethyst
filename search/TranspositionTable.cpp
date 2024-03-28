@@ -1,18 +1,24 @@
 #include "TranspositionTable.h"
 
-void TranspositionTable::put (const TTValue value) {
+void TranspositionTable::put (const TTValue& value) {
     size_t bucketIndex = value.zobristCode % buckets.size();
     if (buckets.at(bucketIndex).isNull() or // always replace null values
             buckets.at(bucketIndex).depth < value.depth or // replace lower depth with higher depth
             (buckets.at(bucketIndex).depth == value.depth and // also replace equal depth
-            (!buckets.at(bucketIndex).isExact() or value.isExact()))) // as long as it's not replacing exact with inexact
-        buckets[bucketIndex] = value;
+            (!buckets.at(bucketIndex).isExact() or value.isExact()))) { // as long as it's not replacing exact with inexact
+        buckets[bucketIndex].lowerBoundEval = value.lowerBoundEval;
+        buckets[bucketIndex].upperBoundEval = value.upperBoundEval;
+        buckets[bucketIndex].hashMove = value.hashMove;
+        buckets[bucketIndex].zobristCode = value.zobristCode;
+        buckets[bucketIndex].depth = value.depth;
+    }
 }
 
 std::optional<TTValue> TranspositionTable::get(const zobrist_t zobristCode, const int depth) {
     size_t bucketIndex = zobristCode % buckets.size();
-    if (buckets.at(bucketIndex).zobristCode == zobristCode and buckets.at(bucketIndex).depth >= depth)
+    if (buckets.at(bucketIndex).zobristCode == zobristCode and buckets.at(bucketIndex).depth >= depth) {
         return buckets[bucketIndex];
+    }
     else
         return std::nullopt;
 }
