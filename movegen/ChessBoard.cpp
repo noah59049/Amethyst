@@ -1531,37 +1531,77 @@ int ChessBoard::getQuietSEE (const int movePieceType, const move_t quietMove) co
 }
 
 int ChessBoard::getQuietSEE (const move_t move) const {
-    const int endSquare = move >> 4 & 63;
-    const bitboard_t endSquareMask = 1ULL << endSquare;
+    const int startSquare = getStartSquare(move);
+    const bitboard_t startSquareMask = 1ULL << startSquare;
     int movingPieceType;
     if (isItWhiteToMove) {
-        if (whiteKingPosition == endSquare)
+        if (whiteKingPosition == startSquareMask)
             return 0;
-        else if (whitePieceTypes[QUEEN_CODE] & endSquare)
+        else if (whitePieceTypes[QUEEN_CODE] & startSquareMask)
             movingPieceType = QUEEN_CODE;
-        else if (whitePieceTypes[ROOK_CODE] & endSquare)
+        else if (whitePieceTypes[ROOK_CODE] & startSquareMask)
             movingPieceType = ROOK_CODE;
-        else if (whitePieceTypes[BISHOP_CODE] & endSquare)
+        else if (whitePieceTypes[BISHOP_CODE] & startSquareMask)
             movingPieceType = BISHOP_CODE;
-        else if (whitePieceTypes[KNIGHT_CODE] & endSquare)
+        else if (whitePieceTypes[KNIGHT_CODE] & startSquareMask)
             movingPieceType = KNIGHT_CODE;
-        else if (whitePieceTypes[PAWN_CODE] & endSquare)
+        else if (whitePieceTypes[PAWN_CODE] & startSquareMask)
             movingPieceType = PAWN_CODE;
         else
             assert(false);
     }
     else {
-        if (blackKingPosition == endSquare)
+        if (blackKingPosition == startSquareMask)
             return 0;
-        else if (blackPieceTypes[QUEEN_CODE] & endSquare)
+        else if (blackPieceTypes[QUEEN_CODE] & startSquareMask)
             movingPieceType = QUEEN_CODE;
-        else if (blackPieceTypes[ROOK_CODE] & endSquare)
+        else if (blackPieceTypes[ROOK_CODE] & startSquareMask)
             movingPieceType = ROOK_CODE;
-        else if (blackPieceTypes[BISHOP_CODE] & endSquare)
+        else if (blackPieceTypes[BISHOP_CODE] & startSquareMask)
             movingPieceType = BISHOP_CODE;
-        else if (blackPieceTypes[KNIGHT_CODE] & endSquare)
+        else if (blackPieceTypes[KNIGHT_CODE] & startSquareMask)
             movingPieceType = KNIGHT_CODE;
-        else if (blackPieceTypes[PAWN_CODE] & endSquare)
+        else if (blackPieceTypes[PAWN_CODE] & startSquareMask)
+            movingPieceType = PAWN_CODE;
+        else
+            assert(false);
+    }
+
+    return getQuietSEE(movingPieceType,move);
+} // end getQuietSEE
+
+int ChessBoard::getCaptureSEE (const move_t move) const {
+    const int startSquare = getStartSquare(move);
+    const bitboard_t startSquareMask = 1ULL << startSquare;
+    int movingPieceType;
+    if (isItWhiteToMove) {
+        if (whiteKingPosition == startSquareMask)
+            return see::TEXTBOOK_PIECE_VALUES[getFlag(move) - CAPTURE_QUEEN_FLAG];
+        else if (whitePieceTypes[QUEEN_CODE] & startSquareMask)
+            movingPieceType = QUEEN_CODE;
+        else if (whitePieceTypes[ROOK_CODE] & startSquareMask)
+            movingPieceType = ROOK_CODE;
+        else if (whitePieceTypes[BISHOP_CODE] & startSquareMask)
+            movingPieceType = BISHOP_CODE;
+        else if (whitePieceTypes[KNIGHT_CODE] & startSquareMask)
+            movingPieceType = KNIGHT_CODE;
+        else if (whitePieceTypes[PAWN_CODE] & startSquareMask)
+            movingPieceType = PAWN_CODE;
+        else
+            assert(false);
+    }
+    else {
+        if (blackKingPosition == startSquareMask)
+            return see::TEXTBOOK_PIECE_VALUES[getFlag(move) - CAPTURE_QUEEN_FLAG];
+        else if (blackPieceTypes[QUEEN_CODE] & startSquareMask)
+            movingPieceType = QUEEN_CODE;
+        else if (blackPieceTypes[ROOK_CODE] & startSquareMask)
+            movingPieceType = ROOK_CODE;
+        else if (blackPieceTypes[BISHOP_CODE] & startSquareMask)
+            movingPieceType = BISHOP_CODE;
+        else if (blackPieceTypes[KNIGHT_CODE] & startSquareMask)
+            movingPieceType = KNIGHT_CODE;
+        else if (blackPieceTypes[PAWN_CODE] & startSquareMask)
             movingPieceType = PAWN_CODE;
         else
             assert(false);

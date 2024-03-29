@@ -1,5 +1,12 @@
 #pragma once
 #include "../Typedefs.h"
+// TODO: Should these be 8-bit ints?
+constexpr const static int QUEEN_CODE = 0;
+constexpr const static int ROOK_CODE = 1;
+constexpr const static int BISHOP_CODE = 2;
+constexpr const static int KNIGHT_CODE = 3;
+constexpr const static int PAWN_CODE = 4;
+
 constexpr const static move_t NORMAL_MOVE_FLAG = 0;
 constexpr const static move_t PROMOTE_TO_QUEEN_FLAG = 1;
 constexpr const static move_t PROMOTE_TO_ROOK_FLAG = 2;
@@ -60,10 +67,3 @@ enum Piece {
     KNIGHT,
     PAWN,
 };
-
-// TODO: Should these be 8-bit ints?
-constexpr const static int QUEEN_CODE = 0;
-constexpr const static int ROOK_CODE = 1;
-constexpr const static int BISHOP_CODE = 2;
-constexpr const static int KNIGHT_CODE = 3;
-constexpr const static int PAWN_CODE = 4;
