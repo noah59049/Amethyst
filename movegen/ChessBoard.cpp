@@ -2048,13 +2048,14 @@ int ChessBoard::perft (const int depth) const {
     if (depth == 0)
         return 1;
 
-    MoveList legalMoves;
-    getLegalMoves1(legalMoves);
+    vector<move_t> legalMoves;
+    legalMoves.reserve(52);
+    getLegalMoves(legalMoves);
 
     int nodeCount = 0;
-    for (int i = 0; i < legalMoves.size; i++) {
+    for (move_t move : legalMoves) {
         ChessBoard copy = *this;
-        copy.makemove(legalMoves.moveList[i]);
+        copy.makemove(move);
         nodeCount += copy.perft(depth - 1);
     }
     return nodeCount;
