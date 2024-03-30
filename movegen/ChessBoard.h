@@ -50,24 +50,25 @@ private:
     void updateDrawByInsufficientMaterial();
 
     // Part 4: Move generation
-    [[nodiscard]] move_t getCaptureMove(int startSquare, int endSquare) const;
-    [[nodiscard]] bitboard_t calculateWhiteAttackedSquares() const;
-    [[nodiscard]] bitboard_t calculateBlackAttackedSquares() const;
-    [[nodiscard]] uint8_t calculatePieceGivingCheck() const;
+    move_t getCaptureMove(int startSquare, int endSquare) const;
+    bitboard_t calculateWhiteAttackedSquares() const;
+    bitboard_t calculateBlackAttackedSquares() const;
+    uint8_t calculatePieceGivingCheck() const;
     void addCastling (std::vector<move_t>& legalMoves, bitboard_t enemyAttackedSquares) const;
     void addEnPassant (std::vector<move_t>& legalMoves, bitboard_t effectiveEnemyBishops, bitboard_t effectiveEnemyRooks) const;
     void addLegalKingMoves (std::vector<move_t>& legalMoves, bitboard_t kingLegalEndSquares) const;
 
     // Part 5: SEE
-    [[nodiscard]] int getCaptureSEE (int capturingPieceType, move_t captureMove) const;
-    [[nodiscard]] int getQuietSEE (int movePieceType, move_t quietMove) const;
+    int getCaptureSEE (int capturingPieceType, move_t captureMove) const;
+    int getQuietSEE (int movePieceType, move_t quietMove) const;
+    int getQuietSEE (move_t move) const;
 
     // Part 6: Eval
-    [[nodiscard]] eval_t getStaticEval () const;
+    float getStaticEval () const;
 
     // Part 7: Algebraic notation
     void decomposeMove(move_t move, Piece& piece, bool& isCapture, int& startSquare, int& endSquare, move_t& flag) const;
-    [[nodiscard]] Piece getMovingPiece(move_t move) const;
+    Piece getMovingPiece(move_t move) const;
     [[nodiscard]] move_t getMoveFromSAN (const std::string& SAN) const;
 
 public:
@@ -77,8 +78,8 @@ public:
     static ChessBoard boardFromFENNotation(const std::string& fenNotation) {
         return ChessBoard(fenNotation);
     }
-    [[nodiscard]] std::string toString() const;
-    [[nodiscard]] std::string toFenNotation () const;
+    std::string toString() const;
+    std::string toFenNotation () const;
 
     // Part 2: Move generation
     void makemove(move_t move);
@@ -87,59 +88,55 @@ public:
     void getNonnegativeSEECapturesOnly (std::vector<move_t>& captures) const;
     void getLegalMoves (std::vector<move_t>& winningEqualCaptures, std::vector<move_t>& losingCaptures, std::vector<move_t>& nonCaptures) const;
     void getLegalMoves (std::vector<move_t>& winningEqualCaptures, std::vector<move_t>& losingCaptures, std::vector<move_t>& zeroSEEQuiets, std::vector<move_t>& negativeSEEQuiets) const;
-    [[nodiscard]] bool areThereLegalMoves() const;
+    bool areThereLegalMoves() const;
 
     // Part 3: Perft
-    [[nodiscard]] int perft (int depth) const;
-    [[nodiscard]] int capturePerft (int depth) const;
+    int perft (int depth) const;
+    int capturePerft (int depth) const;
 
     // Part 4: Eval
-    [[nodiscard]] eval_t getNegaStaticEval () const;
+    float getNegaStaticEval () const;
 
     // Part 5: Null moves
-    [[nodiscard]] bool canMakeNullMove () const;
+    bool canMakeNullMove () const;
     void makeNullMove ();
 
-    // Part 6: SEE
-    [[nodiscard]] int getQuietSEE (move_t move) const;
-    [[nodiscard]] int getCaptureSEE (move_t move) const;
-
-    // Part 7: Algebraic notation
-    [[nodiscard]] std::string moveToSAN (move_t move) const;
+    // Part 6: Algebraic notation
+    std::string moveToSAN (move_t move) const;
     void makeSANMove (const std::string& SAN);
-    [[nodiscard]] move_t getMoveFromPureAlgebraicNotation (const std::string& pureAlgebraicNotation) const;
+    move_t getMoveFromPureAlgebraicNotation (const std::string& pureAlgebraicNotation) const;
     bool makePureAlgebraicNotationMove (const std::string& pureAlgebraicNotation);
     static std::string moveToPureAlgebraicNotation(move_t move);
 
-    // Part 8: Getters
-    [[nodiscard]] bool isDrawByInsufficientMaterial() const {
+    // Part 7: Getters
+    bool isDrawByInsufficientMaterial() const {
         return drawByInsufficientMaterial;
     }
-    [[nodiscard]] bool isDrawByStalemate() const {
+    bool isDrawByStalemate() const {
         //getLegalMoves();
         return drawByStalemate;
     }
-    [[nodiscard]] bool isWhiteWonByCheckmate() const {
+    bool isWhiteWonByCheckmate() const {
         //getLegalMoves();
         return whiteWonByCheckmate;
     }
-    [[nodiscard]] bool isBlackWonByCheckmate() const {
+    bool isBlackWonByCheckmate() const {
         //getLegalMoves();
         return blackWonByCheckmate;
     }
-    [[nodiscard]] bool hasGameEnded() const {
+    bool hasGameEnded() const {
         return isDrawByInsufficientMaterial() or isDrawByStalemate() or isWhiteWonByCheckmate() or isBlackWonByCheckmate();
     }
-    [[nodiscard]] zobrist_t getZobristCode() const {
+    zobrist_t getZobristCode() const {
         return zobristCode;
     }
-    [[nodiscard]] bool getIsItWhiteToMove () const {
+    bool getIsItWhiteToMove () const {
         return isItWhiteToMove;
     }
-    [[nodiscard]] bitboard_t getAllBlackPieces () const {
+    bitboard_t getAllBlackPieces () const {
         return allBlackPieces;
     }
-    [[nodiscard]] bool isInCheck () const {
+    bool isInCheck () const {
         return pieceGivingCheck != NOT_IN_CHECK_CODE;
     }
 
