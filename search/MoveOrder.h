@@ -1,5 +1,5 @@
 #pragma once
-#include "MoveList.h"
+#include "../movegen/MoveList.h"
 #include "../movegen/ChessBoard.h"
 #include "QuietHistory.h"
 #include "TwoKillerMoves.h"

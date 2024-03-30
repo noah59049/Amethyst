@@ -2,10 +2,10 @@
 #include <cstdint>
 #include <string>
 #include <vector>
-#include "../search/MoveList.h"
+#include "MoveList.h"
 #include "Flags.h"
 #include "../Typedefs.h"
-#include "../search/MoveList.h"
+#include "MoveList.h"
 
 class ChessBoard {
 private:
