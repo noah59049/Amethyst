@@ -60,8 +60,6 @@ private:
 
     // Part 5: SEE
     int getCaptureSEE (int capturingPieceType, move_t captureMove) const;
-    int getQuietSEE (int movePieceType, move_t quietMove) const;
-    int getQuietSEE (move_t move) const;
 
     // Part 6: Eval
     float getStaticEval () const;
@@ -87,7 +85,6 @@ public:
     void getLegalCapturesOnly (std::vector<move_t>& captures) const;
     void getNonnegativeSEECapturesOnly (std::vector<move_t>& captures) const;
     void getLegalMoves (std::vector<move_t>& winningEqualCaptures, std::vector<move_t>& losingCaptures, std::vector<move_t>& nonCaptures) const;
-    void getLegalMoves (std::vector<move_t>& winningEqualCaptures, std::vector<move_t>& losingCaptures, std::vector<move_t>& zeroSEEQuiets, std::vector<move_t>& negativeSEEQuiets) const;
     bool areThereLegalMoves() const;
 
     // Part 3: Perft
