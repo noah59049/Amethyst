@@ -2088,23 +2088,13 @@ int ChessBoard::perft (const int depth) const {
     if (depth == 0)
         return 1;
 
-    vector<move_t> winningEqualCaptures;
-    vector<move_t> losingCaptures;
-    vector<move_t> nonCaptures;
-
-    winningEqualCaptures.reserve(52);
-    losingCaptures.reserve(12);
-    nonCaptures.reserve(50);
-
-    getLegalMoves(winningEqualCaptures,losingCaptures,nonCaptures);
-
-    winningEqualCaptures.insert(winningEqualCaptures.end(),nonCaptures.begin(),nonCaptures.end());
-    winningEqualCaptures.insert(winningEqualCaptures.end(),losingCaptures.begin(),losingCaptures.end());
+    MoveList legalMoves;
+    getLegalMoves1(legalMoves);
 
     int nodeCount = 0;
-    for (move_t move : winningEqualCaptures) {
+    for (int i = 0; i < legalMoves.size; i++) {
         ChessBoard copy = *this;
-        copy.makemove(move);
+        copy.makemove(legalMoves.moveList[i]);
         nodeCount += copy.perft(depth - 1);
     }
     return nodeCount;
