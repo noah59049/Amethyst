@@ -1,5 +1,5 @@
 #include "UCI.h"
-#include "movegen/MoveList.h"
+#include "search/MoveList.h"
 #include "movegen/ChessBoard.h"
 #include <iostream>
 #include <vector>
