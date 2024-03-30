@@ -1374,6 +1374,8 @@ void ChessBoard::getLegalCapturesOnly (std::vector<move_t>& captures) const {
 } // end getLegalCapturesOnly
 
 int ChessBoard::getCaptureSEE (const int capturingPieceType, const move_t captureMove) const {
+    if (isPromotion(captureMove))
+        return getFlag(captureMove) == PROMOTE_TO_QUEEN_FLAG ? 900 : -900;
     int startSquare = captureMove >> 10;
     int endSquare = (captureMove >> 4) & 63;
     int pieceTypeCaptured = getFlag(captureMove) - CAPTURE_QUEEN_FLAG;
@@ -1535,7 +1537,7 @@ int ChessBoard::getQuietSEE (const move_t move) const {
     const bitboard_t startSquareMask = 1ULL << startSquare;
     int movingPieceType;
     if (isItWhiteToMove) {
-        if (whiteKingPosition == startSquareMask)
+        if (whiteKingPosition == startSquare)
             return 0;
         else if (whitePieceTypes[QUEEN_CODE] & startSquareMask)
             movingPieceType = QUEEN_CODE;
@@ -1547,11 +1549,13 @@ int ChessBoard::getQuietSEE (const move_t move) const {
             movingPieceType = KNIGHT_CODE;
         else if (whitePieceTypes[PAWN_CODE] & startSquareMask)
             movingPieceType = PAWN_CODE;
-        else
+        else {
+            cout << moveToSAN(move) << endl;
             assert(false);
+        }
     }
     else {
-        if (blackKingPosition == startSquareMask)
+        if (blackKingPosition == startSquare)
             return 0;
         else if (blackPieceTypes[QUEEN_CODE] & startSquareMask)
             movingPieceType = QUEEN_CODE;
@@ -1563,19 +1567,25 @@ int ChessBoard::getQuietSEE (const move_t move) const {
             movingPieceType = KNIGHT_CODE;
         else if (blackPieceTypes[PAWN_CODE] & startSquareMask)
             movingPieceType = PAWN_CODE;
-        else
+        else {
+            cout << moveToSAN(move) << endl;
             assert(false);
+        }
     }
 
     return getQuietSEE(movingPieceType,move);
 } // end getQuietSEE
 
 int ChessBoard::getCaptureSEE (const move_t move) const {
+    // We always assume that capturing a pawn en passant is positive SEE
+    if (getFlag(move) == EN_PASSANT_FLAG)
+        return see::TEXTBOOK_PIECE_VALUES[PAWN_CODE];
+
     const int startSquare = getStartSquare(move);
     const bitboard_t startSquareMask = 1ULL << startSquare;
     int movingPieceType;
     if (isItWhiteToMove) {
-        if (whiteKingPosition == startSquareMask)
+        if (whiteKingPosition == startSquare)
             return see::TEXTBOOK_PIECE_VALUES[getFlag(move) - CAPTURE_QUEEN_FLAG];
         else if (whitePieceTypes[QUEEN_CODE] & startSquareMask)
             movingPieceType = QUEEN_CODE;
@@ -1587,11 +1597,13 @@ int ChessBoard::getCaptureSEE (const move_t move) const {
             movingPieceType = KNIGHT_CODE;
         else if (whitePieceTypes[PAWN_CODE] & startSquareMask)
             movingPieceType = PAWN_CODE;
-        else
+        else {
+            cout << moveToSAN(move) << endl;
             assert(false);
+        }
     }
     else {
-        if (blackKingPosition == startSquareMask)
+        if (blackKingPosition == startSquare)
             return see::TEXTBOOK_PIECE_VALUES[getFlag(move) - CAPTURE_QUEEN_FLAG];
         else if (blackPieceTypes[QUEEN_CODE] & startSquareMask)
             movingPieceType = QUEEN_CODE;
@@ -1603,12 +1615,14 @@ int ChessBoard::getCaptureSEE (const move_t move) const {
             movingPieceType = KNIGHT_CODE;
         else if (blackPieceTypes[PAWN_CODE] & startSquareMask)
             movingPieceType = PAWN_CODE;
-        else
+        else {
+            cout << moveToSAN(move) << endl;
             assert(false);
+        }
     }
 
-    return getQuietSEE(movingPieceType,move);
-} // end getQuietSEE
+    return getCaptureSEE(movingPieceType,move);
+} // end getCaptureSEE
 
 void ChessBoard::getNonnegativeSEECapturesOnly (vector<move_t>& captures) const {
     const bitboard_t diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
