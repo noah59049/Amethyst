@@ -2092,9 +2092,9 @@ int ChessBoard::perft (const int depth) const {
     getLegalMoves1(legalMoves);
 
     int nodeCount = 0;
-    for (move_t move : legalMoves) {
+    for (int i = 0; i < legalMoves.size; i++) {
         ChessBoard copy = *this;
-        copy.makemove(move);
+        copy.makemove(legalMoves.moveList[i]);
         nodeCount += copy.perft(depth - 1);
     }
     return nodeCount;
