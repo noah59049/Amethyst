@@ -32,4 +32,6 @@ add_executable(amethyst_chess2 main.cpp
         ChessGame.h
         search/MoveList.cpp
         search/MoveList.h
+        search/MoveOrder.cpp
+        search/MoveOrder.h
 )

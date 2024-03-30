@@ -2804,7 +2804,7 @@ string ChessBoard::toFenNotation () const {
     return fenNotation;
 }
 
-void ChessBoard::addLegalKingMoves (MoveList& legalMoves, bitboard_t kingLegalEndSquares) const { // Not castling
+void ChessBoard::addLegalKingMoves1 (MoveList& legalMoves, bitboard_t kingLegalEndSquares) const { // Not castling
     const bitboard_t enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
     uint8_t myKingPosition = isItWhiteToMove ? whiteKingPosition : blackKingPosition;
     bitboard_t thisKingLegalEndSquareMask;
@@ -2820,7 +2820,7 @@ void ChessBoard::addLegalKingMoves (MoveList& legalMoves, bitboard_t kingLegalEn
     }
 }
 
-void ChessBoard::addCastling (MoveList& legalMoves, const bitboard_t enemyAttackedSquares) const {
+void ChessBoard::addCastling1 (MoveList& legalMoves, const bitboard_t enemyAttackedSquares) const {
     bitboard_t allPieces = allBlackPieces | allWhitePieces;
     if (isItWhiteToMove) {
         if (canWhiteCastleShort and (enemyAttackedSquares & E1_F1_G1) == 0ULL and (allPieces & E1_THROUGH_H1) == E1_H1)
@@ -2836,7 +2836,7 @@ void ChessBoard::addCastling (MoveList& legalMoves, const bitboard_t enemyAttack
     }
 }
 
-void ChessBoard::addEnPassant (MoveList& legalMoves, const bitboard_t effectiveEnemyBishops, const bitboard_t effectiveEnemyRooks) const {
+void ChessBoard::addEnPassant1 (MoveList& legalMoves, const bitboard_t effectiveEnemyBishops, const bitboard_t effectiveEnemyRooks) const {
     const bitboard_t allPieces = allWhitePieces | allBlackPieces;
     if (pieceGivingCheck == NOT_IN_CHECK_CODE) {
         // Now we add en passant
@@ -2940,7 +2940,7 @@ void ChessBoard::addEnPassant (MoveList& legalMoves, const bitboard_t effectiveE
     } // end else (if we are in single check)
 } // end addEnPassant method
 
-void ChessBoard::getLegalMoves (MoveList& legalMoves) const {
+void ChessBoard::getLegalMoves1 (MoveList& legalMoves) const {
     const bitboard_t diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
     const bitboard_t orthogonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicRookAttackedSquares(whiteKingPosition) : getEmptyBoardMagicRookAttackedSquares(blackKingPosition);
     const bitboard_t effectiveEnemyBishops = isItWhiteToMove ? diagonalSquaresFromKing & (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) : diagonalSquaresFromKing & (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
@@ -2981,14 +2981,14 @@ void ChessBoard::getLegalMoves (MoveList& legalMoves) const {
     } // end while loop
 
     const bitboard_t kingLegalEndSquares = getMagicKingAttackedSquares(myKingPosition) & ~enemyAttackedSquares & ~myPieces;
-    addLegalKingMoves(legalMoves,kingLegalEndSquares);
+    addLegalKingMoves1(legalMoves,kingLegalEndSquares);
     if (pieceGivingCheck == DOUBLE_CHECK_CODE)
         return;
 
     bitboard_t legalCheckBlockSquares = ENTIRE_BOARD;
-    addEnPassant(legalMoves,effectiveEnemyBishops,effectiveEnemyRooks);
+    addEnPassant1(legalMoves,effectiveEnemyBishops,effectiveEnemyRooks);
     if (pieceGivingCheck == NOT_IN_CHECK_CODE)
-        addCastling(legalMoves,enemyAttackedSquares);
+        addCastling1(legalMoves,enemyAttackedSquares);
     else
         legalCheckBlockSquares = lookupCheckResponses(myKingPosition,this->pieceGivingCheck);
 

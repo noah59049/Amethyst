@@ -5,6 +5,7 @@
 #include "../search/MoveList.h"
 #include "Flags.h"
 #include "../Typedefs.h"
+#include "../search/MoveList.h"
 
 class ChessBoard {
 private:
@@ -58,9 +59,9 @@ private:
     void addCastling (std::vector<move_t>& legalMoves, bitboard_t enemyAttackedSquares) const;
     void addEnPassant (std::vector<move_t>& legalMoves, bitboard_t effectiveEnemyBishops, bitboard_t effectiveEnemyRooks) const;
     void addLegalKingMoves (std::vector<move_t>& legalMoves, bitboard_t kingLegalEndSquares) const;
-    void addCastling (MoveList& legalMoves, bitboard_t enemyAttackedSquares) const;
-    void addEnPassant (MoveList& legalMoves, bitboard_t effectiveEnemyBishops, bitboard_t effectiveEnemyRooks) const;
-    void addLegalKingMoves (MoveList& legalMoves, bitboard_t kingLegalEndSquares) const;
+    void addCastling1 (MoveList& legalMoves, bitboard_t enemyAttackedSquares) const;
+    void addEnPassant1 (MoveList& legalMoves, bitboard_t effectiveEnemyBishops, bitboard_t effectiveEnemyRooks) const;
+    void addLegalKingMoves1 (MoveList& legalMoves, bitboard_t kingLegalEndSquares) const;
 
     // Part 5: SEE
     [[nodiscard]] int getCaptureSEE (int capturingPieceType, move_t captureMove) const;
@@ -86,7 +87,7 @@ public:
 
     // Part 2: Move generation
     void makemove(move_t move);
-    void getLegalMoves(MoveList& legalMoves) const;
+    void getLegalMoves1(MoveList& legalMoves) const;
     void getLegalMoves(std::vector<move_t>& legalMoves) const;
     void getLegalCapturesOnly (std::vector<move_t>& captures) const;
     void getNonnegativeSEECapturesOnly (std::vector<move_t>& captures) const;
