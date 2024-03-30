@@ -1,4 +1,5 @@
 #include "MoveOrder.h"
+#include <iostream>
 void sortMoves(MoveList& legalMoves, const ChessBoard &board, move_t hashMove, const TwoKillerMoves &killerMoves,
                          const QuietHistory &quietHistory) {
     // Step 1: Put the hash move first
@@ -24,6 +25,7 @@ void sortMoves(MoveList& legalMoves, const ChessBoard &board, move_t hashMove, c
             }
             else {
                 // the capture has negative SEE
+                std::cout << "capture " << board.moveToSAN(legalMoves.moveList[i]) << "has negative SEE" << std::endl;
                 move_t temp = legalMoves.moveList[backIndex];
                 legalMoves.moveList[backIndex] = legalMoves.moveList[i];
                 legalMoves.moveList[i] = temp;
