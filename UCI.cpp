@@ -81,6 +81,13 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
     mutexPrint("bestmove " + ChessBoard::moveToPureAlgebraicNotation(bestMoveFromPrevious));
 } // end uciSearch
 
+void uciPerft(const ChessBoard board, const int depth) {
+    int numNodes = board.perft(depth);
+    cout << "Nodes searched: " << numNodes << endl;
+    // TODO: Make this responsive to stop and quit commands in the middle of searching
+    // TODO: Have this print out nodes for each move
+}
+
 void uciLoop () {
     using namespace std;
     string command;
@@ -154,8 +161,8 @@ void uciLoop () {
             } // end while loop
         } // end if command starts with position
         else if (command.rfind("go",0) == 0) {
-            if (command == "go infinite") {
-                assert(false); // TODO: Implement this
+            if (false and command == "go infinite") {
+
             }
             else {
                 int wtime = 0;
@@ -167,6 +174,7 @@ void uciLoop () {
                 int nodes = 0;
                 int mate = 0;
                 int movetime = 0;
+                int perft = 0;
                 stringstream ss(command);
                 string word;
                 while (ss >> word) {
@@ -188,6 +196,10 @@ void uciLoop () {
                         ss >> mate;
                     else if (word == "movetime")
                         ss >> movetime;
+                    else if (word == "infinite")
+                        movetime = 1000000000; // search for 1 million seconds
+                    else if (word == "perft")
+                        ss >> perft;
                 } // end while ss >> word
 
                 // Step 0: Determine the movetime
@@ -210,7 +222,10 @@ void uciLoop () {
                 pr = new promise<void>();
                 fut = new future(pr->get_future());
                 // Step 3: Start the search thread!
-                searchThread = new thread(uciSearch,&game,pr,fut,movetime);
+                if (perft == 0)
+                    searchThread = new thread(uciSearch,&game,pr,fut,movetime);
+                else
+                    searchThread = new thread(uciPerft,game.getCurrentPosition(),perft);
             } // end else (command is not go infinite)
         } // end if command starts with go
         else if (command == "stop") {
