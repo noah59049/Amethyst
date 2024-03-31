@@ -2450,3 +2450,43 @@ string ChessBoard::toFenNotation () const {
     // And now we return the result
     return fenNotation;
 }
+
+int ChessBoard::getCaptureSEE(const move_t captureMove) const {
+    const int startSquare = getStartSquare(captureMove);
+    const bitboard_t startSquareMask = 1ULL << startSquare;
+    int movingPieceType;
+    if (isItWhiteToMove) {
+        if (whiteKingPosition == startSquare)
+            return 0;
+        else if (whitePieceTypes[QUEEN_CODE] & startSquareMask)
+            movingPieceType = QUEEN_CODE;
+        else if (whitePieceTypes[ROOK_CODE] & startSquareMask)
+            movingPieceType = ROOK_CODE;
+        else if (whitePieceTypes[BISHOP_CODE] & startSquareMask)
+            movingPieceType = BISHOP_CODE;
+        else if (whitePieceTypes[KNIGHT_CODE] & startSquareMask)
+            movingPieceType = KNIGHT_CODE;
+        else if (whitePieceTypes[PAWN_CODE] & startSquareMask)
+            movingPieceType = PAWN_CODE;
+        else
+            assert(false);
+    }
+    else {
+        if (blackKingPosition == startSquare)
+            return 0;
+        else if (blackPieceTypes[QUEEN_CODE] & startSquareMask)
+            movingPieceType = QUEEN_CODE;
+        else if (blackPieceTypes[ROOK_CODE] & startSquareMask)
+            movingPieceType = ROOK_CODE;
+        else if (blackPieceTypes[BISHOP_CODE] & startSquareMask)
+            movingPieceType = BISHOP_CODE;
+        else if (blackPieceTypes[KNIGHT_CODE] & startSquareMask)
+            movingPieceType = KNIGHT_CODE;
+        else if (blackPieceTypes[PAWN_CODE] & startSquareMask)
+            movingPieceType = PAWN_CODE;
+        else
+            assert(false);
+    }
+
+    return getCaptureSEE(movingPieceType,captureMove);
+}

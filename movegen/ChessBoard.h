@@ -98,14 +98,17 @@ public:
     [[nodiscard]] bool canMakeNullMove () const;
     void makeNullMove ();
 
-    // Part 6: Algebraic notation
+    // Part 6: SEE
+    [[nodiscard]] int getCaptureSEE(move_t captureMove) const;
+
+    // Part 7: Algebraic notation
     [[nodiscard]] std::string moveToSAN (move_t move) const;
     void makeSANMove (const std::string& SAN);
     [[nodiscard]] move_t getMoveFromPureAlgebraicNotation (const std::string& pureAlgebraicNotation) const;
     bool makePureAlgebraicNotationMove (const std::string& pureAlgebraicNotation);
     static std::string moveToPureAlgebraicNotation(move_t move);
 
-    // Part 7: Getters
+    // Part 8: Getters
     [[nodiscard]] bool isDrawByInsufficientMaterial() const {
         return drawByInsufficientMaterial;
     }

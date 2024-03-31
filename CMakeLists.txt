@@ -30,4 +30,7 @@ add_executable(amethyst_chess2 main.cpp
         UCI.cpp
         UCI.h
         ChessGame.h
+        movegen/MoveList.h
+        search/MoveOrder.cpp
+        search/MoveOrder.h
 )
