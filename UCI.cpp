@@ -82,7 +82,13 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
 } // end uciSearch
 
 void uciPerft(const ChessBoard board, const int depth) {
+    auto start = chrono::high_resolution_clock::now();
     int numNodes = board.perft(depth);
+    auto end = chrono::high_resolution_clock::now();
+    auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
+    auto ms = duration.count();
+    int nps = numNodes / ms * 1000;
+    mutexPrint("info nps " + to_string(nps));
     cout << "Nodes searched: " << numNodes << endl;
     // TODO: Make this responsive to stop and quit commands in the middle of searching
     // TODO: Have this print out nodes for each move
