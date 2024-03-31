@@ -2490,3 +2490,300 @@ int ChessBoard::getCaptureSEE(const move_t captureMove) const {
 
     return getCaptureSEE(movingPieceType,captureMove);
 }
+
+void ChessBoard::addLegalKingMoves (MoveList& legalMoves, bitboard_t kingLegalEndSquares) const { // Not castling
+    const bitboard_t enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
+    uint8_t myKingPosition = isItWhiteToMove ? whiteKingPosition : blackKingPosition;
+    bitboard_t thisKingLegalEndSquareMask;
+    int thisKingLegalEndSquare;
+    while (kingLegalEndSquares != 0ULL) {
+        thisKingLegalEndSquareMask = kingLegalEndSquares & -kingLegalEndSquares;
+        kingLegalEndSquares -= thisKingLegalEndSquareMask;
+        thisKingLegalEndSquare = log2ll(thisKingLegalEndSquareMask);
+        if (thisKingLegalEndSquareMask & enemyPieces)
+            legalMoves.push_back(getCaptureMove(myKingPosition,thisKingLegalEndSquare));
+        else
+            legalMoves.push_back(myKingPosition << 10 | thisKingLegalEndSquare << 4 | NORMAL_MOVE_FLAG);
+    }
+}
+
+void ChessBoard::addCastling (MoveList& legalMoves, const bitboard_t enemyAttackedSquares) const {
+    bitboard_t allPieces = allBlackPieces | allWhitePieces;
+    if (isItWhiteToMove) {
+        if (canWhiteCastleShort and (enemyAttackedSquares & E1_F1_G1) == 0ULL and (allPieces & E1_THROUGH_H1) == E1_H1)
+            legalMoves.push_back(WHITE_SHORT_CASTLE);
+        if (canWhiteCastleLong and (enemyAttackedSquares & E1_D1_C1) == 0ULL and (allPieces & E1_THROUGH_A1) == E1_A1)
+            legalMoves.push_back(WHITE_LONG_CASTLE);
+    }
+    else {
+        if (canBlackCastleShort and (enemyAttackedSquares & E8_F8_G8) == 0ULL and (allPieces & E8_THROUGH_H8) == E8_H8)
+            legalMoves.push_back(BLACK_SHORT_CASTLE);
+        if (canBlackCastleLong and (enemyAttackedSquares & E8_D8_C8) == 0ULL and (allPieces & E8_THROUGH_A8) == E8_A8)
+            legalMoves.push_back(BLACK_LONG_CASTLE);
+    }
+}
+
+void ChessBoard::addEnPassant (MoveList& legalMoves, const bitboard_t effectiveEnemyBishops, const bitboard_t effectiveEnemyRooks) const {
+    const bitboard_t allPieces = allWhitePieces | allBlackPieces;
+    if (pieceGivingCheck == NOT_IN_CHECK_CODE) {
+        // Now we add en passant
+        if (isItWhiteToMove) {
+            if (whichPawnMovedTwoSquares < 8) { // REMINDER: The king is not in check
+                int endSquare = 8 * whichPawnMovedTwoSquares + 5;
+                // Consider left en passant
+                if (whichPawnMovedTwoSquares < 7) { // The pawn that pushed two squares is not on the h-file, so we can en passant left
+                    int startSquare = 8 * whichPawnMovedTwoSquares + 12;
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 4)) - (1ULL << startSquare);
+                    if (((whitePieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and
+                        (getMagicBishopAttackedSquares(whiteKingPosition,allPiecesAfterCapture) & effectiveEnemyBishops) == 0ULL and
+                        (getMagicRookAttackedSquares(whiteKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL) {
+                        legalMoves.push_back((startSquare << 10) + (endSquare << 4) + EN_PASSANT_FLAG);
+                    } // end if this en passant doesn't reveal an attack on our king
+                } // end if we can left en passant
+
+                // Consider right en passant
+                if (whichPawnMovedTwoSquares > 0) { // The pawn that pushed two squares is not on the a-file, so we can en passant right.
+                    int startSquare = 8 * whichPawnMovedTwoSquares - 4;
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 4)) - (1ULL << startSquare);
+                    if (((whitePieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and
+                        (getMagicBishopAttackedSquares(whiteKingPosition,allPiecesAfterCapture) & effectiveEnemyBishops) == 0ULL and
+                        (getMagicRookAttackedSquares(whiteKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL) {
+                        legalMoves.push_back((startSquare << 10) + (endSquare << 4) + EN_PASSANT_FLAG);
+                    } // end if this en passant doesn't reveal an attack on our king
+                } // end if we can right en passant
+            } // end if we can en passant
+        } // end if it is white to move
+        else {
+            if (whichPawnMovedTwoSquares < 8) { // REMINDER: The king is not in check
+                int endSquare = 8 * whichPawnMovedTwoSquares + 2;
+                // Consider left en passant
+                if (whichPawnMovedTwoSquares < 7) { // The pawn that pushed two squares is not on the h-file, so we can en passant left
+                    int startSquare = 8 * whichPawnMovedTwoSquares + 11;
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 3)) - (1ULL << startSquare);
+                    if (((blackPieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and
+                        (getMagicBishopAttackedSquares(blackKingPosition,allPiecesAfterCapture) & effectiveEnemyBishops) == 0ULL and
+                        (getMagicRookAttackedSquares(blackKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL) {
+                        legalMoves.push_back((startSquare << 10) + (endSquare << 4) + EN_PASSANT_FLAG);
+                    } // end if this en passant doesn't reveal an attack on our king
+                } // end if we can left en passant
+
+                // Consider right en passant
+                if (whichPawnMovedTwoSquares > 0) { // The pawn that pushed two squares is not on the a-file, so we can en passant right.
+                    int startSquare = 8 * whichPawnMovedTwoSquares - 5;
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 3)) - (1ULL << startSquare);
+                    if (((blackPieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and
+                        (getMagicBishopAttackedSquares(blackKingPosition,allPiecesAfterCapture) & effectiveEnemyBishops) == 0ULL and
+                        (getMagicRookAttackedSquares(blackKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL) {
+                        legalMoves.push_back((startSquare << 10) + (endSquare << 4) + EN_PASSANT_FLAG);
+                    } // end if this en passant doesn't reveal an attack on our king
+                } // end if we can right en passant
+            } // end if we can en passant
+        } // end if it is black to move
+    } // end if we are not in check
+
+    else { // we are in single check
+        if (isItWhiteToMove) {
+            if (whichPawnMovedTwoSquares < 8 and pieceGivingCheck == 8 * whichPawnMovedTwoSquares + 4) { // REMINDER: We are in check by a pawn that we can en passant capture. En passant is never legal after a discovered check.
+                int endSquare = 8 * whichPawnMovedTwoSquares + 5;
+                // Left en passant
+                if (whichPawnMovedTwoSquares < 7) { // the pawn that pushed 2 squares is not the h-pawn, so we can en passant left.
+                    int startSquare = 8 * whichPawnMovedTwoSquares + 12;
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 4)) - (1ULL << startSquare);\
+                if (((whitePieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and (getMagicRookAttackedSquares(whiteKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL)
+                        legalMoves.push_back((startSquare << 10) + (endSquare << 4) + EN_PASSANT_FLAG);
+                } // end if we can en passant left
+
+                // Consider right en passant
+                if (whichPawnMovedTwoSquares > 0) { // The pawn that pushed two squares is not on the a-file, so we can en passant right.
+                    int startSquare = 8 * whichPawnMovedTwoSquares - 4;
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 4)) - (1ULL << startSquare);
+                    if (((whitePieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and (getMagicRookAttackedSquares(whiteKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL) {
+                        legalMoves.push_back((startSquare << 10) + (endSquare << 4) + EN_PASSANT_FLAG);
+                    } // end if this en passant doesn't reveal an attack on our king
+                } // end if we can right en passant
+            } // end if we can en passant at all
+        } // end if it is white to move
+        else { // it is black to move
+            if (whichPawnMovedTwoSquares < 8 and pieceGivingCheck == 8 * whichPawnMovedTwoSquares + 3) { // REMINDER: We are in check by a pawn that we can en passant capture. En passant is never legal after a discovered check.
+                int endSquare = 8 * whichPawnMovedTwoSquares + 2;
+                // Left en passant
+                if (whichPawnMovedTwoSquares < 7) { // the pawn that pushed 2 squares is not the h-pawn, so we can en passant left.
+                    int startSquare = 8 * whichPawnMovedTwoSquares + 11;
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 3)) - (1ULL << startSquare);\
+                if (((blackPieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and (getMagicRookAttackedSquares(blackKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL)
+                        legalMoves.push_back((startSquare << 10) + (endSquare << 4) + EN_PASSANT_FLAG);
+                } // end if we can en passant left
+
+                // Consider right en passant
+                if (whichPawnMovedTwoSquares > 0) { // The pawn that pushed two squares is not on the a-file, so we can en passant right.
+                    int startSquare = 8 * whichPawnMovedTwoSquares - 5;
+                    bitboard_t allPiecesAfterCapture = allPieces + (1ULL << endSquare) - (1ULL << (8 * whichPawnMovedTwoSquares + 3)) - (1ULL << startSquare);
+                    if (((blackPieceTypes[PAWN_CODE] >> startSquare) & 1ULL) == 1ULL and (getMagicRookAttackedSquares(blackKingPosition,allPiecesAfterCapture) & effectiveEnemyRooks) == 0ULL) {
+                        legalMoves.push_back((startSquare << 10) + (endSquare << 4) + EN_PASSANT_FLAG);
+                    } // end if this en passant doesn't reveal an attack on our king
+                } // end if we can right en passant
+            } // end if we can en passant at all
+        } // end if it is black to move
+    } // end else (if we are in single check)
+} // end addEnPassant method
+
+void ChessBoard::getLegalMoves (MoveList& legalMoves) const {
+    const bitboard_t diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
+    const bitboard_t orthogonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicRookAttackedSquares(whiteKingPosition) : getEmptyBoardMagicRookAttackedSquares(blackKingPosition);
+    const bitboard_t effectiveEnemyBishops = isItWhiteToMove ? diagonalSquaresFromKing & (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) : diagonalSquaresFromKing & (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t effectiveEnemyRooks = isItWhiteToMove ? orthogonalSquaresFromKing & (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) : orthogonalSquaresFromKing & (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t enemyAttackedSquares = isItWhiteToMove ? calculateBlackAttackedSquares() : calculateWhiteAttackedSquares();
+    const uint8_t myKingPosition = isItWhiteToMove ? whiteKingPosition : blackKingPosition;
+    const bitboard_t myPieces = isItWhiteToMove ? allWhitePieces : allBlackPieces;
+    const bitboard_t enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
+    const bitboard_t allPieces = allWhitePieces | allBlackPieces;
+
+    bitboard_t bishopPinnedPieces = 0ULL;
+    bitboard_t rookPinnedPieces = 0ULL;
+
+    bitboard_t thisPinningPieceMask, interposingSquares, interposingOccupiedSquares;
+    int thisPinningPieceSquare;
+    bitboard_t effectiveEnemyBishops1 = effectiveEnemyBishops, effectiveEnemyRooks1 = effectiveEnemyRooks;
+    while (effectiveEnemyBishops1 != 0ULL) {
+        thisPinningPieceMask = effectiveEnemyBishops1 & -effectiveEnemyBishops1;
+        effectiveEnemyBishops1 -= thisPinningPieceMask;
+        thisPinningPieceSquare = log2ll(thisPinningPieceMask);
+        interposingSquares = lookupCheckResponses(myKingPosition,thisPinningPieceSquare) - (1ULL << thisPinningPieceSquare);
+        interposingOccupiedSquares = interposingSquares & allPieces;
+        if ((1ULL << log2ll(interposingOccupiedSquares)) == interposingOccupiedSquares)
+            bishopPinnedPieces |= interposingSquares;
+        // In other words, if there is only one piece between the Bishop and the King, then it's pinned
+        // And we might have caught an opponent's piece that could give a discovered attack if it were their turn, but that won't affect anything.
+    } // end while loop
+    while (effectiveEnemyRooks1 != 0ULL) {
+        thisPinningPieceMask = effectiveEnemyRooks1 & -effectiveEnemyRooks1;
+        effectiveEnemyRooks1 -= thisPinningPieceMask;
+        thisPinningPieceSquare = log2ll(thisPinningPieceMask);
+        interposingSquares = lookupCheckResponses(myKingPosition,thisPinningPieceSquare) - (1ULL << thisPinningPieceSquare);
+        interposingOccupiedSquares = interposingSquares & allPieces;
+        if ((1ULL << log2ll(interposingOccupiedSquares)) == interposingOccupiedSquares)
+            rookPinnedPieces |= interposingSquares;
+        // In other words, if there is only one piece between the Rook and the King, then it's pinned
+        // And we might have caught an opponent's piece that could give a discovered attack if it were their turn, but that won't affect anything.
+    } // end while loop
+
+    const bitboard_t kingLegalEndSquares = getMagicKingAttackedSquares(myKingPosition) & ~enemyAttackedSquares & ~myPieces;
+    addLegalKingMoves(legalMoves,kingLegalEndSquares);
+    if (pieceGivingCheck == DOUBLE_CHECK_CODE)
+        return;
+
+    bitboard_t legalCheckBlockSquares = ENTIRE_BOARD;
+    addEnPassant(legalMoves,effectiveEnemyBishops,effectiveEnemyRooks);
+    if (pieceGivingCheck == NOT_IN_CHECK_CODE)
+        addCastling(legalMoves,enemyAttackedSquares);
+    else
+        legalCheckBlockSquares = lookupCheckResponses(myKingPosition,this->pieceGivingCheck);
+
+    bitboard_t piecesRemaining;
+    bitboard_t startSquareMask;
+    int startSquare;
+    bitboard_t legalEndSquares;
+    bitboard_t endSquareMask;
+    int endSquare;
+
+    // Loop over all piece types, except pawns.
+    for (int pieceType = KNIGHT_CODE; pieceType >= QUEEN_CODE; pieceType--) {
+        piecesRemaining = isItWhiteToMove ? whitePieceTypes[pieceType] : blackPieceTypes[pieceType];
+        while (piecesRemaining != 0ULL) {
+            startSquareMask = piecesRemaining & -piecesRemaining;
+            piecesRemaining -= startSquareMask;
+            startSquare = log2ll(startSquareMask);
+            legalEndSquares = getMagicWhiteAttackedSquares(pieceType, startSquare, allPieces) & legalCheckBlockSquares & ~myPieces;
+            if (bishopPinnedPieces & startSquareMask)
+                legalEndSquares &= diagonalSquaresFromKing & getEmptyBoardMagicBishopAttackedSquares(startSquare);
+            else if (rookPinnedPieces & startSquareMask)
+                legalEndSquares &= orthogonalSquaresFromKing & getEmptyBoardMagicRookAttackedSquares(startSquare);
+
+            while (legalEndSquares != 0ULL) {
+                endSquareMask = legalEndSquares & -legalEndSquares;
+                legalEndSquares -= endSquareMask;
+                endSquare = log2ll(endSquareMask);
+                if (enemyPieces & endSquareMask)
+                    legalMoves.push_back(getCaptureMove(startSquare, endSquare));
+                else
+                    legalMoves.push_back(startSquare << 10 | endSquare << 4 | NORMAL_MOVE_FLAG);
+            } // end while legalEndSquares is not 0
+        } // end while piecesRemaining is not 0
+    } // end for loop over all piece types
+
+    const bitboard_t myPawns = isItWhiteToMove ? whitePieceTypes[PAWN_CODE] : blackPieceTypes[PAWN_CODE];
+    const int leftCaptureOffset = isItWhiteToMove ? 7 : 9;
+    const int rightCaptureOffset = isItWhiteToMove ? 9 : 7; // but we are right shifting instead of left shifting
+    const int pawnSinglePushOffset = isItWhiteToMove ? 1 : -1;
+    const int pawnDoublePushOffset = isItWhiteToMove ? 2 : -2;
+
+    // Pawns that can left capture
+    piecesRemaining = myPawns & (enemyPieces & legalCheckBlockSquares) << leftCaptureOffset & ~rookPinnedPieces & (~bishopPinnedPieces | effectiveEnemyBishops << leftCaptureOffset);
+    while (piecesRemaining != 0) {
+        startSquareMask = piecesRemaining & -piecesRemaining;
+        piecesRemaining -= startSquareMask;
+        startSquare = log2ll(startSquareMask);
+        endSquare = startSquare - leftCaptureOffset;
+        if ((endSquare & 7) == 7 or (endSquare & 7) == 0) {
+            legalMoves.push_back(startSquare << 10 | endSquare << 4 | PROMOTE_TO_QUEEN_FLAG);
+            legalMoves.push_back(startSquare << 10 | endSquare << 4 | PROMOTE_TO_ROOK_FLAG);
+            legalMoves.push_back(startSquare << 10 | endSquare << 4 | PROMOTE_TO_BISHOP_FLAG);
+            legalMoves.push_back(startSquare << 10 | endSquare << 4 | PROMOTE_TO_KNIGHT_FLAG);
+        }
+        else {
+            legalMoves.push_back(getCaptureMove(startSquare,endSquare));
+        }
+    } // end left captures
+
+    // Pawns that can right capture
+    piecesRemaining = myPawns & (enemyPieces & legalCheckBlockSquares) >> rightCaptureOffset & ~rookPinnedPieces & (~bishopPinnedPieces | effectiveEnemyBishops >> rightCaptureOffset);
+    while (piecesRemaining != 0) {
+        startSquareMask = piecesRemaining & -piecesRemaining;
+        piecesRemaining -= startSquareMask;
+        startSquare = log2ll(startSquareMask);
+        endSquare = startSquare + rightCaptureOffset;
+        if ((endSquare & 7) == 7 or (endSquare & 7) == 0) {
+            legalMoves.push_back(startSquare << 10 | endSquare << 4 | PROMOTE_TO_QUEEN_FLAG);
+            legalMoves.push_back(startSquare << 10 | endSquare << 4 | PROMOTE_TO_ROOK_FLAG);
+            legalMoves.push_back(startSquare << 10 | endSquare << 4 | PROMOTE_TO_BISHOP_FLAG);
+            legalMoves.push_back(startSquare << 10 | endSquare << 4 | PROMOTE_TO_KNIGHT_FLAG);
+        }
+        else {
+            legalMoves.push_back(getCaptureMove(startSquare,endSquare));
+        }
+    } // end right captures
+
+    // Pawn pushes one square
+    piecesRemaining = isItWhiteToMove ?
+                      myPawns & (~allPieces & legalCheckBlockSquares) >> 1 & ~bishopPinnedPieces & (~rookPinnedPieces | 255ULL << (myKingPosition & 56)) :
+                      myPawns & (~allPieces & legalCheckBlockSquares) << 1 & ~bishopPinnedPieces & (~rookPinnedPieces | 255ULL << (myKingPosition & 56));
+
+    while (piecesRemaining != 0ULL) {
+        startSquareMask = piecesRemaining & -piecesRemaining;
+        piecesRemaining -= startSquareMask;
+        startSquare = log2ll(startSquareMask);
+        endSquare = startSquare + pawnSinglePushOffset;
+        if ((endSquare & 7) == 7 or (endSquare & 7) == 0) {
+            legalMoves.push_back(startSquare << 10 | endSquare << 4 | PROMOTE_TO_QUEEN_FLAG);
+            legalMoves.push_back(startSquare << 10 | endSquare << 4 | PROMOTE_TO_ROOK_FLAG);
+            legalMoves.push_back(startSquare << 10 | endSquare << 4 | PROMOTE_TO_BISHOP_FLAG);
+            legalMoves.push_back(startSquare << 10 | endSquare << 4 | PROMOTE_TO_KNIGHT_FLAG);
+        }
+        else {
+            legalMoves.push_back(startSquare << 10 | endSquare << 4 | NORMAL_MOVE_FLAG);
+        }
+    } // end pawn pushes one square
+
+    // Pawn pushes two squares
+    piecesRemaining = isItWhiteToMove ?
+                      myPawns & SECOND_RANK & ~allPieces >> 1 & ~allPieces >> 2 & legalCheckBlockSquares >> 2 & ~bishopPinnedPieces & (~rookPinnedPieces | 255ULL << (myKingPosition & 56)) :
+                      myPawns &SEVENTH_RANK & ~allPieces << 1 & ~allPieces << 2 & legalCheckBlockSquares << 2 & ~bishopPinnedPieces & (~rookPinnedPieces | 255ULL << (myKingPosition & 56));
+
+    while (piecesRemaining != 0ULL) {
+        startSquareMask = piecesRemaining & -piecesRemaining;
+        piecesRemaining -= startSquareMask;
+        startSquare = log2ll(startSquareMask);
+        endSquare = startSquare + pawnDoublePushOffset;
+        legalMoves.push_back(startSquare << 10 | endSquare << 4 | PAWN_PUSH_TWO_SQUARES_FLAG);
+    } // end pawn pushes two squares
+} // end getLegalMoves method
