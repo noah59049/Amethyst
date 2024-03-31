@@ -2126,7 +2126,7 @@ move_t ChessBoard::getMoveFromSAN (const string& SAN) const {
         startSquare = isItWhiteToMove ? whiteKingPosition : blackKingPosition;
     }
     else if (piece == PAWN) {
-        unsigned long startSquareMask;
+        bitboard_t startSquareMask;
         bool isEnPassant = false;
         bool isDoublePawnPush = false;
         if (isCapture) {
@@ -2177,7 +2177,7 @@ move_t ChessBoard::getMoveFromSAN (const string& SAN) const {
     else { // the piece is one of QRBN
         vector<move_t> legalMoves;
         getLegalMoves(legalMoves);
-        unsigned long possibleStartSquaresMask = 0;
+        bitboard_t possibleStartSquaresMask = 0;
         for (move_t legalMove : legalMoves) {
             if (getMovingPiece(legalMove) == piece and getEndSquare(legalMove) == endSquare)
                 possibleStartSquaresMask |= 1ULL << getStartSquare(legalMove);
@@ -2250,7 +2250,7 @@ move_t ChessBoard::getMoveFromPureAlgebraicNotation (const string& pureAlgebraic
         endSquare = 8 * endFile + endRank;
 
         // handle en passant and castling
-        const unsigned long allPawns = whitePieceTypes[PAWN_CODE] | blackPieceTypes[PAWN_CODE];
+        const bitboard_t allPawns = whitePieceTypes[PAWN_CODE] | blackPieceTypes[PAWN_CODE];
         const bool isAPawnMoving = (allPawns >> startSquare & 1ULL) == 1ULL;
 
         if (isAPawnMoving and isItWhiteToMove and endSquare == 8 * whichPawnMovedTwoSquares + 5)
@@ -2344,7 +2344,7 @@ string ChessBoard::toFenNotation () const {
         numEmptySquares = 0;
         for (int file = 0; file < 8; file++) {
             int square = 8 * file + rank;
-            unsigned long squareMask = 1ULL << square;
+            bitboard_t squareMask = 1ULL << square;
             char piece;
             if (whiteKingPosition == square) {
                 piece = 'K';
