@@ -238,34 +238,34 @@ ChessBoard::ChessBoard(const string& fenNotation) {
     updateMates();
 }
 
-//move_t ChessBoard::getCaptureMove(const int startSquare, const int endSquare) const {
-//    if (isItWhiteToMove) {
-//        if (((blackPieceTypes[PAWN_CODE] >> endSquare) & 1ULL) == 1ULL)
-//            return (startSquare << 10) + (endSquare << 4) + CAPTURE_PAWN_FLAG;
-//        if (((blackPieceTypes[KNIGHT_CODE] >> endSquare) & 1ULL) == 1ULL)
-//            return (startSquare << 10) + (endSquare << 4) + CAPTURE_KNIGHT_FLAG;
-//        if (((blackPieceTypes[BISHOP_CODE] >> endSquare) & 1ULL) == 1ULL)
-//            return (startSquare << 10) + (endSquare << 4) + CAPTURE_BISHOP_FLAG;
-//        if (((blackPieceTypes[ROOK_CODE] >> endSquare) & 1ULL) == 1ULL)
-//            return (startSquare << 10) + (endSquare << 4) + CAPTURE_ROOK_FLAG;
-//        if (((blackPieceTypes[QUEEN_CODE] >> endSquare) & 1ULL) == 1ULL)
-//            return (startSquare << 10) + (endSquare << 4) + CAPTURE_QUEEN_FLAG;
-//    } else {
-//        if (((whitePieceTypes[PAWN_CODE] >> endSquare) & 1ULL) == 1ULL)
-//            return (startSquare << 10) + (endSquare << 4) + CAPTURE_PAWN_FLAG;
-//        if (((whitePieceTypes[KNIGHT_CODE] >> endSquare) & 1ULL) == 1ULL)
-//            return (startSquare << 10) + (endSquare << 4) + CAPTURE_KNIGHT_FLAG;
-//        if (((whitePieceTypes[BISHOP_CODE] >> endSquare) & 1ULL) == 1ULL)
-//            return (startSquare << 10) + (endSquare << 4) + CAPTURE_BISHOP_FLAG;
-//        if (((whitePieceTypes[ROOK_CODE] >> endSquare) & 1ULL) == 1ULL)
-//            return (startSquare << 10) + (endSquare << 4) + CAPTURE_ROOK_FLAG;
-//        if (((whitePieceTypes[QUEEN_CODE] >> endSquare) & 1ULL) == 1ULL)
-//            return (startSquare << 10) + (endSquare << 4) + CAPTURE_QUEEN_FLAG;
-//    }
-//    cout << toString() << endl << "is it white to move: " << isItWhiteToMove << endl;
-//    cout << "getCaptureMove isn't a move. Start square is " << startSquare << ". End square is " << endSquare << "." << endl;
-//    exit(1);
-//}
+move_t ChessBoard::getCaptureMove(const int startSquare, const int endSquare) const {
+    if (isItWhiteToMove) {
+        if (((blackPieceTypes[PAWN_CODE] >> endSquare) & 1ULL) == 1ULL)
+            return (startSquare << 10) + (endSquare << 4) + CAPTURE_PAWN_FLAG;
+        if (((blackPieceTypes[KNIGHT_CODE] >> endSquare) & 1ULL) == 1ULL)
+            return (startSquare << 10) + (endSquare << 4) + CAPTURE_KNIGHT_FLAG;
+        if (((blackPieceTypes[BISHOP_CODE] >> endSquare) & 1ULL) == 1ULL)
+            return (startSquare << 10) + (endSquare << 4) + CAPTURE_BISHOP_FLAG;
+        if (((blackPieceTypes[ROOK_CODE] >> endSquare) & 1ULL) == 1ULL)
+            return (startSquare << 10) + (endSquare << 4) + CAPTURE_ROOK_FLAG;
+        if (((blackPieceTypes[QUEEN_CODE] >> endSquare) & 1ULL) == 1ULL)
+            return (startSquare << 10) + (endSquare << 4) + CAPTURE_QUEEN_FLAG;
+    } else {
+        if (((whitePieceTypes[PAWN_CODE] >> endSquare) & 1ULL) == 1ULL)
+            return (startSquare << 10) + (endSquare << 4) + CAPTURE_PAWN_FLAG;
+        if (((whitePieceTypes[KNIGHT_CODE] >> endSquare) & 1ULL) == 1ULL)
+            return (startSquare << 10) + (endSquare << 4) + CAPTURE_KNIGHT_FLAG;
+        if (((whitePieceTypes[BISHOP_CODE] >> endSquare) & 1ULL) == 1ULL)
+            return (startSquare << 10) + (endSquare << 4) + CAPTURE_BISHOP_FLAG;
+        if (((whitePieceTypes[ROOK_CODE] >> endSquare) & 1ULL) == 1ULL)
+            return (startSquare << 10) + (endSquare << 4) + CAPTURE_ROOK_FLAG;
+        if (((whitePieceTypes[QUEEN_CODE] >> endSquare) & 1ULL) == 1ULL)
+            return (startSquare << 10) + (endSquare << 4) + CAPTURE_QUEEN_FLAG;
+    }
+    cout << toString() << endl << "is it white to move: " << isItWhiteToMove << endl;
+    cout << "getCaptureMove isn't a move. Start square is " << startSquare << ". End square is " << endSquare << "." << endl;
+    exit(1);
+}
 
 void ChessBoard::updateDrawByInsufficientMaterial() {
     // Scenario 1: K vs K, K + B vs K, or each side has bishops and they are all on the same color.
