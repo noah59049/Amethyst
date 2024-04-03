@@ -7,13 +7,15 @@
 class QuietHistory {
 private:
     int cutoffCounts[4096]{};
-    [[nodiscard]] inline int lookupMoveCutoffCount (move_t move) const {
-        return cutoffCounts[move >> 4];
-    }
 
     void sortMovesByCutoffs(std::vector<move_t> &vec, int startIndex, int endIndex) const;
 public:
     QuietHistory();
+
+    [[nodiscard]] inline int lookupMoveCutoffCount (move_t move) const {
+        return cutoffCounts[move >> 4];
+    }
+
     void recordKillerMove (move_t move);
 
     void sortMoves(std::vector<move_t>& quietMoves) const;
