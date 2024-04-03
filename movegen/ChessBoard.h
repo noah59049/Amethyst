@@ -51,7 +51,33 @@ private:
     void updateDrawByInsufficientMaterial();
 
     // Part 4: Move generation
-    [[nodiscard]] move_t getCaptureMove(int startSquare, int endSquare) const;
+    [[nodiscard]] inline move_t getCaptureMove(const int startSquare, const int endSquare) const {
+        if (isItWhiteToMove) {
+            if (((blackPieceTypes[PAWN_CODE] >> endSquare) & 1ULL) == 1ULL)
+                return (startSquare << 10) + (endSquare << 4) + CAPTURE_PAWN_FLAG;
+            if (((blackPieceTypes[KNIGHT_CODE] >> endSquare) & 1ULL) == 1ULL)
+                return (startSquare << 10) + (endSquare << 4) + CAPTURE_KNIGHT_FLAG;
+            if (((blackPieceTypes[BISHOP_CODE] >> endSquare) & 1ULL) == 1ULL)
+                return (startSquare << 10) + (endSquare << 4) + CAPTURE_BISHOP_FLAG;
+            if (((blackPieceTypes[ROOK_CODE] >> endSquare) & 1ULL) == 1ULL)
+                return (startSquare << 10) + (endSquare << 4) + CAPTURE_ROOK_FLAG;
+            if (((blackPieceTypes[QUEEN_CODE] >> endSquare) & 1ULL) == 1ULL)
+                return (startSquare << 10) + (endSquare << 4) + CAPTURE_QUEEN_FLAG;
+        }
+        else {
+            if (((whitePieceTypes[PAWN_CODE] >> endSquare) & 1ULL) == 1ULL)
+                return (startSquare << 10) + (endSquare << 4) + CAPTURE_PAWN_FLAG;
+            if (((whitePieceTypes[KNIGHT_CODE] >> endSquare) & 1ULL) == 1ULL)
+                return (startSquare << 10) + (endSquare << 4) + CAPTURE_KNIGHT_FLAG;
+            if (((whitePieceTypes[BISHOP_CODE] >> endSquare) & 1ULL) == 1ULL)
+                return (startSquare << 10) + (endSquare << 4) + CAPTURE_BISHOP_FLAG;
+            if (((whitePieceTypes[ROOK_CODE] >> endSquare) & 1ULL) == 1ULL)
+                return (startSquare << 10) + (endSquare << 4) + CAPTURE_ROOK_FLAG;
+            if (((whitePieceTypes[QUEEN_CODE] >> endSquare) & 1ULL) == 1ULL)
+                return (startSquare << 10) + (endSquare << 4) + CAPTURE_QUEEN_FLAG;
+        }
+        assert(false);
+    }
     [[nodiscard]] bitboard_t calculateWhiteAttackedSquares() const;
     [[nodiscard]] bitboard_t calculateBlackAttackedSquares() const;
     [[nodiscard]] uint8_t calculatePieceGivingCheck() const;
