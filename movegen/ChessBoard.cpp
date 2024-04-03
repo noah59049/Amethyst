@@ -1745,8 +1745,7 @@ int ChessBoard::perft (const int depth) const {
     if (depth == 0)
         return 1;
 
-    vector<move_t> legalMoves;
-    legalMoves.reserve(52);
+    MoveList legalMoves;
     getLegalMoves(legalMoves);
 
     int nodeCount = 0;
