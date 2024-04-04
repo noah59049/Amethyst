@@ -17,10 +17,7 @@ float search::getNegaQuiescenceEval(const ChessBoard &board, float alpha, float 
     float newscore;
     for (move_t move: captures) {
         ChessBoard newBoard = board;
-        newBoard.makemoveLazy(move);
-        // Do checkmate detection, but not stalemate detection.
-        if (newBoard.isInCheck())
-            newBoard.updateMates();
+        newBoard.makemove(move);
         newscore = -getNegaQuiescenceEval(newBoard, -beta, -alpha);
         if (newscore >= beta)
             return beta;
