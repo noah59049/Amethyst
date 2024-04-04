@@ -14,6 +14,8 @@ namespace search {
     constexpr const static int MIN_LMR_DEPTH = 3;
     constexpr const static float ASPIRATION_WINDOW_RADIUS = 75;
     constexpr const static float FULL_WINDOW_VALUE = 2000000;
+    constexpr const static float RFP_MARGIN = 150;
+    constexpr const static int MAX_RFP_DEPTH = 4;
 
     class SearchCancelledException : std::exception {
 

@@ -73,6 +73,11 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
 
     // Null move pruning (technically null move reductions)
     if (board.canMakeNullMove()) {
+        eval_t staticEval = board.getNegaStaticEval();
+        // Reverse futility pruning
+        if (depth <= MAX_RFP_DEPTH and staticEval - RFP_MARGIN * float(depth) >= beta)
+            return beta;
+
         ChessBoard nmBoard = board;
         nmBoard.makeNullMove();
         if (-getNegamaxEval(nmBoard, max(0,depth - NMP_REDUCTION),-beta - ZERO_WINDOW_RADIUS, -beta + ZERO_WINDOW_RADIUS, data) > beta) {
