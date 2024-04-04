@@ -1,4 +1,5 @@
 #include "Negamax.h"
+#include "MoveOrder.h"
 #include <iostream>
 using namespace std;
 
@@ -39,10 +40,8 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
     if (board.isInCheck())
         depth++;
 
-    vector<move_t> winningEqualCaptures;
-    vector<move_t> losingCaptures;
-    vector<move_t> nonCaptures;
 
+    move_t hashMove = SEARCH_FAILED_MOVE_CODE;
     // Check if our result is in the transposition table, plus add hash move if it is
     std::optional<TTValue> ttHashValue = data.transpositionTable.get(board.getZobristCode(),depth);
     if (ttHashValue != std::nullopt) { // our thing was in the transposition table! Yay!
@@ -54,7 +53,7 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
         else if (ttValue.upperBoundEval <= alpha)
             return alpha;
         else if (ttValue.hashMove != SEARCH_FAILED_MOVE_CODE) // We add the hash move
-            winningEqualCaptures.push_back(ttValue.hashMove);
+            hashMove = ttValue.hashMove;
     }
         // Otherwise, we do IID
     else {
@@ -63,7 +62,7 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
                 break;
             std::optional<TTValue> prevHashValue = data.transpositionTable.get(board.getZobristCode(),depth - depthDecrease);
             if (prevHashValue != std::nullopt and prevHashValue->hashMove != SEARCH_FAILED_MOVE_CODE) {
-                winningEqualCaptures.push_back(prevHashValue->hashMove);
+                hashMove = prevHashValue->hashMove;
                 break;
             }
         }
@@ -92,45 +91,23 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
     if (depth > KILLER_MAX_COUSIN_LEVEL)
         data.killerMoves[depth - KILLER_MAX_COUSIN_LEVEL].clear();
 
-    winningEqualCaptures.reserve(52);
-    losingCaptures.reserve(8);
-    nonCaptures.reserve(50);
-    board.getLegalMoves(winningEqualCaptures, losingCaptures, nonCaptures);
+    MoveList legalMoves;
+    board.getLegalMoves(legalMoves);
 
     if (board.getIsItWhiteToMove())
-        data.whiteHHB.sortMoves(nonCaptures);
+        sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),data.whiteHHB);
     else
-        data.blackHHB.sortMoves(nonCaptures);
+        sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),data.whiteHHB);
 
-    bool firstKillerMoveIsLegal = false;
-    bool secondKillerMoveIsLegal = false;
-    const move_t firstKillerMove = data.killerMoves[depth].getFirstKillerMove();
-    const move_t secondKillerMove = data.killerMoves[depth].getSecondKillerMove();
-    for (const move_t move : nonCaptures) {
-        if (move == firstKillerMove) {
-            firstKillerMoveIsLegal = true;
-        }
-        else if (move == secondKillerMove) {
-            secondKillerMoveIsLegal = true;
-        }
-    }
 
-    if (firstKillerMoveIsLegal)
-        winningEqualCaptures.push_back(firstKillerMove);
-    if (secondKillerMoveIsLegal)
-        winningEqualCaptures.push_back(secondKillerMove);
-
-    const unsigned int numMovesToNotReduce = winningEqualCaptures.size() + QUIETS_TO_NOT_REDUCE;
+    const unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
     unsigned int numMovesSearched = 0;
-
-    winningEqualCaptures.insert(winningEqualCaptures.end(), nonCaptures.begin(), nonCaptures.end());
-    winningEqualCaptures.insert(winningEqualCaptures.end(), losingCaptures.begin(), losingCaptures.end());
 
     float newscore;
     float bestscore = -INFINITY;
     move_t bestmove = SEARCH_FAILED_MOVE_CODE;
     bool improvedAlpha = false;
-    for (move_t move: winningEqualCaptures) {
+    for (move_t move: legalMoves) {
         ChessBoard newBoard = board;
         newBoard.makemove(move);
         numMovesSearched++;
