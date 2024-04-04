@@ -1,5 +1,4 @@
 #include "MoveOrder.h"
-#include "MoveOrder.h"
 void sortMoves(MoveList& legalMoves, const ChessBoard &board, move_t hashMove, const TwoKillerMoves &killerMoves,
                const QuietHistory &quietHistory) {
     // Step 1: Put the hash move first
