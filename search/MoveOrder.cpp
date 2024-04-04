@@ -50,7 +50,7 @@ void sortMoves(MoveList& legalMoves, const ChessBoard &board, move_t hashMove, c
     }
 
     // Step 4: Make sure the killers are in the right order
-    if (legalMoves.at(sortedIndex-1) == killerMoves.getFirstKillerMove() and legalMoves.at(sortedIndex-2) == killerMoves.getSecondKillerMove()) {
+    if (sortedIndex >= 2 and legalMoves.at(sortedIndex-1) == killerMoves.getFirstKillerMove() and legalMoves.at(sortedIndex-2) == killerMoves.getSecondKillerMove()) {
         legalMoves.moveList[sortedIndex-2] = killerMoves.getFirstKillerMove();
         legalMoves.moveList[sortedIndex-1] = killerMoves.getSecondKillerMove();
     }
