@@ -95,8 +95,7 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
     if (board.getIsItWhiteToMove())
         sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),data.whiteHHB);
     else
-        sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),data.whiteHHB);
-
+        sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),data.blackHHB);
 
     const unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
     unsigned int numMovesSearched = 0;
