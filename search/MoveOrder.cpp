@@ -1,6 +1,9 @@
 #include "MoveOrder.h"
 void sortMoves(MoveList& legalMoves, const ChessBoard &board, move_t hashMove, const TwoKillerMoves &killerMoves,
                const QuietHistory &quietHistory) {
+    // Step 0: Do nothing if there are 1 or fewer legal moves
+    if (legalMoves.size < 2)
+        return;
     // Step 1: Put the hash move first
     for (unsigned int i = 0; i < legalMoves.size; i++) {
         if (legalMoves.at(i) == hashMove) {
