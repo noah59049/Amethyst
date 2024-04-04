@@ -3,7 +3,7 @@
 #include <iostream>
 using namespace std;
 
-float search::getNegaQuiescenceEval(const ChessBoard &board, float alpha, float beta) {
+eval_t search::getNegaQuiescenceEval(const ChessBoard &board, eval_t alpha, eval_t beta) {
     if (board.hasGameEnded())
         return board.getNegaStaticEval();
 
@@ -14,7 +14,7 @@ float search::getNegaQuiescenceEval(const ChessBoard &board, float alpha, float 
     MoveList captures;
     board.getNonnegativeSEECapturesOnly(captures);
 
-    float newscore;
+    eval_t newscore;
     for (move_t move: captures) {
         ChessBoard newBoard = board;
         newBoard.makemove(move);
@@ -28,7 +28,7 @@ float search::getNegaQuiescenceEval(const ChessBoard &board, float alpha, float 
     return alpha;
 }
 
-float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, const float beta, search::NegamaxData& data) {
+eval_t search::getNegamaxEval(const ChessBoard &board, int depth, eval_t alpha, const eval_t beta, search::NegamaxData& data) {
     if (board.hasGameEnded())
         return board.getNegaStaticEval();
     if (data.repetitionTable.count(board) >= 2) // If we go there a 3rd time, it's a draw.
@@ -75,7 +75,7 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
     if (board.canMakeNullMove()) {
         eval_t staticEval = board.getNegaStaticEval();
         // Reverse futility pruning
-        if (depth <= MAX_RFP_DEPTH and staticEval - RFP_MARGIN * float(depth) >= beta)
+        if (depth <= MAX_RFP_DEPTH and staticEval - RFP_MARGIN * eval_t(depth) >= beta)
             return beta;
 
         ChessBoard nmBoard = board;
@@ -105,8 +105,8 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
     const unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
     unsigned int numMovesSearched = 0;
 
-    float newscore;
-    float bestscore = -INFINITY;
+    eval_t newscore;
+    eval_t bestscore = -INFINITY;
     move_t bestmove = SEARCH_FAILED_MOVE_CODE;
     bool improvedAlpha = false;
     for (move_t move: legalMoves) {
@@ -116,7 +116,7 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
 
         // Late move reductions
         if (depth >= MIN_LMR_DEPTH and numMovesSearched > numMovesToNotReduce) {
-            float reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - ZERO_WINDOW_RADIUS, -alpha + ZERO_WINDOW_RADIUS, data);
+            eval_t reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - ZERO_WINDOW_RADIUS, -alpha + ZERO_WINDOW_RADIUS, data);
             if (reducedScore < alpha)
                 continue;
         }
@@ -154,8 +154,8 @@ float search::getNegamaxEval(const ChessBoard &board, int depth, float alpha, co
     return alpha;
 }
 
-void search::getNegamaxBestMoveAndEval(const ChessBoard &board, const int depth, NegamaxData& data, const float aspirationWindowCenter,
-                               move_t &bestMove, float &eval) {
+void search::getNegamaxBestMoveAndEval(const ChessBoard &board, const int depth, NegamaxData& data, const eval_t aspirationWindowCenter,
+                               move_t &bestMove, eval_t &eval) {
     if (*data.isCancelled)
         throw SearchCancelledException();
 
@@ -184,11 +184,11 @@ void search::getNegamaxBestMoveAndEval(const ChessBoard &board, const int depth,
     winningEqualCaptures.insert(winningEqualCaptures.end(), nonCaptures.begin(), nonCaptures.end());
     winningEqualCaptures.insert(winningEqualCaptures.end(), losingCaptures.begin(), losingCaptures.end());
 
-    float startAlpha = aspirationWindowCenter - ASPIRATION_WINDOW_RADIUS;
-    float beta = aspirationWindowCenter + ASPIRATION_WINDOW_RADIUS;
+    eval_t startAlpha = aspirationWindowCenter - ASPIRATION_WINDOW_RADIUS;
+    eval_t beta = aspirationWindowCenter + ASPIRATION_WINDOW_RADIUS;
 
-    float newscore;
-    float alpha = startAlpha;
+    eval_t newscore;
+    eval_t alpha = startAlpha;
     move_t bestmove = SEARCH_FAILED_MOVE_CODE;
     while (alpha <= startAlpha or alpha >= beta) { // in other words, we leave this loop once we score inside the aspiration window.
         for (move_t move: winningEqualCaptures) {
@@ -220,7 +220,7 @@ void search::getNegamaxBestMoveAndEval(const ChessBoard &board, const int depth,
 
 void search::timeSearchFromFEN (const string& fenNotation, int maxDepth) {
     ChessBoard board = ChessBoard::boardFromFENNotation(fenNotation);
-    float negaEval = 0;
+    eval_t negaEval = 0;
     for (int depth = 1; depth <= maxDepth; depth++) {
         auto start = std::chrono::high_resolution_clock::now();
         bool* isCancelled = new bool(false);
