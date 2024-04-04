@@ -46,7 +46,6 @@ private:
 
     // Part 3: Updating fields
     void updatePieceGivingCheck();
-    void updateMates();
     void manuallyInitializeZobristCode();
     void updateDrawByInsufficientMaterial();
 
@@ -84,6 +83,8 @@ public:
     [[nodiscard]] std::string toFenNotation () const;
 
     // Part 2: Move generation
+    void updateMates();
+    void makemoveLazy(move_t move);
     void makemove(move_t move);
     void getLegalMoves(MoveList& legalMoves) const;
     void getNonnegativeSEECapturesOnly (MoveList& captures) const;

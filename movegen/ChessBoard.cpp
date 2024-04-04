@@ -511,7 +511,7 @@ bitboard_t ChessBoard::calculateBlackAttackedSquares() const {
     return attackedSquares;
 }
 
-void ChessBoard::makemove(move_t move) {
+void ChessBoard::makemoveLazy(move_t move) {
     if (whichPawnMovedTwoSquares < 8) {
         zobristCode ^= zobrist::WHICH_PAWN_MOVED_TWO_SQUARES_CODES[whichPawnMovedTwoSquares] ^
                        zobrist::WHICH_PAWN_MOVED_TWO_SQUARES_CODES[255];
@@ -566,7 +566,7 @@ void ChessBoard::makemove(move_t move) {
                            zobrist::IS_IT_WHITE_TO_MOVE_CODE;
 
             updatePieceGivingCheck();
-            updateMates();
+//            updateMates();
             return;
             // We did this because when we're not castling, we update allWhitePieces at the very end, but if we were castling, we would update it in here.
             // So we don't want to update it twice.
@@ -589,7 +589,7 @@ void ChessBoard::makemove(move_t move) {
                            zobrist::IS_IT_WHITE_TO_MOVE_CODE;
 
             updatePieceGivingCheck();
-            updateMates();
+//            updateMates();
             return;
             // We did this because when we're not castling, we update allWhitePieces at the very end, but if we were castling, we would update it in here.
             // So we don't want to update it twice.
@@ -717,7 +717,7 @@ void ChessBoard::makemove(move_t move) {
                            zobrist::IS_IT_WHITE_TO_MOVE_CODE;
 
             updatePieceGivingCheck();
-            updateMates();
+//            updateMates();
             return;
             // We did this because when we're not castling, we update allBlackPieces at the very end, but if we were castling, we would update it in here.
             // So we don't want to update it twice.
@@ -739,7 +739,7 @@ void ChessBoard::makemove(move_t move) {
                            zobrist::IS_IT_WHITE_TO_MOVE_CODE;
 
             updatePieceGivingCheck();
-            updateMates();
+//            updateMates();
             return;
             // We did this because when we're not castling, we update allBlackPieces at the very end, but if we were castling, we would update it in here.
             // So we don't want to update it twice.
@@ -845,9 +845,14 @@ void ChessBoard::makemove(move_t move) {
     if (isCapture)
         updateDrawByInsufficientMaterial();
     updatePieceGivingCheck();
-    updateMates();
+//    updateMates();
 
-} // end makemove method
+} // end makemoveLazy method
+
+void ChessBoard::makemove(move_t move) {
+    makemoveLazy(move);
+    updateMates();
+}
 
 void ChessBoard::addLegalKingMoves (vector<move_t>& legalMoves, bitboard_t kingLegalEndSquares) const { // Not castling
     const bitboard_t enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
@@ -1751,7 +1756,7 @@ int ChessBoard::perft (const int depth) const {
     int nodeCount = 0;
     for (move_t move : legalMoves) {
         ChessBoard copy = *this;
-        copy.makemove(move);
+        copy.makemoveLazy(move);
         nodeCount += copy.perft(depth - 1);
     }
     return nodeCount;
