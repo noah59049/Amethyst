@@ -2787,3 +2787,119 @@ void ChessBoard::getLegalMoves (MoveList& legalMoves) const {
         legalMoves.push_back(startSquare << 10 | endSquare << 4 | PAWN_PUSH_TWO_SQUARES_FLAG);
     } // end pawn pushes two squares
 } // end getLegalMoves method
+
+void ChessBoard::getNonnegativeSEECapturesOnly (MoveList& captures) const {
+    const bitboard_t diagonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicBishopAttackedSquares(whiteKingPosition) : getEmptyBoardMagicBishopAttackedSquares(blackKingPosition);
+    const bitboard_t orthogonalSquaresFromKing = isItWhiteToMove ? getEmptyBoardMagicRookAttackedSquares(whiteKingPosition) : getEmptyBoardMagicRookAttackedSquares(blackKingPosition);
+    const bitboard_t effectiveEnemyBishops = isItWhiteToMove ? diagonalSquaresFromKing & (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) : diagonalSquaresFromKing & (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t effectiveEnemyRooks = isItWhiteToMove ? orthogonalSquaresFromKing & (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) : orthogonalSquaresFromKing & (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]);
+    const bitboard_t enemyAttackedSquares = isItWhiteToMove ? calculateBlackAttackedSquares() : calculateWhiteAttackedSquares();
+    const uint8_t myKingPosition = isItWhiteToMove ? whiteKingPosition : blackKingPosition;
+    const bitboard_t myPieces = isItWhiteToMove ? allWhitePieces : allBlackPieces;
+    const bitboard_t enemyPieces = isItWhiteToMove ? allBlackPieces : allWhitePieces;
+    const bitboard_t allPieces = allWhitePieces | allBlackPieces;
+
+    bitboard_t bishopPinnedPieces = 0ULL;
+    bitboard_t rookPinnedPieces = 0ULL;
+
+    bitboard_t thisPinningPieceMask, interposingSquares, interposingOccupiedSquares;
+    int thisPinningPieceSquare;
+    bitboard_t effectiveEnemyBishops1 = effectiveEnemyBishops, effectiveEnemyRooks1 = effectiveEnemyRooks;
+    while (effectiveEnemyBishops1 != 0ULL) {
+        thisPinningPieceMask = effectiveEnemyBishops1 & -effectiveEnemyBishops1;
+        effectiveEnemyBishops1 -= thisPinningPieceMask;
+        thisPinningPieceSquare = log2ll(thisPinningPieceMask);
+        interposingSquares = lookupCheckResponses(myKingPosition,thisPinningPieceSquare) - (1ULL << thisPinningPieceSquare);
+        interposingOccupiedSquares = interposingSquares & allPieces;
+        if ((1ULL << log2ll(interposingOccupiedSquares)) == interposingOccupiedSquares)
+            bishopPinnedPieces |= interposingSquares;
+        // In other words, if there is only one piece between the Bishop and the King, then it's pinned
+        // And we might have caught an opponent's piece that could give a discovered attack if it were their turn, but that won't affect anything.
+    } // end while loop
+    while (effectiveEnemyRooks1 != 0ULL) {
+        thisPinningPieceMask = effectiveEnemyRooks1 & -effectiveEnemyRooks1;
+        effectiveEnemyRooks1 -= thisPinningPieceMask;
+        thisPinningPieceSquare = log2ll(thisPinningPieceMask);
+        interposingSquares = lookupCheckResponses(myKingPosition,thisPinningPieceSquare) - (1ULL << thisPinningPieceSquare);
+        interposingOccupiedSquares = interposingSquares & allPieces;
+        if ((1ULL << log2ll(interposingOccupiedSquares)) == interposingOccupiedSquares)
+            rookPinnedPieces |= interposingSquares;
+        // In other words, if there is only one piece between the Rook and the King, then it's pinned
+        // And we might have caught an opponent's piece that could give a discovered attack if it were their turn, but that won't affect anything.
+    } // end while loop
+
+    const bitboard_t kingLegalEndSquares = getMagicKingAttackedSquares(myKingPosition) & ~enemyAttackedSquares & enemyPieces;
+    addLegalKingMoves(captures,kingLegalEndSquares);
+    addEnPassant(captures,effectiveEnemyBishops,effectiveEnemyRooks);
+    if (pieceGivingCheck == DOUBLE_CHECK_CODE)
+        return;
+
+    bitboard_t piecesRemaining;
+    bitboard_t startSquareMask;
+    int startSquare;
+    bitboard_t legalEndSquares;
+    bitboard_t endSquareMask;
+    int endSquare;
+
+    const bitboard_t legalCheckBlockSquares = pieceGivingCheck == NOT_IN_CHECK_CODE ? ENTIRE_BOARD : lookupCheckResponses(myKingPosition,this->pieceGivingCheck);
+
+    const bitboard_t myPawns = isItWhiteToMove ? whitePieceTypes[PAWN_CODE] : blackPieceTypes[PAWN_CODE];
+    const int leftCaptureOffset = isItWhiteToMove ? 7 : 9;
+    const int rightCaptureOffset = isItWhiteToMove ? 9 : 7; // but we are right shifting instead of left shifting
+
+    // Pawns that can left capture
+    piecesRemaining = myPawns & (enemyPieces & legalCheckBlockSquares) << leftCaptureOffset & ~rookPinnedPieces & (~bishopPinnedPieces | effectiveEnemyBishops << leftCaptureOffset);
+    while (piecesRemaining != 0) {
+        startSquareMask = piecesRemaining & -piecesRemaining;
+        piecesRemaining -= startSquareMask;
+        startSquare = log2ll(startSquareMask);
+        endSquare = startSquare - leftCaptureOffset;
+        if ((endSquare & 7) == 7 or (endSquare & 7) == 0) {
+            captures.push_back(startSquare << 10 | endSquare << 4 | PROMOTE_TO_QUEEN_FLAG);
+        }
+        else {
+            captures.push_back(getCaptureMove(startSquare,endSquare));
+        }
+    } // end left captures
+
+    // Pawns that can right capture
+    piecesRemaining = myPawns & (enemyPieces & legalCheckBlockSquares) >> rightCaptureOffset & ~rookPinnedPieces & (~bishopPinnedPieces | effectiveEnemyBishops >> rightCaptureOffset);
+    while (piecesRemaining != 0) {
+        startSquareMask = piecesRemaining & -piecesRemaining;
+        piecesRemaining -= startSquareMask;
+        startSquare = log2ll(startSquareMask);
+        endSquare = startSquare + rightCaptureOffset;
+        if ((endSquare & 7) == 7 or (endSquare & 7) == 0) {
+            captures.push_back(startSquare << 10 | endSquare << 4 | PROMOTE_TO_QUEEN_FLAG);
+        }
+        else {
+            captures.push_back(getCaptureMove(startSquare,endSquare));
+        }
+    } // end right captures
+
+    move_t captureMove;
+
+    // Loop over all piece types, except pawns.
+    for (int pieceType = KNIGHT_CODE; pieceType >= QUEEN_CODE; pieceType--) {
+        piecesRemaining = isItWhiteToMove ? whitePieceTypes[pieceType] : blackPieceTypes[pieceType];
+        while (piecesRemaining != 0ULL) {
+            startSquareMask = piecesRemaining & -piecesRemaining;
+            piecesRemaining -= startSquareMask;
+            startSquare = log2ll(startSquareMask);
+            legalEndSquares = getMagicWhiteAttackedSquares(pieceType, startSquare, allPieces) & legalCheckBlockSquares & enemyPieces;
+            if (bishopPinnedPieces & startSquareMask)
+                legalEndSquares &= diagonalSquaresFromKing & getEmptyBoardMagicBishopAttackedSquares(startSquare);
+            else if (rookPinnedPieces & startSquareMask)
+                legalEndSquares &= orthogonalSquaresFromKing & getEmptyBoardMagicRookAttackedSquares(startSquare);
+
+            while (legalEndSquares != 0ULL) {
+                endSquareMask = legalEndSquares & -legalEndSquares;
+                legalEndSquares -= endSquareMask;
+                endSquare = log2ll(endSquareMask);
+                captureMove = getCaptureMove(startSquare, endSquare);
+                if ((enemyAttackedSquares & endSquareMask) == 0 or getCaptureSEE(pieceType,captureMove) >= 0)
+                    captures.push_back(captureMove);
+            } // end while legalEndSquares is not 0
+        } // end while piecesRemaining is not 0
+    } // end for loop over all piece types
+} // end getNonnegativeSEECapturesOnly

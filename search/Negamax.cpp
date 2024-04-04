@@ -11,9 +11,7 @@ float search::getNegaQuiescenceEval(const ChessBoard &board, float alpha, float 
     if (alpha >= beta)
         return beta;
 
-    vector<move_t> captures;
-    captures.reserve(5);
-
+    MoveList captures;
     board.getNonnegativeSEECapturesOnly(captures);
 
     float newscore;

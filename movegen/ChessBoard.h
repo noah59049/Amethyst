@@ -86,6 +86,7 @@ public:
     // Part 2: Move generation
     void makemove(move_t move);
     void getLegalMoves(MoveList& legalMoves) const;
+    void getNonnegativeSEECapturesOnly (MoveList& captures) const;
     void getLegalMoves(std::vector<move_t>& legalMoves) const;
     void getLegalCapturesOnly (std::vector<move_t>& captures) const;
     void getNonnegativeSEECapturesOnly (std::vector<move_t>& captures) const;
