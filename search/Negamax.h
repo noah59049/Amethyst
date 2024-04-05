@@ -16,6 +16,8 @@ namespace search {
     constexpr const static eval_t FULL_WINDOW_VALUE = 2000000;
     constexpr const static eval_t RFP_MARGIN = 150;
     constexpr const static int MAX_RFP_DEPTH = 4;
+    constexpr const static eval_t RAZORING_MARGIN = 300;
+    constexpr const static int MAX_RAZORING_DEPTH = 3;
 
     class SearchCancelledException : std::exception {
 
