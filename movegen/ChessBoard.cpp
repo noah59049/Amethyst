@@ -1792,12 +1792,18 @@ eval_t ChessBoard::getStaticEval () const {
     else if (drawByInsufficientMaterial or drawByStalemate)
         return 0;
 
+    // Initialize king zones
+    const bitboard_t whiteKingZone = getMagicKingAttackedSquares(whiteKingPosition) | 1ULL << whiteKingPosition;
+    const bitboard_t blackKingZone = getMagicKingAttackedSquares(blackKingPosition) | 1ULL << blackKingPosition;
+    const bitboard_t allPieces = allWhitePieces | allBlackPieces;
+
     // king PSTs
     packed_eval_t packedScore = king_psts[whiteKingPosition] - king_psts[blackKingPosition ^ 7];
     int phase = 0; // 24 = mg, 0 = mg
     bitboard_t piecesRemaining;
     bitboard_t thisPieceMask;
     int thisPieceSquare;
+    bitboard_t pieceAttacks;
     for (int pieceType = QUEEN_CODE; pieceType <= PAWN_CODE; pieceType++) {
         // phase transition
         phase += __builtin_popcountll(whitePieceTypes[pieceType] | blackPieceTypes[pieceType]) * PHASE_PIECE_VALUES[pieceType];
@@ -1809,6 +1815,12 @@ eval_t ChessBoard::getStaticEval () const {
             piecesRemaining -= thisPieceMask;
             thisPieceSquare = log2ll(thisPieceMask);
             packedScore += piece_type_psts[pieceType][thisPieceSquare];
+
+
+            pieceAttacks = getMagicWhiteAttackedSquares(pieceType,thisPieceSquare,allPieces);
+            // King attacks
+            pieceAttacks &= blackKingZone;
+            packedScore += king_zone_attacks[pieceType] * __builtin_popcountll(pieceAttacks);
         }
         
         // black PSTs
@@ -1818,7 +1830,15 @@ eval_t ChessBoard::getStaticEval () const {
             piecesRemaining -= thisPieceMask;
             thisPieceSquare = log2ll(thisPieceMask);
             packedScore -= piece_type_psts[pieceType][thisPieceSquare ^ 7];
+
+            pieceAttacks = getMagicWhiteAttackedSquares(pieceType,thisPieceSquare,allPieces);
+            // King attacks
+            pieceAttacks &= whiteKingZone;
+            packedScore -= king_zone_attacks[pieceType] * __builtin_popcountll(pieceAttacks);
+
         }
+
+
     }
     
     return getEvalFromPacked(packedScore,phase);
