@@ -71,18 +71,10 @@ eval_t search::getNegamaxEval(const ChessBoard &board, int depth, eval_t alpha, 
     if (*data.isCancelled)
         throw SearchCancelledException();
 
-    eval_t staticEval = board.getNegaStaticEval();
-    // Razoring
-    if (depth <= MAX_RAZORING_DEPTH) {
-        if (staticEval + float(depth) * RAZORING_MARGIN <= alpha) {
-            if (getNegaQuiescenceEval(board, alpha - ZERO_WINDOW_RADIUS, alpha + ZERO_WINDOW_RADIUS) <= alpha)
-                return alpha;
-        }
-    }
-
     // Null move pruning (technically null move reductions)
     if (board.canMakeNullMove()) {
-        // Reverse futility pruning (aka static null move pruning)
+        eval_t staticEval = board.getNegaStaticEval();
+        // Reverse futility pruning
         if (depth <= MAX_RFP_DEPTH and staticEval - RFP_MARGIN * eval_t(depth) >= beta)
             return beta;
 
