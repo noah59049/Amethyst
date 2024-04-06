@@ -1831,7 +1831,7 @@ eval_t ChessBoard::getStaticEval () const {
             thisPieceSquare = log2ll(thisPieceMask);
             packedScore -= piece_type_psts[pieceType][thisPieceSquare ^ 7];
 
-            pieceAttacks = getMagicWhiteAttackedSquares(pieceType,thisPieceSquare,allPieces);
+            pieceAttacks = getMagicBlackAttackedSquares(pieceType,thisPieceSquare,allPieces);
             // King attacks
             pieceAttacks &= whiteKingZone;
             packedScore -= king_zone_attacks[pieceType] * __builtin_popcountll(pieceAttacks);
