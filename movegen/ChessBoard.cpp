@@ -1816,8 +1816,9 @@ eval_t ChessBoard::getStaticEval () const {
             thisPieceSquare = log2ll(thisPieceMask);
             packedScore += piece_type_psts[pieceType][thisPieceSquare];
 
-
+            // Mobility
             pieceAttacks = getMagicWhiteAttackedSquares(pieceType,thisPieceSquare,allPieces);
+            packedScore += mobility[pieceType] * __builtin_popcountll(pieceAttacks);
             // King attacks
             pieceAttacks &= blackKingZone;
             packedScore += king_zone_attacks[pieceType] * __builtin_popcountll(pieceAttacks);
@@ -1831,7 +1832,9 @@ eval_t ChessBoard::getStaticEval () const {
             thisPieceSquare = log2ll(thisPieceMask);
             packedScore -= piece_type_psts[pieceType][thisPieceSquare ^ 7];
 
+            // Mobility
             pieceAttacks = getMagicBlackAttackedSquares(pieceType,thisPieceSquare,allPieces);
+            packedScore -= mobility[pieceType] * __builtin_popcountll(pieceAttacks);
             // King attacks
             pieceAttacks &= whiteKingZone;
             packedScore -= king_zone_attacks[pieceType] * __builtin_popcountll(pieceAttacks);
