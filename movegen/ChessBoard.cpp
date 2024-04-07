@@ -1854,7 +1854,7 @@ eval_t ChessBoard::getStaticEval () const {
             if (pieceType == PAWN_CODE) {
                 using namespace pawn_eval;
                 if (isThisBlackPawnPassed(thisPieceSquare,whitePieceTypes[PAWN_CODE]))
-                    packedScore -= hce::getPassedPawnOnSquareBonus(thisPieceSquare);
+                    packedScore -= hce::getPassedPawnOnSquareBonus(thisPieceSquare ^ 7);
             } // end if pieceType == PAWN_CODE
         } // end while piecesRemaining != 0ULL
     } // end for loop over piece type
