@@ -17,7 +17,7 @@ add_executable(amethyst_chess2 main.cpp
         movegen/ChessBoard.h
         search/SEE.cpp
         search/SEE.h
-        Eval.h
+        hce/Eval.h
         search/TranspositionTable.cpp
         search/TranspositionTable.h
         search/TwoKillerMoves.cpp

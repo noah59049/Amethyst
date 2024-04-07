@@ -7,7 +7,7 @@
 #include "MagicBitboards.h"
 #include "CheckBlock.h"
 #include "../search/SEE.h"
-#include "../Eval.h"
+#include "../hce/Eval.h"
 
 using namespace std;
 using namespace bitmasks;
@@ -1828,6 +1828,12 @@ eval_t ChessBoard::getStaticEval () const {
             // King attacks
             pieceAttacks &= blackKingZone;
             packedScore += king_zone_attacks[pieceType] * __builtin_popcountll(pieceAttacks);
+
+            if (pieceType == PAWN_CODE) {
+                using namespace pawn_eval;
+                if (isThisWhitePawnPassed(thisPieceSquare,blackPieceTypes[PAWN_CODE]))
+                    packedScore += hce::getPassedPawnOnSquareBonus(thisPieceSquare);
+            }
         }
         
         // black PSTs
@@ -1845,11 +1851,13 @@ eval_t ChessBoard::getStaticEval () const {
             pieceAttacks &= whiteKingZone;
             packedScore -= king_zone_attacks[pieceType] * __builtin_popcountll(pieceAttacks);
 
-        }
-
-
-    }
-    
+            if (pieceType == PAWN_CODE) {
+                using namespace pawn_eval;
+                if (isThisBlackPawnPassed(thisPieceSquare,whitePieceTypes[PAWN_CODE]))
+                    packedScore -= hce::getPassedPawnOnSquareBonus(thisPieceSquare);
+            } // end if pieceType == PAWN_CODE
+        } // end while piecesRemaining != 0ULL
+    } // end for loop over piece type
     return getEvalFromPacked(packedScore,phase);
 } // end getStaticEval
 

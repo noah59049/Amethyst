@@ -6,7 +6,7 @@
 #include <thread>
 #include "search/RepetitionTable.h"
 #include "search/Negamax.h"
-#include "Eval.h"
+#include "hce/Eval.h"
 #include "ChessGame.h"
 using namespace std;
 // There are still some strange multithreading behaviors that I can't explain or reproduce
