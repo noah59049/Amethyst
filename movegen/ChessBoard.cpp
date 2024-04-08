@@ -1831,6 +1831,8 @@ eval_t ChessBoard::getStaticEval () const {
 
             if (pieceType == PAWN_CODE) {
                 using namespace pawn_eval;
+                if (isThisPawnIsolated(thisPieceSquare,whitePieceTypes[PAWN_CODE]))
+                    packedScore += hce::isolated_pawn;
                 if (isThisWhitePawnPassed(thisPieceSquare,blackPieceTypes[PAWN_CODE]))
                     packedScore += hce::getPassedPawnOnSquareBonus(thisPieceSquare);
             }
@@ -1853,6 +1855,8 @@ eval_t ChessBoard::getStaticEval () const {
 
             if (pieceType == PAWN_CODE) {
                 using namespace pawn_eval;
+                if (isThisPawnIsolated(thisPieceSquare,blackPieceTypes[PAWN_CODE]))
+                    packedScore -= hce::isolated_pawn;
                 if (isThisBlackPawnPassed(thisPieceSquare,whitePieceTypes[PAWN_CODE]))
                     packedScore -= hce::getPassedPawnOnSquareBonus(thisPieceSquare ^ 7);
             } // end if pieceType == PAWN_CODE
