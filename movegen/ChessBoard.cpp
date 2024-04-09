@@ -1799,6 +1799,8 @@ eval_t ChessBoard::getStaticEval () const {
 
     // king PSTs
     packed_eval_t packedScore = king_psts[whiteKingPosition] - king_psts[blackKingPosition ^ 7];
+    // tempo
+    packedScore += isItWhiteToMove ? white_to_move : -white_to_move;
     // bishop pair
     if (__builtin_popcountll(whitePieceTypes[BISHOP_CODE]) >= 2)
         packedScore += bishop_pair;
