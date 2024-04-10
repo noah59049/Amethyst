@@ -3,28 +3,55 @@
 #include <iostream>
 using namespace std;
 
-eval_t search::getNegaQuiescenceEval(const ChessBoard &board, eval_t alpha, eval_t beta) {
+eval_t search::getNegaQuiescenceEval(const ChessBoard &board, TranspositionTable& tt, eval_t alpha, eval_t beta) {
     if (board.hasGameEnded())
         return board.getNegaStaticEval();
 
+    // If we get a hit from the transposition table
+    optional<TTValue> ttValue = tt.get(board.getZobristCode(), 0);
+    if (ttValue != nullopt) {
+        if (ttValue->isExact())
+            return ttValue->lowerBoundEval;
+        else if (ttValue->lowerBoundEval >= beta)
+            return beta;
+        else if (ttValue->upperBoundEval <= alpha)
+            return alpha;
+    }
+
     alpha = max(alpha, board.getNegaStaticEval());
-    if (alpha >= beta)
+    if (alpha >= beta) {
+        // No need to waste TT space on this; one call to getEval will be good enough to find that score > beta in qsearch.
         return beta;
+    }
 
     MoveList captures;
     board.getNonnegativeSEECapturesOnly(captures);
+    // We are not doing the hash move yet
 
     eval_t newscore;
+    bool improvedAlpha = false;
     for (move_t move: captures) {
         ChessBoard newBoard = board;
         newBoard.makemove(move);
-        newscore = -getNegaQuiescenceEval(newBoard, -beta, -alpha);
-        if (newscore >= beta)
+        newscore = -getNegaQuiescenceEval(newBoard, tt, -beta, -alpha);
+        if (newscore >= beta) {
+            tt.put({beta,INFINITY,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),0});
             return beta;
-        if (newscore > alpha)
+        }
+        if (newscore > alpha) {
+            improvedAlpha = true;
             alpha = newscore;
+        }
     }
 
+    if (improvedAlpha) {
+        // We have a PV Node!
+        tt.put({alpha, alpha, SEARCH_FAILED_MOVE_CODE, board.getZobristCode(), 0});
+    }
+    else {
+        // We have an All-Node
+        tt.put({-INFINITY, alpha, SEARCH_FAILED_MOVE_CODE, board.getZobristCode(), 0});
+    }
     return alpha;
 }
 
@@ -67,7 +94,7 @@ eval_t search::getNegamaxEval(const ChessBoard &board, int depth, eval_t alpha, 
     }
 
     if (depth == 0)
-        return getNegaQuiescenceEval(board, alpha, beta);
+        return getNegaQuiescenceEval(board, data.transpositionTable, alpha, beta);
     if (*data.isCancelled)
         throw SearchCancelledException();
 
