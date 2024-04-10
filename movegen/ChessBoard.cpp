@@ -1799,6 +1799,13 @@ eval_t ChessBoard::getStaticEval () const {
 
     // king PSTs
     packed_eval_t packedScore = king_psts[whiteKingPosition] - king_psts[blackKingPosition ^ 7];
+    // king shelter
+    {
+        using namespace kingsafety;
+        packedScore += hce::king_shelter *
+                (__builtin_popcountll(allWhitePieces & WHITE_SHIELD_ZONES[whiteKingPosition]) -
+                 __builtin_popcountll(allBlackPieces & BLACK_SHIELD_ZONES[blackKingPosition]));
+    }
     // bishop pair
     if (__builtin_popcountll(whitePieceTypes[BISHOP_CODE]) >= 2)
         packedScore += bishop_pair;
