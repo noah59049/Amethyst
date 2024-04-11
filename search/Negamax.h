@@ -44,7 +44,7 @@ namespace search {
         }
     };
 
-    eval_t getNegaQuiescenceEval(const ChessBoard &board, TranspositionTable& tt, eval_t alpha, eval_t beta);
+    eval_t getNegaQuiescenceEval(const ChessBoard &board, eval_t alpha, eval_t beta);
 
     eval_t getNegamaxEval(const ChessBoard &board, int depth, eval_t alpha, eval_t beta, NegamaxData& data);
 
