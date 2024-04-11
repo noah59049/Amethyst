@@ -44,11 +44,11 @@ namespace search {
         }
     };
 
-    eval_t getNegaQuiescenceEval(const ChessBoard &board, eval_t alpha, eval_t beta);
+    eval_t getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t beta);
 
-    eval_t getNegamaxEval(const ChessBoard &board, int depth, eval_t alpha, eval_t beta, NegamaxData& data);
+    eval_t getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, eval_t beta, NegamaxData& data);
 
-    void getNegamaxBestMoveAndEval(const ChessBoard &board, int depth, NegamaxData& data, eval_t aspirationWindowCenter,
+    void getNegamaxBestMoveAndEval(ChessBoard &board, int depth, NegamaxData& data, eval_t aspirationWindowCenter,
                                    move_t &bestMove, eval_t &eval);
 
     void timeSearchFromFEN (const std::string& fenNotation, int maxDepth);

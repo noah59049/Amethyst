@@ -1,15 +1,19 @@
 #include "Negamax.h"
 #include "MoveOrder.h"
+#include "../hce/Eval.h"
 #include <iostream>
 using namespace std;
 
-eval_t search::getNegaQuiescenceEval(const ChessBoard &board, eval_t alpha, eval_t beta) {
+eval_t search::getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t beta) {
+    if (board.isInCheck())
+        board.updateMates();
     if (board.hasGameEnded())
         return board.getNegaStaticEval();
 
     alpha = max(alpha, board.getNegaStaticEval());
-    if (alpha >= beta)
+    if (alpha >= beta) {
         return beta;
+    }
 
     MoveList captures;
     board.getNonnegativeSEECapturesOnly(captures);
@@ -17,7 +21,7 @@ eval_t search::getNegaQuiescenceEval(const ChessBoard &board, eval_t alpha, eval
     eval_t newscore;
     for (move_t move: captures) {
         ChessBoard newBoard = board;
-        newBoard.makemove(move);
+        newBoard.makemoveLazy(move);
         newscore = -getNegaQuiescenceEval(newBoard, -beta, -alpha);
         if (newscore >= beta)
             return beta;
@@ -28,7 +32,7 @@ eval_t search::getNegaQuiescenceEval(const ChessBoard &board, eval_t alpha, eval
     return alpha;
 }
 
-eval_t search::getNegamaxEval(const ChessBoard &board, int depth, eval_t alpha, const eval_t beta, search::NegamaxData& data) {
+eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const eval_t beta, search::NegamaxData& data) {
     if (board.hasGameEnded())
         return board.getNegaStaticEval();
     if (data.repetitionTable.count(board) >= 2) // If we go there a 3rd time, it's a draw.
@@ -97,6 +101,10 @@ eval_t search::getNegamaxEval(const ChessBoard &board, int depth, eval_t alpha, 
     MoveList legalMoves;
     board.getLegalMoves(legalMoves);
 
+    // Checkmate and stalemate detection
+    if (legalMoves.size == 0)
+        return board.isInCheck() ? -hce::MATE_VALUE : 0;
+
     if (board.getIsItWhiteToMove())
         sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),data.whiteHHB);
     else
@@ -111,7 +119,7 @@ eval_t search::getNegamaxEval(const ChessBoard &board, int depth, eval_t alpha, 
     bool improvedAlpha = false;
     for (move_t move: legalMoves) {
         ChessBoard newBoard = board;
-        newBoard.makemove(move);
+        newBoard.makemoveLazy(move);
         numMovesSearched++;
 
         // Late move reductions
@@ -154,7 +162,7 @@ eval_t search::getNegamaxEval(const ChessBoard &board, int depth, eval_t alpha, 
     return alpha;
 }
 
-void search::getNegamaxBestMoveAndEval(const ChessBoard &board, const int depth, NegamaxData& data, const eval_t aspirationWindowCenter,
+void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, NegamaxData& data, const eval_t aspirationWindowCenter,
                                move_t &bestMove, eval_t &eval) {
     if (*data.isCancelled)
         throw SearchCancelledException();
