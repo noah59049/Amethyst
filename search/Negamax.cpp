@@ -66,8 +66,17 @@ eval_t search::getNegamaxEval(const ChessBoard &board, int depth, eval_t alpha, 
         }
     }
 
-    if (depth == 0)
-        return getNegaQuiescenceEval(board, alpha, beta);
+    if (depth == 0) {
+        eval_t result = getNegaQuiescenceEval(board, alpha, beta);
+        if (result >= beta)
+            data.transpositionTable.put({beta,INFINITY,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
+        else if (result <= alpha)
+            data.transpositionTable.put({-INFINITY,alpha,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
+        else
+            data.transpositionTable.put({alpha,alpha,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
+        return result;
+    }
+
     if (*data.isCancelled)
         throw SearchCancelledException();
 
