@@ -198,10 +198,24 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
     eval_t newscore;
     eval_t alpha = startAlpha;
     move_t bestmove = SEARCH_FAILED_MOVE_CODE;
+
+    unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
+
     while (alpha <= startAlpha or alpha >= beta) { // in other words, we leave this loop once we score inside the aspiration window.
         for (move_t move: winningEqualCaptures) {
             ChessBoard newBoard = board;
             newBoard.makemove(move);
+
+            // Late move reductions
+            if (depth >= MIN_LMR_DEPTH and numMovesToNotReduce > 0) {
+                eval_t reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - ZERO_WINDOW_RADIUS, -alpha + ZERO_WINDOW_RADIUS, data);
+                if (reducedScore < alpha)
+                    continue;
+            }
+            else {
+                numMovesToNotReduce = 0;
+            }
+
             newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
             if (newscore > alpha) {
                 alpha = newscore;
