@@ -125,7 +125,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         // Late move reductions
         if (depth >= MIN_LMR_DEPTH and numMovesSearched > numMovesToNotReduce) {
             eval_t reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - 1, -alpha, data);
-            if (reducedScore < alpha)
+            if (reducedScore <= alpha)
                 continue;
         }
         newscore = -getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
