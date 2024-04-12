@@ -9,15 +9,13 @@ namespace search {
     constexpr const static int KILLER_MAX_COUSIN_LEVEL = 2;
     constexpr const static int IID_DEPTH_DECREASE = 1;
     constexpr const static int NMP_REDUCTION = 3;
+    constexpr const static eval_t ZERO_WINDOW_RADIUS = 1.0F;
     constexpr const static unsigned int QUIETS_TO_NOT_REDUCE = 8;
     constexpr const static int MIN_LMR_DEPTH = 3;
     constexpr const static eval_t ASPIRATION_WINDOW_RADIUS = 75;
     constexpr const static eval_t FULL_WINDOW_VALUE = 32000;
     constexpr const static eval_t RFP_MARGIN = 150;
     constexpr const static int MAX_RFP_DEPTH = 4;
-
-    constexpr const static eval_t MAX_EVAL = 32767;
-    constexpr const static eval_t MIN_EVAL = -32768;
 
     class SearchCancelledException : std::exception {
 

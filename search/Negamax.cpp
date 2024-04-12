@@ -84,11 +84,11 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
         ChessBoard nmBoard = board;
         nmBoard.makeNullMove();
-        if (-getNegamaxEval(nmBoard, max(0,depth - NMP_REDUCTION),-beta - 1, -beta, data) > beta) {
+        if (-getNegamaxEval(nmBoard, max(0,depth - NMP_REDUCTION),-beta - ZERO_WINDOW_RADIUS, -beta + ZERO_WINDOW_RADIUS, data) > beta) {
             // To guard against zugzwang, we do a search to depth - 4 without a null move, and if THAT causes a beta cutoff, then we return beta.
-            if (getNegamaxEval(board, max(0,depth - 4), beta , beta + 1, data) > beta) {
+            if (getNegamaxEval(board, max(0,depth - 4), beta - ZERO_WINDOW_RADIUS, beta + ZERO_WINDOW_RADIUS, data) > beta) {
                 // We know we caused a beta cutoff, but we don't know what the best move is
-                data.transpositionTable.put({beta,MAX_EVAL,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
+                data.transpositionTable.put({beta,INFINITY,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
                 return beta;
             }
         }
@@ -114,7 +114,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     unsigned int numMovesSearched = 0;
 
     eval_t newscore;
-    eval_t bestscore = MIN_EVAL;
+    eval_t bestscore = -INFINITY;
     move_t bestmove = SEARCH_FAILED_MOVE_CODE;
     bool improvedAlpha = false;
     for (move_t move: legalMoves) {
@@ -124,7 +124,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
         // Late move reductions
         if (depth >= MIN_LMR_DEPTH and numMovesSearched > numMovesToNotReduce) {
-            eval_t reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - 1, -alpha, data);
+            eval_t reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - ZERO_WINDOW_RADIUS, -alpha + ZERO_WINDOW_RADIUS, data);
             if (reducedScore < alpha)
                 continue;
         }
@@ -147,7 +147,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                     else
                         data.blackHHB.recordKillerMove(move);
                 }
-                data.transpositionTable.put({beta,MAX_EVAL,move,board.getZobristCode(),depth});
+                data.transpositionTable.put({beta,INFINITY,move,board.getZobristCode(),depth});
                 return beta;
             } // end if alpha > beta
         } // end if newscore > alpha
@@ -157,7 +157,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     }
     else { // None of the moves improved alpha. The score is an upper bound
         // Change implemented in Amethyst 43: At an All-Node, we don't add the "best move" to the transposition table because that's just noise
-        data.transpositionTable.put({MIN_EVAL,alpha,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
+        data.transpositionTable.put({-INFINITY,alpha,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
     }
     return alpha;
 }
