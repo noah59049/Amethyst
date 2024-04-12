@@ -35,7 +35,7 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
 
     // Set up search parameters
     int depth;
-    float eval = board.getNegaStaticEval();
+    eval_t eval = board.getNegaStaticEval();
     vector<move_t> moves;
     board.getLegalMoves(moves);
     move_t bestMoveFromPrevious = moves.at(0);
