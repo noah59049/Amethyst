@@ -29,7 +29,7 @@ namespace hce {
     [[nodiscard]] inline eval_t getEvalFromPacked (packed_eval_t packed, int phase) { // higher phase means closer to mg
         int mg = int(int16_t(packed >> 32 & 0xffff));
         int eg = int(int16_t(packed & 0xffff));
-        return eval_t((mg * phase + eg * (24 - phase)) / 24);
+        return float(mg * phase + eg * (24 - phase)) / 24.0F;
     }
 }
 
