@@ -194,8 +194,13 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
             newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
             if (newscore > alpha) {
                 alpha = newscore;
-                bestmove = move;
+                bestMove = bestmove = move;
                 if (alpha >= beta) {
+                    // we caused a beta cutoff at the root node, meaning our aspiration window was too narrow
+                    // so we re-search with a wider window, but put the cut move first.
+                    legalMoves = MoveList();
+                    board.getLegalMoves(legalMoves);
+                    sortMoves(legalMoves,board,move,TwoKillerMoves(),board.getIsItWhiteToMove() ? data.whiteHHB : data.blackHHB);
                     break;
                 }
             }
