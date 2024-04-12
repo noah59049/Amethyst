@@ -19,6 +19,10 @@ namespace search {
     constexpr const static eval_t MAX_EVAL = 32767;
     constexpr const static eval_t MIN_EVAL = -32768;
 
+    constexpr const static int ASPIRATION_MISSES_TOLERATED = 2; // A value of 2 means that on the third try, we just use a full aspiration window
+    constexpr const static int ASPIRATION_WINDOW_MULTIPLIER = 2; // How much do we widen the aspiration window if we fail soft
+
+
     class SearchCancelledException : std::exception {
 
     };
