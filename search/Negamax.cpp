@@ -181,11 +181,8 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
     board.getLegalMoves(legalMoves);
     sortMoves(legalMoves,board,hashMove,TwoKillerMoves(),board.getIsItWhiteToMove() ? data.whiteHHB : data.blackHHB);
 
-    eval_t lowerRadius = ASPIRATION_WINDOW_RADIUS;
-    eval_t upperRadius = ASPIRATION_WINDOW_RADIUS;
     eval_t startAlpha = aspirationWindowCenter - ASPIRATION_WINDOW_RADIUS;
     eval_t beta = aspirationWindowCenter + ASPIRATION_WINDOW_RADIUS;
-    int missesLeft = ASPIRATION_MISSES_TOLERATED;
 
     eval_t newscore;
     eval_t alpha = startAlpha;
@@ -211,25 +208,8 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
         else {
             // Search returned an evaluation outside the aspiration window
             // We need to redo the search with a wider window.
-
-            if (missesLeft <= 0) {
-                startAlpha = -FULL_WINDOW_VALUE;
-                beta = FULL_WINDOW_VALUE;
-            }
-            else {
-                missesLeft--;
-                if (alpha <= startAlpha) { // we failed low
-                    lowerRadius *= ASPIRATION_WINDOW_MULTIPLIER;
-                }
-                else if (alpha >= beta) {
-                    upperRadius *= ASPIRATION_WINDOW_MULTIPLIER;
-                }
-                else {
-                    assert(false);
-                }
-                startAlpha = aspirationWindowCenter - lowerRadius;
-                beta = aspirationWindowCenter + upperRadius;
-            } // end else (if we haven't exceeded the number of fail softs tolerated)
+            startAlpha = -FULL_WINDOW_VALUE;
+            beta = FULL_WINDOW_VALUE;
             alpha = startAlpha;
         } // end else
     } // end while
