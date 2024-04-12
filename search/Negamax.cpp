@@ -164,33 +164,22 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
 void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, NegamaxData& data, const eval_t aspirationWindowCenter,
                                move_t &bestMove, eval_t &eval) {
-    if (*data.isCancelled)
-        throw SearchCancelledException();
-
-    vector<move_t> winningEqualCaptures;
-    vector<move_t> losingCaptures;
-    vector<move_t> nonCaptures;
-    board.getLegalMoves(winningEqualCaptures, losingCaptures, nonCaptures);
 
     // Internal iterative deepening
+    move_t hashMove = SEARCH_FAILED_MOVE_CODE;
     for (int depthDecrease = 1; depthDecrease <= IID_DEPTH_DECREASE; depthDecrease++) {
         if (depth <= depthDecrease)
             break;
         std::optional<TTValue> prevHashValue = data.transpositionTable.get(board.getZobristCode(),depth - depthDecrease);
-        if (prevHashValue != std::nullopt) {
-            winningEqualCaptures.push_back(prevHashValue->hashMove);
+        if (prevHashValue != std::nullopt and prevHashValue->hashMove != SEARCH_FAILED_MOVE_CODE) {
+            hashMove = prevHashValue->hashMove;
             break;
         }
     }
 
-    if (board.getIsItWhiteToMove())
-        data.whiteHHB.sortMoves(nonCaptures);
-    else
-        data.blackHHB.sortMoves(nonCaptures);
-
-
-    winningEqualCaptures.insert(winningEqualCaptures.end(), nonCaptures.begin(), nonCaptures.end());
-    winningEqualCaptures.insert(winningEqualCaptures.end(), losingCaptures.begin(), losingCaptures.end());
+    MoveList legalMoves;
+    board.getLegalMoves(legalMoves);
+    sortMoves(legalMoves,board,hashMove,TwoKillerMoves(),board.getIsItWhiteToMove() ? data.whiteHHB : data.blackHHB);
 
     eval_t startAlpha = aspirationWindowCenter - ASPIRATION_WINDOW_RADIUS;
     eval_t beta = aspirationWindowCenter + ASPIRATION_WINDOW_RADIUS;
@@ -199,7 +188,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
     eval_t alpha = startAlpha;
     move_t bestmove = SEARCH_FAILED_MOVE_CODE;
     while (alpha <= startAlpha or alpha >= beta) { // in other words, we leave this loop once we score inside the aspiration window.
-        for (move_t move: winningEqualCaptures) {
+        for (move_t move: legalMoves) {
             ChessBoard newBoard = board;
             newBoard.makemove(move);
             newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
