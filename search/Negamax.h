@@ -12,7 +12,7 @@ namespace search {
     constexpr const static unsigned int QUIETS_TO_NOT_REDUCE = 8;
     constexpr const static int MIN_LMR_DEPTH = 3;
     constexpr const static eval_t ASPIRATION_WINDOW_RADIUS = 75;
-    constexpr const static eval_t FULL_WINDOW_VALUE = 2000000;
+    constexpr const static eval_t FULL_WINDOW_VALUE = 32000;
     constexpr const static eval_t RFP_MARGIN = 150;
     constexpr const static int MAX_RFP_DEPTH = 4;
 
