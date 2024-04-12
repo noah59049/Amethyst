@@ -2,7 +2,7 @@
 #include "../Typedefs.h"
 namespace hce {
     constexpr int PHASE_PIECE_VALUES[5] = {4,2,1,1,0};
-    constexpr const static eval_t MATE_VALUE = 31000;
+    constexpr const static eval_t MATE_VALUE = 1048576;
     constexpr uint64_t bishop_pair = 154618822755ULL;
     constexpr uint64_t passed_pawn_on_ranks[] = {0ULL, 281444912005091ULL, 281410552266740ULL, 281414847168538ULL, 81604378687ULL, 42949673112ULL, 566935683324ULL, 0ULL};
     constexpr uint64_t passed_pawn_on_file[] = {81604378686ULL, 77309411389ULL, 281462091808806ULL, 17179869200ULL, 281427732070421ULL, 12884901923ULL, 34359738435ULL, 47244640317ULL};
