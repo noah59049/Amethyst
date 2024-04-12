@@ -7,7 +7,7 @@ Board representation/move generation:
 - Zobrist hashing
 
 Search features:
-- Negamax search with alpha-beta pruning
+- Fail-hard negamax search with alpha-beta pruning
 - Repetition table
 - Iterative Deepening
 - Aspiration Windows
@@ -21,11 +21,18 @@ Search features:
   - Captures with SEE<0
 - Check move extension
 - Late move reductions, except not at root node
+- Reverse Futility Pruning
 - Null move reductions
   - If null move fails high, do search with depth-4. This avoids zugzwang.
 - Quiescence search
-  - Only examine captures with SEE>=0
+  - Only examine captures with SEE>=0 (I think this is called SEE pruning)
  
 Evaluation:
 - Material
 - Piece square tables
+- Mobility
+- Isolated Pawns
+- Passed Pawn on rank/file bonus
+- King Shelter
+- King zone attacks
+- Bishop Pair
