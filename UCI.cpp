@@ -36,7 +36,8 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
     // Set up search parameters
     int depth;
     eval_t eval = board.getNegaStaticEval();
-    vector<move_t> moves;
+    move_t bestMove;
+    MoveList moves;
     board.getLegalMoves(moves);
     move_t bestMoveFromPrevious = moves.at(0);
     assert(!game->hasGameEnded());
@@ -47,8 +48,8 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
     std::thread* sleepThread = new std::thread(setPointerTrueLater,fut,isSearchCancelled,ms);
     search::NegamaxData data(isSearchCancelled,repetitionTable,1);
     for (depth = 1; depth < 100; depth++) {
+        bestMove = bestMoveFromPrevious;
         try {
-            u_int16_t bestMove = bestMoveFromPrevious;
             data.extendKillersToDepth(depth);
             search::getNegamaxBestMoveAndEval(board,depth,data,eval,bestMove,eval);
             if (bestMove != SEARCH_FAILED_MOVE_CODE)
@@ -57,9 +58,13 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
                 break;
         }
         catch (const search::SearchCancelledException& e) {
+            if (bestMove != SEARCH_FAILED_MOVE_CODE)
+                bestMoveFromPrevious = bestMove;
             break;
         }
     } // end for loop over depth
+
+
 
     // Once we have broken out of the ID loop, one of three things happened
     // 1) we ran out of time. isSearchCancelled is true and not in use. sleepThread has exited.
