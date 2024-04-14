@@ -28,15 +28,15 @@ namespace search {
         RepetitionTable repetitionTable;
         TranspositionTable transpositionTable = TranspositionTable(uci::HASH_MB * 1000000 / int(sizeof(TTValue)));
         std::vector<TwoKillerMoves> killerMoves;
-        QuietHistory whiteHHB;
-        QuietHistory blackHHB;
+        QuietHistory whiteQuietHistory;
+        QuietHistory blackQuietHistory;
 
         NegamaxData(bool* isCancelled, const RepetitionTable& repetitionTable, int depth) {
             this->isCancelled = isCancelled;
             this->repetitionTable = repetitionTable;
             this->killerMoves = std::vector<TwoKillerMoves>(depth + 1);
-            this->whiteHHB = QuietHistory();
-            this->blackHHB = QuietHistory();
+            this->whiteQuietHistory = QuietHistory();
+            this->blackQuietHistory = QuietHistory();
         }
 
         void extendKillersToDepth(const int depth) {

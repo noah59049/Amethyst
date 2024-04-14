@@ -1,6 +1,7 @@
 #pragma once
 #include <vector>
 #include <array>
+#include "../movegen/MoveList.h"
 #include "../Typedefs.h"
 
 
@@ -16,7 +17,7 @@ public:
         return cutoffCounts[move >> 4];
     }
 
-    void recordKillerMove (move_t move);
+    void recordKillerMove (move_t move, MoveList& moveList, int weight);
 
     void sortMoves(std::vector<move_t>& quietMoves) const;
 

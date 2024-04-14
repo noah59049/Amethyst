@@ -1,4 +1,5 @@
 #include "QuietHistory.h"
+#include "../movegen/Flags.h"
 void QuietHistory::sortMovesByCutoffs(std::vector<move_t> &vec, int startIndex, int endIndex) const {
     // Recursive base case
     if (startIndex >= endIndex) {
@@ -38,8 +39,16 @@ void QuietHistory::sortMovesByCutoffs(std::vector<move_t> &vec, int startIndex, 
 }
 
 QuietHistory::QuietHistory() =default;
-void QuietHistory::recordKillerMove (move_t move) {
-    cutoffCounts[move >> 4] ++;
+void QuietHistory::recordKillerMove (move_t cutoffMove, MoveList& moveList, int weight) {
+    for (const move_t move : moveList) {
+        if (move == cutoffMove) {
+            cutoffCounts[move >> 4] += weight - weight * cutoffCounts[move >> 4] / 512;
+            break;
+        }
+        else if (!isCapture(move)) {
+            cutoffCounts[move >> 4] -= weight + weight * cutoffCounts[move >> 4] / 512;
+        }
+    }
 }
 
 void QuietHistory::sortMoves(std::vector<move_t>& quietMoves) const {
