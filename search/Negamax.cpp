@@ -106,10 +106,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         return board.isInCheck() ? -hce::MATE_VALUE : 0;
 
     // Move ordering
-    if (board.getIsItWhiteToMove())
-        sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),data.whiteHHB);
-    else
-        sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),data.blackHHB);
+    sortMoves(legalMoves,board,hashMove,TwoKillerMoves(),board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory);
 
     // Set up LMR
     const unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
@@ -150,9 +147,9 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                     data.killerMoves[depth].recordKillerMove(move);
                     // Record a move for history heuristic
                     if (board.getIsItWhiteToMove())
-                        data.whiteHHB.recordKillerMove(move);
+                        data.whiteQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
                     else
-                        data.blackHHB.recordKillerMove(move);
+                        data.blackQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
                 }
                 data.transpositionTable.put({beta,MAX_EVAL,move,board.getZobristCode(),depth});
                 return beta;
@@ -186,7 +183,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
 
     MoveList legalMoves;
     board.getLegalMoves(legalMoves);
-    sortMoves(legalMoves,board,hashMove,TwoKillerMoves(),board.getIsItWhiteToMove() ? data.whiteHHB : data.blackHHB);
+    sortMoves(legalMoves,board,hashMove,TwoKillerMoves(),board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory);
 
     eval_t startAlpha = aspirationWindowCenter - ASPIRATION_WINDOW_RADIUS;
     eval_t beta = aspirationWindowCenter + ASPIRATION_WINDOW_RADIUS;
