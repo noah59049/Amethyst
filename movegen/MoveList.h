@@ -15,11 +15,6 @@ struct MoveList {
         return moveList[index];
     }
 
-    inline void trimToSize(const unsigned int newSize) {
-        if (size > newSize)
-            size = newSize;
-    }
-
     inline std::array<move_t,218>::iterator begin() {
         return moveList.begin();
     }

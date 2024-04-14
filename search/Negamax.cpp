@@ -105,20 +105,13 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     if (legalMoves.size == 0)
         return board.isInCheck() ? -hce::MATE_VALUE : 0;
 
-    // Move ordering
     if (board.getIsItWhiteToMove())
         sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),data.whiteHHB);
     else
         sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),data.blackHHB);
 
-    // Set up LMR
     const unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
     unsigned int numMovesSearched = 0;
-
-    // Late move pruning
-    if (depth <= MAX_LMP_DEPTH) {
-        legalMoves.trimToSize(LMP_MOVECOUNT * depth);
-    }
 
     eval_t newscore;
     eval_t bestscore = MIN_EVAL;
