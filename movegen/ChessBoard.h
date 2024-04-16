@@ -116,6 +116,8 @@ public:
     static std::string moveToPureAlgebraicNotation(move_t move);
 
     // Part 8: Getters
+    [[nodiscard]] colored_piece_t getPieceMoving (move_t move) const;
+
     [[nodiscard]] bool isDrawByInsufficientMaterial() const {
         return drawByInsufficientMaterial;
     }
