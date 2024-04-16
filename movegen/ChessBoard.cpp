@@ -2968,3 +2968,7 @@ colored_piece_t ChessBoard::getPieceMoving(move_t move) const {
     }
     assert(false);
 }
+
+uint16_t ChessBoard::getConthistIndex(move_t move) const {
+    return 64 * getPieceMoving(move) + getEndSquare(move);
+}

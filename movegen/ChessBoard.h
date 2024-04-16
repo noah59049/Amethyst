@@ -117,6 +117,7 @@ public:
 
     // Part 8: Getters
     [[nodiscard]] colored_piece_t getPieceMoving (move_t move) const;
+    [[nodiscard]] uint16_t getConthistIndex(move_t move) const;
 
     [[nodiscard]] bool isDrawByInsufficientMaterial() const {
         return drawByInsufficientMaterial;
