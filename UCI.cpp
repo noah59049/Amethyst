@@ -41,17 +41,16 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
     board.getLegalMoves(moves);
     move_t bestMoveFromPrevious = moves.at(0);
     assert(!game->hasGameEnded());
-    RepetitionTable repetitionTable(*game);
+    search::repetitionTable = RepetitionTable(*game);
 
     // Set up the sleep thread
     bool* isSearchCancelled = new bool(false);
     std::thread* sleepThread = new std::thread(setPointerTrueLater,fut,isSearchCancelled,ms);
-    search::NegamaxData data(isSearchCancelled,repetitionTable,1);
+
     for (depth = 1; depth < 100; depth++) {
         bestMove = bestMoveFromPrevious;
         try {
-            data.extendKillersToDepth(depth);
-            search::getNegamaxBestMoveAndEval(board,depth,data,eval,bestMove,eval);
+            search::getNegamaxBestMoveAndEval(board,depth,isSearchCancelled,eval,bestMove,eval);
             if (bestMove != SEARCH_FAILED_MOVE_CODE)
                 bestMoveFromPrevious = bestMove;
             if (eval == hce::MATE_VALUE) // mate pruning. We find the fastest mate.

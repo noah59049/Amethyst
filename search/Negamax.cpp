@@ -1,7 +1,6 @@
 #include "Negamax.h"
 #include "MoveOrder.h"
 #include "../hce/Eval.h"
-#include <iostream>
 using namespace std;
 
 eval_t search::getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t beta) {
@@ -32,10 +31,10 @@ eval_t search::getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t bet
     return alpha;
 }
 
-eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const eval_t beta, search::NegamaxData& data) {
+eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const eval_t beta, bool* isCancelled) {
     if (board.hasGameEnded())
         return board.getNegaStaticEval();
-    if (data.repetitionTable.count(board) >= 2) // If we go there a 3rd time, it's a draw.
+    if (repetitionTable.count(board) >= 2) // If we go there a 3rd time, it's a draw.
         return 0;
 
     // Check move extension
@@ -45,7 +44,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
     move_t hashMove = SEARCH_FAILED_MOVE_CODE;
     // Check if our result is in the transposition table, plus add hash move if it is
-    std::optional<TTValue> ttHashValue = data.transpositionTable.get(board.getZobristCode(),depth);
+    std::optional<TTValue> ttHashValue = transpositionTable.get(board.getZobristCode(),depth);
     if (ttHashValue != std::nullopt) { // our thing was in the transposition table! Yay!
         TTValue ttValue = ttHashValue.value();
         if (ttValue.lowerBoundEval == ttValue.upperBoundEval)
@@ -62,7 +61,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         for (int depthDecrease = 1; depthDecrease <= IID_DEPTH_DECREASE; depthDecrease++) {
             if (depth <= depthDecrease)
                 break;
-            std::optional<TTValue> prevHashValue = data.transpositionTable.get(board.getZobristCode(),depth - depthDecrease);
+            std::optional<TTValue> prevHashValue = transpositionTable.get(board.getZobristCode(),depth - depthDecrease);
             if (prevHashValue != std::nullopt and prevHashValue->hashMove != SEARCH_FAILED_MOVE_CODE) {
                 hashMove = prevHashValue->hashMove;
                 break;
@@ -72,7 +71,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
     if (depth == 0)
         return getNegaQuiescenceEval(board, alpha, beta);
-    if (*data.isCancelled)
+    if (*isCancelled)
         throw SearchCancelledException();
 
     // Null move pruning (technically null move reductions)
@@ -84,11 +83,11 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
         ChessBoard nmBoard = board;
         nmBoard.makeNullMove();
-        if (-getNegamaxEval(nmBoard, max(0,depth - NMP_REDUCTION),-beta - 1, -beta, data) > beta) {
+        if (-getNegamaxEval(nmBoard, max(0,depth - NMP_REDUCTION),-beta - 1, -beta, isCancelled) > beta) {
             // To guard against zugzwang, we do a search to depth - 4 without a null move, and if THAT causes a beta cutoff, then we return beta.
-            if (getNegamaxEval(board, max(0,depth - 4), beta , beta + 1, data) > beta) {
+            if (getNegamaxEval(board, max(0,depth - 4), beta , beta + 1, isCancelled) > beta) {
                 // We know we caused a beta cutoff, but we don't know what the best move is
-                data.transpositionTable.put({beta,MAX_EVAL,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
+                transpositionTable.put({beta,MAX_EVAL,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
                 return beta;
             }
         }
@@ -96,7 +95,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
     // clear the killer moves from irrelevant positions
     if (depth > KILLER_MAX_COUSIN_LEVEL)
-        data.killerMoves[depth - KILLER_MAX_COUSIN_LEVEL].clear();
+        killerMoves[depth - KILLER_MAX_COUSIN_LEVEL].clear();
 
     MoveList legalMoves;
     board.getLegalMoves(legalMoves);
@@ -107,9 +106,9 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
     // Move ordering
     if (board.getIsItWhiteToMove())
-        sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),data.whiteQuietHistory);
+        sortMoves(legalMoves,board,hashMove,killerMoves.at(depth),whiteQuietHistory);
     else
-        sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),data.blackQuietHistory);
+        sortMoves(legalMoves,board,hashMove,killerMoves.at(depth),blackQuietHistory);
 
     // Set up LMR
     const unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
@@ -131,11 +130,11 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
         // Late move reductions
         if (depth >= MIN_LMR_DEPTH and numMovesSearched > numMovesToNotReduce) {
-            eval_t reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - 1, -alpha, data);
+            eval_t reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - 1, -alpha, isCancelled);
             if (reducedScore <= alpha)
                 continue;
         }
-        newscore = -getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
+        newscore = -getNegamaxEval(newBoard, depth - 1, -beta, -alpha, isCancelled);
 
         if (newscore > bestscore) {
             bestscore = newscore;
@@ -147,29 +146,29 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
             if (alpha >= beta) { // We caused a beta cutoff
                 if (!isCapture(move)) {
                     // Record a killer move
-                    data.killerMoves[depth].recordKillerMove(move);
+                    killerMoves[depth].recordKillerMove(move);
                     // Record a move for history heuristic
                     if (board.getIsItWhiteToMove())
-                        data.whiteQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
+                        whiteQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
                     else
-                        data.blackQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
+                        blackQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
                 }
-                data.transpositionTable.put({beta,MAX_EVAL,move,board.getZobristCode(),depth});
+                transpositionTable.put({beta,MAX_EVAL,move,board.getZobristCode(),depth});
                 return beta;
             } // end if alpha > beta
         } // end if newscore > alpha
     } // end for loop over moves
     if (improvedAlpha) { // This is a PV node, and score is exact
-        data.transpositionTable.put({alpha,alpha,bestmove,board.getZobristCode(),depth});
+        transpositionTable.put({alpha,alpha,bestmove,board.getZobristCode(),depth});
     }
     else { // None of the moves improved alpha. The score is an upper bound
         // Change implemented in Amethyst 43: At an All-Node, we don't add the "best move" to the transposition table because that's just noise
-        data.transpositionTable.put({MIN_EVAL,alpha,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
+        transpositionTable.put({MIN_EVAL,alpha,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
     }
     return alpha;
 }
 
-void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, NegamaxData& data, const eval_t aspirationWindowCenter,
+void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, bool* isCancelled, const eval_t aspirationWindowCenter,
                                move_t &bestMove, eval_t &eval) {
 
     // Internal iterative deepening
@@ -177,7 +176,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
     for (int depthDecrease = 1; depthDecrease <= IID_DEPTH_DECREASE; depthDecrease++) {
         if (depth <= depthDecrease)
             break;
-        std::optional<TTValue> prevHashValue = data.transpositionTable.get(board.getZobristCode(),depth - depthDecrease);
+        std::optional<TTValue> prevHashValue = transpositionTable.get(board.getZobristCode(),depth - depthDecrease);
         if (prevHashValue != std::nullopt and prevHashValue->hashMove != SEARCH_FAILED_MOVE_CODE) {
             hashMove = prevHashValue->hashMove;
             break;
@@ -186,7 +185,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
 
     MoveList legalMoves;
     board.getLegalMoves(legalMoves);
-    sortMoves(legalMoves,board,hashMove,TwoKillerMoves(),board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory);
+    sortMoves(legalMoves,board,hashMove,TwoKillerMoves(),board.getIsItWhiteToMove() ? whiteQuietHistory : blackQuietHistory);
 
     eval_t startAlpha = aspirationWindowCenter - ASPIRATION_WINDOW_RADIUS;
     eval_t beta = aspirationWindowCenter + ASPIRATION_WINDOW_RADIUS;
@@ -198,7 +197,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
         for (move_t move: legalMoves) {
             ChessBoard newBoard = board;
             newBoard.makemove(move);
-            newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
+            newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, isCancelled);
             if (newscore > alpha) {
                 alpha = newscore;
                 bestMove = bestmove = move;
@@ -210,7 +209,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
         if (startAlpha < alpha and alpha < beta) {
             bestMove = bestmove;
             eval = alpha;
-            data.transpositionTable.put({alpha,alpha,bestmove,board.getZobristCode(),depth});
+            transpositionTable.put({alpha,alpha,bestmove,board.getZobristCode(),depth});
         }
         else {
             // Search returned an evaluation outside the aspiration window
@@ -222,25 +221,25 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
     } // end while
 } // end getNegamaxBestMoveAndEval
 
-void search::timeSearchFromFEN (const string& fenNotation, int maxDepth) {
-    ChessBoard board = ChessBoard::boardFromFENNotation(fenNotation);
-    eval_t negaEval = 0;
-    for (int depth = 1; depth <= maxDepth; depth++) {
-        auto start = std::chrono::high_resolution_clock::now();
-        bool* isCancelled = new bool(false);
-        RepetitionTable repetitionTable;
-        NegamaxData data(isCancelled,repetitionTable,depth);
-        move_t bestMove = SEARCH_FAILED_MOVE_CODE;
-        getNegamaxBestMoveAndEval(board,depth,data,negaEval,bestMove,negaEval);
-        string readableBestMove = board.moveToSAN(bestMove);
-        delete isCancelled;
-        auto end = std::chrono::high_resolution_clock::now();
-        auto duration = std::chrono::duration_cast<chrono::milliseconds>(end - start);
-        long ms = duration.count();
-        cout << "Nega eval is " << negaEval << " and best move is " << readableBestMove << " at depth " << depth << " in " << ms << " milliseconds." << endl;
-    } // end for loop
-} // end timeSearchFromTraxler
-
-void search::timeSearchFromTraxler () {
-    timeSearchFromFEN("r1bqk2r/pppp1Npp/2n2n2/4p3/2B1P3/8/PPPP1KPP/RNBQ3R b kq - 0 6",7);
-} // end timeSearchFromTraxler
+//void search::timeSearchFromFEN (const string& fenNotation, int maxDepth) {
+//    ChessBoard board = ChessBoard::boardFromFENNotation(fenNotation);
+//    eval_t negaEval = 0;
+//    for (int depth = 1; depth <= maxDepth; depth++) {
+//        auto start = std::chrono::high_resolution_clock::now();
+//        bool* isCancelled = new bool(false);
+//        RepetitionTable repetitionTable;
+//        NegamaxData data(isCancelled,repetitionTable,depth);
+//        move_t bestMove = SEARCH_FAILED_MOVE_CODE;
+//        getNegamaxBestMoveAndEval(board,depth,data,negaEval,bestMove,negaEval);
+//        string readableBestMove = board.moveToSAN(bestMove);
+//        delete isCancelled;
+//        auto end = std::chrono::high_resolution_clock::now();
+//        auto duration = std::chrono::duration_cast<chrono::milliseconds>(end - start);
+//        long ms = duration.count();
+//        cout << "Nega eval is " << negaEval << " and best move is " << readableBestMove << " at depth " << depth << " in " << ms << " milliseconds." << endl;
+//    } // end for loop
+//} // end timeSearchFromTraxler
+//
+//void search::timeSearchFromTraxler () {
+//    timeSearchFromFEN("r1bqk2r/pppp1Npp/2n2n2/4p3/2B1P3/8/PPPP1KPP/RNBQ3R b kq - 0 6",7);
+//} // end timeSearchFromTraxler
