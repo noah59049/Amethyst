@@ -31,7 +31,7 @@ namespace search {
         std::vector<TwoKillerMoves> killerMoves;
         QuietHistory whiteQuietHistory;
         QuietHistory blackQuietHistory;
-        Conthist conthist;
+        Conthist* conthist;
         std::vector<uint16_t> conthistPrevStack;
 
         NegamaxData(bool* isCancelled, const RepetitionTable& repetitionTable, int depth) {
@@ -40,9 +40,12 @@ namespace search {
             this->killerMoves = std::vector<TwoKillerMoves>(depth + 1);
             this->whiteQuietHistory = QuietHistory();
             this->blackQuietHistory = QuietHistory();
-            this->conthist = Conthist();
+            this->conthist = new Conthist();
             this->conthistPrevStack = std::vector<uint16_t>();
             conthistPrevStack.reserve(100);
+        }
+        ~NegamaxData() {
+            delete conthist;
         }
 
         void extendKillersToDepth(const int depth) {

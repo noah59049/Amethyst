@@ -111,7 +111,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
 
     sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),
-              board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory,data.conthist,data.conthistPrevStack);
+              board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory,*data.conthist,data.conthistPrevStack);
 
 
     const unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
@@ -157,7 +157,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                     // Record a move for conthist
                     // 1-ply conthist
                     if (data.conthistPrevStack.size() >= 1)
-                        data.conthist.recordKillerMove(legalMoves,data.conthistPrevStack.at(data.conthistPrevStack.size() - 1),board,move,depth * depth);
+                        data.conthist->recordKillerMove(legalMoves,data.conthistPrevStack.at(data.conthistPrevStack.size() - 1),board,move,depth * depth);
                     // I will eventually try 2-ply or more conthist
                 }
                 data.transpositionTable.put({beta,MAX_EVAL,move,board.getZobristCode(),depth});
@@ -193,7 +193,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
     MoveList legalMoves;
     board.getLegalMoves(legalMoves);
     sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),
-              board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory,data.conthist,data.conthistPrevStack);
+              board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory,*data.conthist,data.conthistPrevStack);
 
     eval_t startAlpha = aspirationWindowCenter - ASPIRATION_WINDOW_RADIUS;
     eval_t beta = aspirationWindowCenter + ASPIRATION_WINDOW_RADIUS;
