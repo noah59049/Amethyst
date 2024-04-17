@@ -28,7 +28,6 @@ void setPointerTrueLater (const future<void>* fut, bool* ptr, const long long ms
 }
 
 void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fut, const long long ms) {
-    search::setupNewRoot();
     // Set up the board
     ChessBoard simpleBoard = game->getCurrentPosition();
     string fenNotation = simpleBoard.toFenNotation();

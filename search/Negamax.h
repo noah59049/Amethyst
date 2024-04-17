@@ -32,12 +32,11 @@ namespace search {
     static QuietHistory whiteQuietHistory;
     static QuietHistory blackQuietHistory;
     static Conthist conthist;
-    static std::vector<uint16_t> conthistStack;
-
-    inline void setupNewRoot() {
-        conthistStack.clear();
-        conthistStack.reserve(100);
-    }
+    struct ConthistData {
+        ChessBoard boardBeforeMove;
+        move_t move;
+    };
+    static std::vector<ConthistData> conthistStack;
 
     eval_t getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t beta);
 
