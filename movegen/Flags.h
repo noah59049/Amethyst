@@ -67,3 +67,24 @@ constexpr const static int ROOK_CODE = 1;
 constexpr const static int BISHOP_CODE = 2;
 constexpr const static int KNIGHT_CODE = 3;
 constexpr const static int PAWN_CODE = 4;
+
+namespace colored_pieces {
+    constexpr const static colored_piece_t WHITE_QUEEN = 0;
+    constexpr const static colored_piece_t BLACK_QUEEN = 1;
+    constexpr const static colored_piece_t WHITE_ROOK = 2;
+    constexpr const static colored_piece_t BLACK_ROOK = 3;
+    constexpr const static colored_piece_t WHITE_BISHOP = 4;
+    constexpr const static colored_piece_t BLACK_BISHOP = 5;
+    constexpr const static colored_piece_t WHITE_KNIGHT = 6;
+    constexpr const static colored_piece_t BLACK_KNIGHT = 7;
+    constexpr const static colored_piece_t WHITE_PAWN = 8;
+    constexpr const static colored_piece_t BLACK_PAWN = 9;
+    constexpr const static colored_piece_t WHITE_KING = 10;
+    constexpr const static colored_piece_t BLACK_KING = 11;
+    inline int getPieceCode(colored_piece_t colored_piece) {
+        return colored_piece >> 1;
+    }
+    inline int getSide(colored_piece_t colored_piece) {
+        return colored_piece & 1;
+    }
+}
