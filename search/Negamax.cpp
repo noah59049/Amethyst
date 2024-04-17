@@ -84,18 +84,14 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
         ChessBoard nmBoard = board;
         nmBoard.makeNullMove();
-        data.conthistPrevStack.push_back(board.getConthistNullIndex());
         if (-getNegamaxEval(nmBoard, max(0,depth - NMP_REDUCTION),-beta - 1, -beta, data) > beta) {
             // To guard against zugzwang, we do a search to depth - 4 without a null move, and if THAT causes a beta cutoff, then we return beta.
-            data.conthistPrevStack.push_back(board.getConthistNullIndex());
             if (getNegamaxEval(board, max(0,depth - 4), beta , beta + 1, data) > beta) {
                 // We know we caused a beta cutoff, but we don't know what the best move is
                 data.transpositionTable.put({beta,MAX_EVAL,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
                 return beta;
             }
-            data.conthistPrevStack.pop_back();
         }
-        data.conthistPrevStack.pop_back();
     }
 
     // clear the killer moves from irrelevant positions
@@ -111,7 +107,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
 
     sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),
-              board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory,data.conthist,data.conthistPrevStack);
+              board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory);
 
 
     const unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
@@ -128,15 +124,11 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
         // Late move reductions
         if (depth >= MIN_LMR_DEPTH and numMovesSearched > numMovesToNotReduce) {
-            data.conthistPrevStack.push_back(board.getConthistPrevIndex(move));
             eval_t reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - 1, -alpha, data);
-            data.conthistPrevStack.pop_back();
             if (reducedScore <= alpha)
                 continue;
         }
-        data.conthistPrevStack.push_back(board.getConthistPrevIndex(move));
         newscore = -getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
-        data.conthistPrevStack.pop_back();
 
         if (newscore > bestscore) {
             bestscore = newscore;
@@ -154,11 +146,6 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                         data.whiteQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
                     else
                         data.blackQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
-                    // Record a move for conthist
-                    // 1-ply conthist
-                    if (data.conthistPrevStack.size() >= 1)
-                        data.conthist.recordKillerMove(legalMoves,data.conthistPrevStack.at(data.conthistPrevStack.size() - 1),board,move,depth * depth);
-                    // I will eventually try 2-ply or more conthist
                 }
                 data.transpositionTable.put({beta,MAX_EVAL,move,board.getZobristCode(),depth});
                 return beta;
@@ -193,7 +180,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
     MoveList legalMoves;
     board.getLegalMoves(legalMoves);
     sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),
-              board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory,data.conthist,data.conthistPrevStack);
+              board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory);
 
     eval_t startAlpha = aspirationWindowCenter - ASPIRATION_WINDOW_RADIUS;
     eval_t beta = aspirationWindowCenter + ASPIRATION_WINDOW_RADIUS;
@@ -205,9 +192,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
         for (move_t move: legalMoves) {
             ChessBoard newBoard = board;
             newBoard.makemove(move);
-            data.conthistPrevStack.push_back(board.getConthistPrevIndex(move));
             newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
-            data.conthistPrevStack.pop_back();
             if (newscore > alpha) {
                 alpha = newscore;
                 bestMove = bestmove = move;
