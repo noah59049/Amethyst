@@ -160,7 +160,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                         blackQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
 
                     // Record a killer move for conthist
-                    conthist.recordKillerMove(legalMoves,conthistStack.at(conthistStack.size() - 1),board,move,depth * depth);
+                    //conthist.recordKillerMove(legalMoves,conthistStack.at(conthistStack.size() - 1),board,move,depth * depth);
                 }
                 transpositionTable.put({beta,MAX_EVAL,move,board.getZobristCode(),depth});
                 return beta;
