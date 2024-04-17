@@ -13,8 +13,6 @@ private:
 public:
     QuietHistory();
 
-    void clear();
-
     [[nodiscard]] inline int lookupMoveCutoffCount (move_t move) const {
         return cutoffCounts[move >> 4];
     }
