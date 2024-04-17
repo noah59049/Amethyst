@@ -4,7 +4,6 @@
 #include "TranspositionTable.h"
 #include "TwoKillerMoves.h"
 #include "QuietHistory.h"
-#include "Conthist.h"
 #include "../UCI.h"
 namespace search {
     constexpr const static int KILLER_MAX_COUSIN_LEVEL = 2;
@@ -31,12 +30,6 @@ namespace search {
     static std::vector<TwoKillerMoves> killerMoves = std::vector<TwoKillerMoves>(100);
     static QuietHistory whiteQuietHistory;
     static QuietHistory blackQuietHistory;
-    static Conthist conthist;
-    struct ConthistData {
-        ChessBoard boardBeforeMove;
-        move_t move;
-    };
-    static std::vector<ConthistData> conthistStack;
 
     eval_t getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t beta);
 
