@@ -2956,15 +2956,3 @@ void ChessBoard::getNonnegativeSEECapturesOnly (MoveList& captures) const {
         } // end while piecesRemaining is not 0
     } // end for loop over all piece types
 } // end getNonnegativeSEECapturesOnly
-
-colored_piece_t ChessBoard::getPieceMoving(move_t move) const {
-    using namespace colored_pieces;
-    const move_t startSquare = getStartSquare(move);
-    if (isItWhiteToMove ? (whiteKingPosition == startSquare) : (blackKingPosition == startSquare))
-        return isItWhiteToMove ? WHITE_KING : BLACK_KING;
-    for (int pieceType = QUEEN_CODE; pieceType <= PAWN_CODE; pieceType++) {
-        if ((isItWhiteToMove ? whitePieceTypes[pieceType] : blackPieceTypes[pieceType]) & (1ULL << startSquare))
-            return 2 * pieceType + isItWhiteToMove;
-    }
-    assert(false);
-}
