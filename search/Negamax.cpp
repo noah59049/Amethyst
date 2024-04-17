@@ -2,7 +2,6 @@
 #include "MoveOrder.h"
 #include "../hce/Eval.h"
 using namespace std;
-// TODO: Stop pushing an entire ChessBoard to the conthist stack when we make a move. Refactor so we get a prevMoveConthist index
 
 eval_t search::getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t beta) {
     if (board.isInCheck())
@@ -138,6 +137,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
             if (reducedScore <= alpha)
                 continue;
         }
+
         conthistStack.push_back(board.getConthistPrevIndex(move));
         newscore = -getNegamaxEval(newBoard, depth - 1, -beta, -alpha, isCancelled);
         conthistStack.pop_back();
@@ -158,6 +158,9 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                         whiteQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
                     else
                         blackQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
+
+                    // Record a killer move for conthist
+                    conthist.recordKillerMove(legalMoves,conthistStack.at(conthistStack.size() - 1),board,move,depth * depth);
                 }
                 transpositionTable.put({beta,MAX_EVAL,move,board.getZobristCode(),depth});
                 return beta;
@@ -203,7 +206,9 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, bool*
         for (move_t move: legalMoves) {
             ChessBoard newBoard = board;
             newBoard.makemove(move);
+            conthistStack.push_back(board.getConthistPrevIndex(move));
             newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, isCancelled);
+            conthistStack.pop_back();
             if (newscore > alpha) {
                 alpha = newscore;
                 bestMove = bestmove = move;

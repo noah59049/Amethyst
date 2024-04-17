@@ -39,6 +39,15 @@ namespace search {
         conthistStack.reserve(100);
     }
 
+    inline void setupNewGame () {
+        setupNewRoot();
+        transpositionTable = TranspositionTable(uci::HASH_MB * 1000000 / int(sizeof(TTValue)));
+        repetitionTable = RepetitionTable();
+        whiteQuietHistory.clear();
+        blackQuietHistory.clear();
+        conthist.clear();
+    }
+
     eval_t getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t beta);
 
     eval_t getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, eval_t beta, bool* isCancelled);

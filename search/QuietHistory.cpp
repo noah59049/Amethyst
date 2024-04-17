@@ -92,3 +92,7 @@ void QuietHistory::sortMovesByCutoffs(std::array<move_t,218> &vec, int startInde
     sortMovesByCutoffs(vec, startIndex, largerElementIndex-2);
     sortMovesByCutoffs(vec, largerElementIndex, endIndex);
 }
+
+void QuietHistory::clear() {
+    memset(cutoffCounts,0,sizeof(cutoffCounts));
+}
