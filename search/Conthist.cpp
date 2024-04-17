@@ -2,23 +2,21 @@
 void Conthist::clear() {
     memset(cutoffCounts,0,sizeof(cutoffCounts));
 }
-void Conthist::recordKillerMove(MoveList &moves, const ChessBoard &previousBoard, move_t previousMove,
+void Conthist::recordKillerMove(MoveList &moves, const uint16_t prevIndex,
                                 const ChessBoard &thisBoard, move_t thisMove, int weight) {
-    const uint16_t prevIndex = previousBoard.getConthistIndex(previousMove);
-    const unsigned int prevIsCapture = isCapture(previousMove);
 
     for (const move_t move : moves) {
         uint16_t moveIndex = thisBoard.getConthistIndex(move);
         if (move == thisMove) {
-            cutoffCounts[prevIsCapture][prevIndex][moveIndex] += weight - weight * cutoffCounts[prevIsCapture][prevIndex][moveIndex] / 512;
+            cutoffCounts[prevIndex][moveIndex] += weight - weight * cutoffCounts[prevIndex][moveIndex] / 512;
             break;
         }
         else if (!isCapture(move)) {
-            cutoffCounts[prevIsCapture][prevIndex][moveIndex] -= weight + weight * cutoffCounts[prevIsCapture][prevIndex][moveIndex] / 512;
+            cutoffCounts[prevIndex][moveIndex] -= weight + weight * cutoffCounts[prevIndex][moveIndex] / 512;
         }
     }
 }
 
-int16_t Conthist::getCutoffCount(const ChessBoard& previousBoard, move_t previousMove, const ChessBoard& thisBoard, move_t thisMove) const {
-    return cutoffCounts[isCapture(previousMove)][previousBoard.getConthistIndex(previousMove)][thisBoard.getConthistIndex(thisMove)];
+int16_t Conthist::getCutoffCount(const uint16_t prevIndex, const ChessBoard& thisBoard, move_t thisMove) const {
+    return cutoffCounts[prevIndex][thisBoard.getConthistIndex(thisMove)];
 }

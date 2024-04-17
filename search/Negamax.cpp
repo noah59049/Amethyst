@@ -2,6 +2,7 @@
 #include "MoveOrder.h"
 #include "../hce/Eval.h"
 using namespace std;
+// TODO: Stop pushing an entire ChessBoard to the conthist stack when we make a move. Refactor so we get a prevMoveConthist index
 
 eval_t search::getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t beta) {
     if (board.isInCheck())
@@ -83,14 +84,19 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
         ChessBoard nmBoard = board;
         nmBoard.makeNullMove();
+        conthistStack.push_back(board.getConthistNullIndex());
         if (-getNegamaxEval(nmBoard, max(0,depth - NMP_REDUCTION),-beta - 1, -beta, isCancelled) > beta) {
             // To guard against zugzwang, we do a search to depth - 4 without a null move, and if THAT causes a beta cutoff, then we return beta.
+
+            conthistStack.push_back(board.getConthistNullIndex());
             if (getNegamaxEval(board, max(0,depth - 4), beta , beta + 1, isCancelled) > beta) {
                 // We know we caused a beta cutoff, but we don't know what the best move is
                 transpositionTable.put({beta,MAX_EVAL,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
                 return beta;
             }
+            conthistStack.pop_back();
         }
+        conthistStack.pop_back();
     }
 
     // clear the killer moves from irrelevant positions
@@ -118,6 +124,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     eval_t bestscore = MIN_EVAL;
     move_t bestmove = SEARCH_FAILED_MOVE_CODE;
     bool improvedAlpha = false;
+
     for (move_t move: legalMoves) {
         ChessBoard newBoard = board;
         newBoard.makemoveLazy(move);
@@ -125,11 +132,15 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
         // Late move reductions
         if (depth >= MIN_LMR_DEPTH and numMovesSearched > numMovesToNotReduce) {
+            conthistStack.push_back(board.getConthistPrevIndex(move));
             eval_t reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - 1, -alpha, isCancelled);
+            conthistStack.pop_back();
             if (reducedScore <= alpha)
                 continue;
         }
+        conthistStack.push_back(board.getConthistPrevIndex(move));
         newscore = -getNegamaxEval(newBoard, depth - 1, -beta, -alpha, isCancelled);
+        conthistStack.pop_back();
 
         if (newscore > bestscore) {
             bestscore = newscore;

@@ -2966,7 +2966,7 @@ colored_piece_t ChessBoard::getPieceMoving(move_t move) const {
         if ((isItWhiteToMove ? whitePieceTypes[pieceType] : blackPieceTypes[pieceType]) & (1ULL << startSquare))
             return 2 * pieceType + isItWhiteToMove;
     }
-    assert(false);
+    return isItWhiteToMove ? WHITE_KING : BLACK_KING; // castling
 }
 
 uint16_t ChessBoard::getConthistIndex(move_t move) const {
