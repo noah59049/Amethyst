@@ -5,6 +5,7 @@
 #include "TwoKillerMoves.h"
 #include "QuietHistory.h"
 #include "../UCI.h"
+#include "Conthist.h"
 namespace search {
     constexpr const static int KILLER_MAX_COUSIN_LEVEL = 2;
     constexpr const static int IID_DEPTH_DECREASE = 1;
@@ -30,6 +31,8 @@ namespace search {
         std::vector<TwoKillerMoves> killerMoves;
         QuietHistory whiteQuietHistory;
         QuietHistory blackQuietHistory;
+        Conthist conthist;
+        std::vector<uint16_t> conthistPrevStack;
 
         NegamaxData(bool* isCancelled, const RepetitionTable& repetitionTable, int depth) {
             this->isCancelled = isCancelled;
@@ -37,6 +40,9 @@ namespace search {
             this->killerMoves = std::vector<TwoKillerMoves>(depth + 1);
             this->whiteQuietHistory = QuietHistory();
             this->blackQuietHistory = QuietHistory();
+            this->conthist = Conthist();
+            this->conthistPrevStack = std::vector<uint16_t>();
+            conthistPrevStack.reserve(100);
         }
 
         void extendKillersToDepth(const int depth) {
