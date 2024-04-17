@@ -114,11 +114,6 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     const unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
     unsigned int numMovesSearched = 0;
 
-    // Late move pruning
-    if (depth <= MAX_LMP_DEPTH) {
-        legalMoves.trimToSize(LMP_MOVECOUNT * depth);
-    }
-
     eval_t newscore;
     eval_t bestscore = MIN_EVAL;
     move_t bestmove = SEARCH_FAILED_MOVE_CODE;
