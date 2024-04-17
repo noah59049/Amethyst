@@ -33,6 +33,4 @@ add_executable(amethyst_chess2 main.cpp
         movegen/MoveList.h
         search/MoveOrder.cpp
         search/MoveOrder.h
-        search/Conthist.cpp
-        search/Conthist.h
 )
