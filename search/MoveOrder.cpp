@@ -1,6 +1,54 @@
 #include "MoveOrder.h"
+void sortMovesByCutoffs (std::array<move_t,218> &vec, int startIndex, int endIndex,
+                         const ChessBoard& board, const QuietHistory& quietHistory, const Conthist& conthist, const std::vector<uint16_t>& conthistStack) {
+    if (startIndex >= endIndex) {
+        return;
+    }
+
+    // Choose a partition element
+    move_t partition = vec[startIndex];
+
+    // Loop through vec from startIndex to endIndex
+    // Keep track of where the > partition elements start
+    int i;
+    int largerElementIndex = startIndex+1;
+    move_t temp;
+    for (i = startIndex+1; i <= endIndex; ++i) {
+        // Get the scores to sort the moves by
+        int veciScore = quietHistory.lookupMoveCutoffCount(vec[i]);
+        if (conthistStack.size() >= 1)
+            veciScore += conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, vec[i]);
+        int partitionScore = quietHistory.lookupMoveCutoffCount(partition);
+        if (conthistStack.size() >= 1)
+            partitionScore += conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, partition);
+
+        if (veciScore >= partitionScore) {
+            // Swap the larger/equal item to the left of the larger items
+            // This is modified so the moves are going from highest to lowest reward, instead of lowest to highest.
+            temp = vec[i];
+            vec[i] = vec[largerElementIndex];
+            vec[largerElementIndex] = temp;
+            // Update largerElementIndex
+            ++largerElementIndex;
+        }
+    }
+    // Swap the partition element into place
+    temp = vec[startIndex];
+    vec[startIndex] = vec[largerElementIndex-1];
+    vec[largerElementIndex-1] = temp;
+
+    // Uncomment this line if you want to see each iteration
+    //printVec(vec);
+
+    // Recursive calls for two halves
+    sortMovesByCutoffs(vec, startIndex, largerElementIndex-2,
+                       board, quietHistory, conthist, conthistStack);
+    sortMovesByCutoffs(vec, largerElementIndex, endIndex,
+                       board, quietHistory, conthist, conthistStack);
+}
+
 void sortMoves(MoveList& legalMoves, const ChessBoard &board, move_t hashMove, const TwoKillerMoves &killerMoves,
-               const QuietHistory &quietHistory) {
+               const QuietHistory &quietHistory, const Conthist& conthist, const std::vector<uint16_t>& conthistStack) {
     // Step 0: Do nothing if there are 1 or fewer legal moves
     if (legalMoves.size < 2)
         return;
@@ -58,5 +106,7 @@ void sortMoves(MoveList& legalMoves, const ChessBoard &board, move_t hashMove, c
     }
 
     // Step 5: Sort quiets by history heuristic
-    quietHistory.sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex);
+    //quietHistory.sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex);
+    sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex,
+                       board,quietHistory,conthist,conthistStack);
 }
