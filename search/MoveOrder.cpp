@@ -15,10 +15,10 @@ void sortMovesByCutoffs (std::array<move_t,218> &vec, int startIndex, int endInd
     move_t temp;
     for (i = startIndex+1; i <= endIndex; ++i) {
         // Get the scores to sort the moves by
-        int veciScore = 2 * quietHistory.lookupMoveCutoffCount(vec[i]);
+        int veciScore = quietHistory.lookupMoveCutoffCount(vec[i]);
         if (conthistStack.size() >= 1)
             veciScore += conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, vec[i]);
-        int partitionScore = 2 * quietHistory.lookupMoveCutoffCount(partition);
+        int partitionScore = quietHistory.lookupMoveCutoffCount(partition);
         if (conthistStack.size() >= 1)
             partitionScore += conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, partition);
 
