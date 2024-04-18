@@ -156,7 +156,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                         data.blackQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
                     // Record a move for conthist
                     // 1-ply conthist
-                    if (data.conthistPrevStack.size() >= 1)
+                    if (false and data.conthistPrevStack.size() >= 1)
                         data.conthist->recordKillerMove(legalMoves,data.conthistPrevStack.at(data.conthistPrevStack.size() - 1),board,move,depth * depth);
                     // I will eventually try 2-ply or more conthist
                 }
