@@ -106,7 +106,7 @@ void sortMoves(MoveList& legalMoves, const ChessBoard &board, move_t hashMove, c
     }
 
     // Step 5: Sort quiets by history heuristic
-    //quietHistory.sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex);
-    sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex,
-                       board,quietHistory,conthist,conthistStack);
+    quietHistory.sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex);
+//    sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex,
+//                       board,quietHistory,conthist,conthistStack);
 }
