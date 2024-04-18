@@ -17,10 +17,10 @@ void sortMovesByCutoffs (std::array<move_t,218> &vec, int startIndex, int endInd
         // Get the scores to sort the moves by
         int veciScore = quietHistory.lookupMoveCutoffCount(vec[i]);
         if (conthistStack.size() >= 1)
-            veciScore += conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, vec[i]);
+            veciScore += 0 * conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, vec[i]);
         int partitionScore = quietHistory.lookupMoveCutoffCount(partition);
         if (conthistStack.size() >= 1)
-            partitionScore += conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, partition);
+            partitionScore += 0 * conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, partition);
 
         if (veciScore >= partitionScore) {
             // Swap the larger/equal item to the left of the larger items
@@ -106,7 +106,7 @@ void sortMoves(MoveList& legalMoves, const ChessBoard &board, move_t hashMove, c
     }
 
     // Step 5: Sort quiets by history heuristic
-    quietHistory.sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex);
-//    sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex,
-//                       board,quietHistory,conthist,conthistStack);
+//    quietHistory.sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex);
+    sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex,
+                       board,quietHistory,conthist,conthistStack);
 }
