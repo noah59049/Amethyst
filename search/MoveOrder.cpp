@@ -18,9 +18,14 @@ void sortMovesByCutoffs (std::array<move_t,218> &vec, int startIndex, int endInd
         int veciScore = quietHistory.lookupMoveCutoffCount(vec[i]);
         if (conthistStack.size() >= 1)
             veciScore += conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, vec[i]);
+        if (conthistStack.size() >= 2)
+            veciScore += conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 2), board, vec[i]);
+
         int partitionScore = quietHistory.lookupMoveCutoffCount(partition);
         if (conthistStack.size() >= 1)
             partitionScore += conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, partition);
+        if (conthistStack.size() >= 2)
+            partitionScore += conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 2), board, partition);
 
         if (veciScore >= partitionScore) {
             // Swap the larger/equal item to the left of the larger items
