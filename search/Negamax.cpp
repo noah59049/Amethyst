@@ -111,8 +111,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
 
     sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),
-              board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory,*data.conthist,data.conthistPrevStack,
-              depth >= MIN_CONTHIST_DEPTH);
+              board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory,*data.conthist,data.conthistPrevStack);
 
 
     const unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
@@ -194,8 +193,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
     MoveList legalMoves;
     board.getLegalMoves(legalMoves);
     sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),
-              board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory,*data.conthist,data.conthistPrevStack,
-              false); // no conthist at root node
+              board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory,*data.conthist,data.conthistPrevStack);
 
     eval_t startAlpha = aspirationWindowCenter - ASPIRATION_WINDOW_RADIUS;
     eval_t beta = aspirationWindowCenter + ASPIRATION_WINDOW_RADIUS;
