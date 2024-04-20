@@ -1,4 +1,17 @@
 #include "MoveOrder.h"
+
+// WARNING! If search is multithreaded, this approach will completely break!
+static int16_t historyTempValues[4096]{};
+
+void updatepdateHistoryTempValues (std::array<move_t,218> &vec, int startIndex, int endIndex,
+                         const ChessBoard& board, const QuietHistory& quietHistory, const Conthist& conthist, const std::vector<uint16_t>& conthistStack) {
+    for (int i = startIndex; i < endIndex; i++) {
+        historyTempValues[vec[i] >> 4] = quietHistory.lookupMoveCutoffCount(vec[i]);
+        if (conthistStack.size() >= 1)
+            historyTempValues[vec[i] >> 4] += conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, vec[i]);
+    }
+}
+
 void sortMovesByCutoffs (std::array<move_t,218> &vec, int startIndex, int endIndex,
                          const ChessBoard& board, const QuietHistory& quietHistory, const Conthist& conthist, const std::vector<uint16_t>& conthistStack) {
     if (startIndex >= endIndex) {
@@ -14,15 +27,7 @@ void sortMovesByCutoffs (std::array<move_t,218> &vec, int startIndex, int endInd
     int largerElementIndex = startIndex+1;
     move_t temp;
     for (i = startIndex+1; i <= endIndex; ++i) {
-        // Get the scores to sort the moves by
-        int veciScore = quietHistory.lookupMoveCutoffCount(vec[i]);
-        if (conthistStack.size() >= 1)
-            veciScore += 0 * conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, vec[i]);
-        int partitionScore = quietHistory.lookupMoveCutoffCount(partition);
-        if (conthistStack.size() >= 1)
-            partitionScore += 0 * conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, partition);
-
-        if (veciScore >= partitionScore) {
+        if (historyTempValues[vec[i] >> 4] >= historyTempValues[partition >> 4]) {
             // Swap the larger/equal item to the left of the larger items
             // This is modified so the moves are going from highest to lowest reward, instead of lowest to highest.
             temp = vec[i];
@@ -107,6 +112,8 @@ void sortMoves(MoveList& legalMoves, const ChessBoard &board, move_t hashMove, c
 
     // Step 5: Sort quiets by history heuristic
 //    quietHistory.sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex);
+    updatepdateHistoryTempValues(legalMoves.moveList,sortedIndex,backIndex,
+                                 board,quietHistory,conthist,conthistStack);
     sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex,
                        board,quietHistory,conthist,conthistStack);
 }

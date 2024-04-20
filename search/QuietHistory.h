@@ -7,7 +7,7 @@
 
 class QuietHistory {
 private:
-    int cutoffCounts[4096]{};
+    int16_t cutoffCounts[4096]{};
 
     void sortMovesByCutoffs(std::vector<move_t> &vec, int startIndex, int endIndex) const;
 public:
