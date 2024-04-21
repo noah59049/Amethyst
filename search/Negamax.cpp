@@ -85,17 +85,19 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         ChessBoard nmBoard = board;
         nmBoard.makeNullMove();
         data.conthistPrevStack.push_back(board.getConthistNullIndex());
-        if (-getNegamaxEval(nmBoard, max(0,depth - NMP_REDUCTION),-beta - 1, -beta, data) > beta) {
+        eval_t nmEval = -getNegamaxEval(nmBoard, max(0,depth - NMP_REDUCTION),-beta - 1, -beta, data);
+        data.conthistPrevStack.pop_back();
+        if (nmEval > beta) {
             // To guard against zugzwang, we do a search to depth - 4 without a null move, and if THAT causes a beta cutoff, then we return beta.
             data.conthistPrevStack.push_back(board.getConthistNullIndex());
-            if (getNegamaxEval(board, max(0,depth - 4), beta , beta + 1, data) > beta) {
+            nmEval = getNegamaxEval(board, max(0,depth - 4), beta , beta + 1, data);
+            data.conthistPrevStack.pop_back();
+            if (nmEval > beta) {
                 // We know we caused a beta cutoff, but we don't know what the best move is
                 data.transpositionTable.put({beta,MAX_EVAL,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
                 return beta;
             }
-            data.conthistPrevStack.pop_back();
         }
-        data.conthistPrevStack.pop_back();
     }
 
     // clear the killer moves from irrelevant positions

@@ -8,7 +8,7 @@ void updatepdateHistoryTempValues (std::array<move_t,218> &vec, int startIndex, 
     for (int i = startIndex; i <= endIndex; i++) {
         historyTempValues[vec[i] >> 4] = quietHistory.lookupMoveCutoffCount(vec[i]);
         if (conthistStack.size() >= 1)
-            historyTempValues[vec[i] >> 4] += 0 * conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, vec[i]);
+            historyTempValues[vec[i] >> 4] += conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, vec[i]);
     }
 }
 
