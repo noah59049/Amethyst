@@ -3,7 +3,7 @@
 // WARNING! If search is multithreaded, this approach will completely break!
 static int16_t historyTempValues[4096]{};
 
-void updateHistoryTempValues (std::array<move_t,218> &vec, int startIndex, int endIndex,
+void updatepdateHistoryTempValues (std::array<move_t,218> &vec, int startIndex, int endIndex,
                          const ChessBoard& board, const QuietHistory& quietHistory, const Conthist& conthist, const std::vector<uint16_t>& conthistStack) {
     for (int i = startIndex; i <= endIndex; i++) {
         historyTempValues[vec[i] >> 4] = quietHistory.lookupMoveCutoffCount(vec[i]);
@@ -112,7 +112,7 @@ void sortMoves(MoveList& legalMoves, const ChessBoard &board, move_t hashMove, c
 
     // Step 5: Sort quiets by history heuristic
 //    quietHistory.sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex);
-    updateHistoryTempValues(legalMoves.moveList,sortedIndex,backIndex,
+    updatepdateHistoryTempValues(legalMoves.moveList,sortedIndex,backIndex,
                                  board,quietHistory,conthist,conthistStack);
     sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex,
                        board,quietHistory,conthist,conthistStack);
