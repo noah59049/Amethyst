@@ -10,7 +10,7 @@ void updateHistoryTempValues (std::array<move_t,218> &vec, int startIndex, int e
         if (conthistStack.size() >= 1)
             historyTempValues[vec[i] >> 4] += conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, vec[i]);
         if (conthistStack.size() >= 2)
-            historyTempValues[vec[i] >> 4] += conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 1), board, vec[i]);
+            historyTempValues[vec[i] >> 4] += conthist.getCutoffCount(conthistStack.at(conthistStack.size() - 2), board, vec[i]);
     }
 }
 
