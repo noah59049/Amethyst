@@ -130,15 +130,19 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
         // Late move reductions
         if (depth >= MIN_LMR_DEPTH and numMovesSearched > numMovesToNotReduce) {
-            data.conthistPrevStack.push_back(board.getConthistPrevIndex(move));
+            if (depth > 1)
+                data.conthistPrevStack.push_back(board.getConthistPrevIndex(move));
             eval_t reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - 1, -alpha, data);
-            data.conthistPrevStack.pop_back();
+            if (depth > 1)
+                data.conthistPrevStack.pop_back();
             if (reducedScore <= alpha)
                 continue;
         }
-        data.conthistPrevStack.push_back(board.getConthistPrevIndex(move));
+        if (depth > 1)
+            data.conthistPrevStack.push_back(board.getConthistPrevIndex(move));
         newscore = -getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
-        data.conthistPrevStack.pop_back();
+        if (depth > 1)
+            data.conthistPrevStack.pop_back();
 
         if (newscore > bestscore) {
             bestscore = newscore;
