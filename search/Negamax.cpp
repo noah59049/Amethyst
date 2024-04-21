@@ -168,7 +168,8 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                     // 1-ply conthist
                     if (data.conthistPrevStack.size() >= 1)
                         data.conthist->recordKillerMove(legalMoves,data.conthistPrevStack.at(data.conthistPrevStack.size() - 1),board,move,depth * depth);
-                    // I will eventually try 2-ply or more conthist
+                    if (data.conthistPrevStack.size() >= 2)
+                        data.conthist->recordKillerMove(legalMoves,data.conthistPrevStack.at(data.conthistPrevStack.size() - 2),board,move,depth * depth);
                 }
                 data.transpositionTable.put({beta,MAX_EVAL,move,board.getZobristCode(),depth});
                 return beta;
