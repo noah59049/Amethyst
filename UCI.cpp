@@ -52,6 +52,10 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
         try {
             data.extendKillersToDepth(depth);
             search::getNegamaxBestMoveAndEval(board,depth,data,eval,bestMove,eval);
+            if (!data.conthistPrevStack.empty()) {
+                mutexPrint("the suspicious assert failed");
+                exit(24);
+            }
             if (bestMove != SEARCH_FAILED_MOVE_CODE)
                 bestMoveFromPrevious = bestMove;
             if (eval == hce::MATE_VALUE) // mate pruning. We find the fastest mate.
