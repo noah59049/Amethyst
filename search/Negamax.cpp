@@ -108,7 +108,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
     sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),
               board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory,
-              data.counterMoves[lastMove]);
+              data.counterMoves[lastMove >> 4]);
 
 
     const unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
