@@ -30,6 +30,8 @@ namespace search {
         std::vector<TwoKillerMoves> killerMoves;
         QuietHistory whiteQuietHistory;
         QuietHistory blackQuietHistory;
+        move_t counterMoves[4096] = {};
+        // Every counter move will be initialized to 0, which is not a legal move in any position
 
         NegamaxData(bool* isCancelled, const RepetitionTable& repetitionTable, int depth) {
             this->isCancelled = isCancelled;
@@ -48,7 +50,7 @@ namespace search {
 
     eval_t getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t beta);
 
-    eval_t getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, eval_t beta, NegamaxData& data);
+    eval_t getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, eval_t beta, NegamaxData& data, move_t lastMove);
 
     void getNegamaxBestMoveAndEval(ChessBoard &board, int depth, NegamaxData& data, eval_t aspirationWindowCenter,
                                    move_t &bestMove, eval_t &eval);

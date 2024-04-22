@@ -1,6 +1,6 @@
 #include "MoveOrder.h"
 void sortMoves(MoveList& legalMoves, const ChessBoard &board, move_t hashMove, const TwoKillerMoves &killerMoves,
-               const QuietHistory &quietHistory) {
+               const QuietHistory &quietHistory, const move_t counterMove) {
     // Step 0: Do nothing if there are 1 or fewer legal moves
     if (legalMoves.size < 2)
         return;
@@ -57,6 +57,17 @@ void sortMoves(MoveList& legalMoves, const ChessBoard &board, move_t hashMove, c
         legalMoves.moveList[sortedIndex-1] = killerMoves.getSecondKillerMove();
     }
 
-    // Step 5: Sort quiets by history heuristic
+    // Step 5: Counter move
+    for (unsigned int i = sortedIndex; i <= backIndex; i++) {
+        if (legalMoves.at(i) == counterMove) {
+            move_t temp = legalMoves.at(sortedIndex);
+            legalMoves.moveList[sortedIndex] = legalMoves.at(i);
+            legalMoves.moveList[i] = temp;
+            sortedIndex++;
+            break;
+        }
+    }
+
+    // Step 6: Sort quiets by history heuristic
     quietHistory.sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex);
 }
