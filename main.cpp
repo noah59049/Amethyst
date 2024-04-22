@@ -1,5 +1,5 @@
 #include "UCI.h"
 int main() {
-uciLoop();
+    uciLoop();
     return 0;
 }

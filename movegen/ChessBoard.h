@@ -116,6 +116,16 @@ public:
     static std::string moveToPureAlgebraicNotation(move_t move);
 
     // Part 8: Getters
+
+    [[nodiscard]] colored_piece_t getPieceMoving (move_t move) const;
+    [[nodiscard]] uint16_t getConthistIndex(move_t move) const;
+    [[nodiscard]] uint16_t getConthistPrevIndex(move_t move) const {
+        return getConthistIndex(move) + (isCapture(move) ? (64 * 12) : 0);
+    }
+    [[nodiscard]] inline uint16_t getConthistNullIndex () {
+        return 64 * colored_pieces::WHITE_PAWN + 0; // white pawn to a1, an impossible move
+    }
+
     [[nodiscard]] bool isDrawByInsufficientMaterial() const {
         return drawByInsufficientMaterial;
     }

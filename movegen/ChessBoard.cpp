@@ -2956,3 +2956,17 @@ void ChessBoard::getNonnegativeSEECapturesOnly (MoveList& captures) const {
         } // end while piecesRemaining is not 0
     } // end for loop over all piece types
 } // end getNonnegativeSEECapturesOnly
+
+colored_piece_t ChessBoard::getPieceMoving(const move_t move) const {
+    using namespace colored_pieces;
+    const bitboard_t startSquareMask = 1ULL << getStartSquare(move);
+    for (int pieceType = PAWN_CODE; pieceType >= QUEEN_CODE; pieceType--) {
+        if ((isItWhiteToMove ? whitePieceTypes[pieceType] : blackPieceTypes[pieceType]) & startSquareMask)
+            return 2 * pieceType + !isItWhiteToMove;
+    }
+    return isItWhiteToMove ? WHITE_KING : BLACK_KING; // castling
+}
+
+uint16_t ChessBoard::getConthistIndex(move_t move) const {
+    return 64 * getPieceMoving(move) + getEndSquare(move);
+}

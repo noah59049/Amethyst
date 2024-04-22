@@ -11,6 +11,11 @@ struct MoveList {
         size++;
     }
 
+    inline void trimToSize(const unsigned int newSize) {
+        if (size > newSize)
+            size = newSize;
+    }
+
     [[nodiscard]] inline move_t at (const unsigned int index) const {
         return moveList[index];
     }
