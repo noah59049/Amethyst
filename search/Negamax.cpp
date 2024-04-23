@@ -185,7 +185,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
     MoveList legalMoves;
     board.getLegalMoves(legalMoves);
     sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),
-              board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory);
+              board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory, 234);
 
     eval_t startAlpha = aspirationWindowCenter - ASPIRATION_WINDOW_RADIUS;
     eval_t beta = aspirationWindowCenter + ASPIRATION_WINDOW_RADIUS;
