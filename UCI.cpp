@@ -29,7 +29,9 @@ void setPointerTrueLater (const future<void>* fut, bool* ptr, const long long ms
 
 void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fut, const long long ms) {
     // Set up the board
-    ChessBoard board = game->getCurrentPosition();
+    ChessBoard simpleBoard = game->getCurrentPosition();
+    string fenNotation = simpleBoard.toFenNotation();
+    ChessBoard board = ChessBoard::boardFromFENNotation(fenNotation);
 
     // Set up search parameters
     int depth;
@@ -43,13 +45,13 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
 
     // Set up the sleep thread
     bool* isSearchCancelled = new bool(false);
-    auto sleepThread = new std::thread(setPointerTrueLater,fut,isSearchCancelled,ms);
-    auto data = new search::NegamaxData(isSearchCancelled,repetitionTable,1);
+    std::thread* sleepThread = new std::thread(setPointerTrueLater,fut,isSearchCancelled,ms);
+    search::NegamaxData data(isSearchCancelled,repetitionTable,1);
     for (depth = 1; depth < 100; depth++) {
         bestMove = bestMoveFromPrevious;
         try {
-            data->extendKillersToDepth(depth);
-            search::getNegamaxBestMoveAndEval(board,depth,*data,eval,bestMove,eval);
+            data.extendKillersToDepth(depth);
+            search::getNegamaxBestMoveAndEval(board,depth,data,eval,bestMove,eval);
             if (bestMove != SEARCH_FAILED_MOVE_CODE)
                 bestMoveFromPrevious = bestMove;
             if (eval == hce::MATE_VALUE) // mate pruning. We find the fastest mate.
@@ -62,8 +64,6 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
         }
     } // end for loop over depth
 
-    delete data;
-    data = nullptr;
 
 
     // Once we have broken out of the ID loop, one of three things happened
@@ -92,7 +92,7 @@ void uciPerft(const ChessBoard board, const int depth) {
     auto end = chrono::high_resolution_clock::now();
     auto duration = chrono::duration_cast<chrono::milliseconds>(end - start);
     auto ms = duration.count();
-    unsigned int nps = numNodes / ms * 1000;
+    int nps = numNodes / ms * 1000;
     mutexPrint("info nps " + to_string(nps));
     cout << "Nodes searched: " << numNodes << endl;
     // TODO: Make this responsive to stop and quit commands in the middle of searching
@@ -172,67 +172,72 @@ void uciLoop () {
             } // end while loop
         } // end if command starts with position
         else if (command.rfind("go",0) == 0) {
-            int wtime = 0;
-            int btime = 0;
-            int winc = 0;
-            int binc = 0;
-            int movestogo = 0;
-            int depth = 0;
-            int nodes = 0;
-            int mate = 0;
-            int movetime = 0;
-            int perft = 0;
-            stringstream ss(command);
-            string word;
-            while (ss >> word) {
-                if (word == "wtime")
-                    ss >> wtime;
-                else if (word == "btime")
-                    ss >> btime;
-                else if (word == "winc")
-                    ss >> winc;
-                else if (word == "binc")
-                    ss >> binc;
-                else if (word == "movestogo")
-                    ss >> movestogo;
-                else if (word == "depth")
-                    ss >> depth;
-                else if (word == "nodes")
-                    ss >> nodes;
-                else if (word == "mate")
-                    ss >> mate;
-                else if (word == "movetime")
-                    ss >> movetime;
-                else if (word == "infinite")
-                    movetime = 1000000000; // search for 1 million seconds
-                else if (word == "perft")
-                    ss >> perft;
-            } // end while ss >> word
+            if (false and command == "go infinite") {
 
-            // Step 0: Determine the movetime
-            if (movetime == 0) {
-                if (game.getCurrentPosition().getIsItWhiteToMove())
-                    movetime = wtime / 40 + winc * 9 / 10;
+            }
+            else {
+                int wtime = 0;
+                int btime = 0;
+                int winc = 0;
+                int binc = 0;
+                int movestogo = 0;
+                int depth = 0;
+                int nodes = 0;
+                int mate = 0;
+                int movetime = 0;
+                int perft = 0;
+                stringstream ss(command);
+                string word;
+                while (ss >> word) {
+                    if (word == "wtime")
+                        ss >> wtime;
+                    else if (word == "btime")
+                        ss >> btime;
+                    else if (word == "winc")
+                        ss >> winc;
+                    else if (word == "binc")
+                        ss >> binc;
+                    else if (word == "movestogo")
+                        ss >> movestogo;
+                    else if (word == "depth")
+                        ss >> depth;
+                    else if (word == "nodes")
+                        ss >> nodes;
+                    else if (word == "mate")
+                        ss >> mate;
+                    else if (word == "movetime")
+                        ss >> movetime;
+                    else if (word == "infinite")
+                        movetime = 1000000000; // search for 1 million seconds
+                    else if (word == "perft")
+                        ss >> perft;
+                } // end while ss >> word
+
+                // Step 0: Determine the movetime
+                if (movetime == 0) {
+                    if (game.getCurrentPosition().getIsItWhiteToMove())
+                        movetime = wtime / 40 + winc * 9 / 10;
+                    else
+                        movetime = btime / 40 + binc * 9 / 10;
+                } // end if movetime == 0
+
+                // Step 1: Clean up the old pointers. We don't know if they're null or not
+                // The old search thread won't still be running; we will have received a "stop" command.
+                // However, we need to free the memory used by the old pointers because they aren't freed anywhere else.
+                if (searchThread != nullptr)
+                    searchThread->join();
+                delete searchThread;
+                delete pr;
+                delete fut;
+                // Step 2: Reinitialize the promise and future pointers
+                pr = new promise<void>();
+                fut = new future(pr->get_future());
+                // Step 3: Start the search thread!
+                if (perft == 0)
+                    searchThread = new thread(uciSearch,&game,pr,fut,movetime);
                 else
-                    movetime = btime / 40 + binc * 9 / 10;
-            } // end if movetime == 0
-
-            // Step 1: Clean up the old pointers. We don't know if they're null or not
-            // The old search thread won't still be running; we will have received a "stop" command.
-            // However, we need to free the memory used by the old pointers because they aren't freed anywhere else.
-            if (searchThread != nullptr)
-                searchThread->join();
-            delete searchThread;
-            delete pr;
-            delete fut;
-            // Step 2: Reinitialize the promise and future pointers
-            pr = new promise<void>();
-            fut = new future(pr->get_future());
-            // Step 3: Start the search thread!
-            if (perft == 0)
-                searchThread = new thread(uciSearch,&game,pr,fut,movetime);
-            else
-                searchThread = new thread(uciPerft,game.getCurrentPosition(),perft);
+                    searchThread = new thread(uciPerft,game.getCurrentPosition(),perft);
+            } // end else (command is not go infinite)
         } // end if command starts with go
         else if (command == "stop") {
             assert(searchThread != nullptr);
