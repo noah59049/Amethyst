@@ -23,10 +23,6 @@ namespace search {
 
     };
 
-    struct CounterMoves {
-        move_t counterMoves[4096] = {};
-    };
-
     struct NegamaxData {
         const bool* isCancelled;
         RepetitionTable repetitionTable;
@@ -34,8 +30,7 @@ namespace search {
         std::vector<TwoKillerMoves> killerMoves;
         QuietHistory whiteQuietHistory;
         QuietHistory blackQuietHistory;
-        std::vector<CounterMoves> whiteCounterMoves;
-        std::vector<CounterMoves> blackCounterMoves;
+        move_t counterMoves[4096] = {};
         // Every counter move will be initialized to 0, which is not a legal move in any position
 
         NegamaxData(bool* isCancelled, const RepetitionTable& repetitionTable, int depth) {
@@ -44,19 +39,11 @@ namespace search {
             this->killerMoves = std::vector<TwoKillerMoves>(depth + 1);
             this->whiteQuietHistory = QuietHistory();
             this->blackQuietHistory = QuietHistory();
-            this->whiteCounterMoves = std::vector<CounterMoves>(1);
-            this->blackCounterMoves = std::vector<CounterMoves>(1);
         }
 
         void extendKillersToDepth(const int depth) {
             while (killerMoves.size() <= depth) {
                 killerMoves.emplace_back();
-            }
-            while (whiteCounterMoves.size() <= depth) {
-                whiteCounterMoves.emplace_back();
-            }
-            while (blackCounterMoves.size() <= depth) {
-                blackCounterMoves.emplace_back();
             }
         }
     };

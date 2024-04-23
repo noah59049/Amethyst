@@ -105,10 +105,10 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     if (legalMoves.size == 0)
         return board.isInCheck() ? -hce::MATE_VALUE : 0;
 
-    move_t counterMove = (board.getIsItWhiteToMove() ? data.whiteCounterMoves : data.blackCounterMoves)[depth].counterMoves[lastMove >> 4];
+
     sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),
               board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory,
-              counterMove);
+              data.counterMoves[lastMove >> 4]);
 
 
     const unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
@@ -148,7 +148,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                     else
                         data.blackQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
                     // Record a counter move
-                    (board.getIsItWhiteToMove() ? data.whiteCounterMoves : data.blackCounterMoves)[depth].counterMoves[lastMove >> 4] = move;
+                    data.counterMoves[lastMove >> 4] = move;
                 }
                 data.transpositionTable.put({beta,MAX_EVAL,move,board.getZobristCode(),depth});
                 return beta;
