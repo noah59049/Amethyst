@@ -21,5 +21,6 @@ public:
 
     void sortMoves(std::vector<move_t>& quietMoves) const;
 
-    void sortMovesByCutoffs(std::array<move_t,218> &vec, int startIndex, int endIndex) const;
+    void sortMovesByCutoffs(std::array<move_t,218> &vec, int startIndex, int endIndex,
+                            unsigned int movesToKeep) const;
 };

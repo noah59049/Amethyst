@@ -15,6 +15,8 @@ namespace search {
     constexpr const static eval_t FULL_WINDOW_VALUE = 32000;
     constexpr const static eval_t RFP_MARGIN = 150;
     constexpr const static int MAX_RFP_DEPTH = 4;
+    constexpr const static unsigned int MAX_LMP_DEPTH = 3;
+    constexpr const static unsigned int LMP_MOVECOUNT = 7;
 
     constexpr const static eval_t MAX_EVAL = 32767;
     constexpr const static eval_t MIN_EVAL = -32768;

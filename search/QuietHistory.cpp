@@ -55,9 +55,10 @@ void QuietHistory::sortMoves(std::vector<move_t>& quietMoves) const {
     sortMovesByCutoffs(quietMoves, 0, (quietMoves.size()) - 1);
 }
 
-void QuietHistory::sortMovesByCutoffs(std::array<move_t,218> &vec, int startIndex, int endIndex) const {
+void QuietHistory::sortMovesByCutoffs(std::array<move_t,218> &vec, int startIndex, int endIndex,
+                                      const unsigned int movesToKeep) const {
     // Recursive base case
-    if (startIndex >= endIndex) {
+    if (startIndex >= endIndex or startIndex >= movesToKeep) {
         return;
     }
 
@@ -89,6 +90,6 @@ void QuietHistory::sortMovesByCutoffs(std::array<move_t,218> &vec, int startInde
     //printVec(vec);
 
     // Recursive calls for two halves
-    sortMovesByCutoffs(vec, startIndex, largerElementIndex-2);
-    sortMovesByCutoffs(vec, largerElementIndex, endIndex);
+    sortMovesByCutoffs(vec, startIndex, largerElementIndex-2,movesToKeep);
+    sortMovesByCutoffs(vec, largerElementIndex, endIndex,movesToKeep);
 }
