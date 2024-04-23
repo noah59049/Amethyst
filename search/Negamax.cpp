@@ -192,12 +192,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
         for (move_t move: legalMoves) {
             ChessBoard newBoard = board;
             newBoard.makemove(move);
-
-            // Principal variation search
-            if (move == legalMoves.at(0) or -search::getNegamaxEval(newBoard, depth - 1, -alpha - 1, -alpha, data) > alpha)
-                newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
-            else
-                newscore = alpha;
+            newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
             if (newscore > alpha) {
                 alpha = newscore;
                 bestMove = bestmove = move;
