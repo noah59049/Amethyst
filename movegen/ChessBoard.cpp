@@ -1831,7 +1831,7 @@ eval_t ChessBoard::getStaticEval () const {
 
             // Mobility
             pieceAttacks = getMagicWhiteAttackedSquares(pieceType,thisPieceSquare,allPieces);
-            packedScore += mobility[pieceType] * __builtin_popcountll(pieceAttacks);
+            packedScore += mobility[pieceType] * __builtin_popcountll(pieceAttacks & ~allWhitePieces);
             // King attacks
             pieceAttacks &= blackKingZone;
             packedScore += king_zone_attacks[pieceType] * __builtin_popcountll(pieceAttacks);
@@ -1855,7 +1855,7 @@ eval_t ChessBoard::getStaticEval () const {
 
             // Mobility
             pieceAttacks = getMagicBlackAttackedSquares(pieceType,thisPieceSquare,allPieces);
-            packedScore -= mobility[pieceType] * __builtin_popcountll(pieceAttacks);
+            packedScore -= mobility[pieceType] * __builtin_popcountll(pieceAttacks & ~allBlackPieces);
             // King attacks
             pieceAttacks &= whiteKingZone;
             packedScore -= king_zone_attacks[pieceType] * __builtin_popcountll(pieceAttacks);
