@@ -8,6 +8,7 @@
 #include "CheckBlock.h"
 #include "../search/SEE.h"
 #include "../hce/Eval.h"
+#include "../hce/PawnHashTable.h"
 
 using namespace std;
 using namespace bitmasks;
@@ -1817,7 +1818,7 @@ eval_t ChessBoard::getStaticEval () const {
     bitboard_t thisPieceMask;
     int thisPieceSquare;
     bitboard_t pieceAttacks;
-    for (int pieceType = QUEEN_CODE; pieceType <= PAWN_CODE; pieceType++) {
+    for (int pieceType = QUEEN_CODE; pieceType <= KNIGHT_CODE; pieceType++) {
         // phase transition
         phase += __builtin_popcountll(whitePieceTypes[pieceType] | blackPieceTypes[pieceType]) * PHASE_PIECE_VALUES[pieceType];
         
@@ -1869,6 +1870,62 @@ eval_t ChessBoard::getStaticEval () const {
             } // end if pieceType == PAWN_CODE
         } // end while piecesRemaining != 0ULL
     } // end for loop over piece type
+
+    // Pawn mobility and king attacks
+    bitboard_t pawnAttacks;
+    // White pawn left attacks
+    pawnAttacks = (whitePieceTypes[PAWN_CODE] & NOT_A_FILE) >> 7;
+    packedScore += mobility[PAWN_CODE] * __builtin_popcountll(pawnAttacks & ~allWhitePieces);
+    packedScore += king_zone_attacks[PAWN_CODE] * __builtin_popcountll(pawnAttacks & blackKingZone);
+    // White pawn right attacks
+    pawnAttacks = (whitePieceTypes[PAWN_CODE] & NOT_H_FILE) << 9;
+    packedScore += mobility[PAWN_CODE] * __builtin_popcountll(pawnAttacks & ~allWhitePieces);
+    packedScore += king_zone_attacks[PAWN_CODE] * __builtin_popcountll(pawnAttacks & blackKingZone);
+    // Black pawn left attacks
+    pawnAttacks = (blackPieceTypes[PAWN_CODE] & NOT_A_FILE) >> 9;
+    packedScore -= mobility[PAWN_CODE] * __builtin_popcountll(pawnAttacks & ~allBlackPieces);
+    packedScore -= king_zone_attacks[PAWN_CODE] * __builtin_popcountll(pawnAttacks & whiteKingZone);
+    // Black pawn right attacks
+    pawnAttacks = (blackPieceTypes[PAWN_CODE] & NOT_H_FILE) << 7;
+    packedScore -= mobility[PAWN_CODE] * __builtin_popcountll(pawnAttacks & ~allBlackPieces);
+    packedScore -= king_zone_attacks[PAWN_CODE] * __builtin_popcountll(pawnAttacks & whiteKingZone);
+
+    // Pawn hash table lookup
+    auto pawnHashValue = GLOBAL_PAWN_HASH_TABLE.get(whitePieceTypes[PAWN_CODE],blackPieceTypes[PAWN_CODE]);
+    if (pawnHashValue.second) { // we found it in the table
+        packedScore += pawnHashValue.first;
+    }
+    else {
+        // we have to actually evaluate pawn structure
+        using namespace pawn_eval;
+        packed_eval_t pawnPackedEval = 0ULL;
+        piecesRemaining = whitePieceTypes[PAWN_CODE];
+        while (piecesRemaining != 0ULL) {
+            thisPieceMask = piecesRemaining & -piecesRemaining;
+            piecesRemaining -= thisPieceMask;
+            thisPieceSquare = log2ll(thisPieceMask);
+            pawnPackedEval += piece_type_psts[PAWN_CODE][thisPieceSquare];
+            if (isThisPawnIsolated(thisPieceSquare,whitePieceTypes[PAWN_CODE]))
+                pawnPackedEval += hce::isolated_pawn;
+            if (isThisWhitePawnPassed(thisPieceSquare,blackPieceTypes[PAWN_CODE]))
+                pawnPackedEval += hce::getPassedPawnOnSquareBonus(thisPieceSquare);
+        } // end while piecesRemaining != 0ULL
+        piecesRemaining = blackPieceTypes[PAWN_CODE];
+        while (piecesRemaining != 0ULL) {
+            thisPieceMask = piecesRemaining & -piecesRemaining;
+            piecesRemaining -= thisPieceMask;
+            thisPieceSquare = log2ll(thisPieceMask);
+            pawnPackedEval -= piece_type_psts[PAWN_CODE][thisPieceSquare ^ 7];
+            if (isThisPawnIsolated(thisPieceSquare,blackPieceTypes[PAWN_CODE]))
+                pawnPackedEval -= hce::isolated_pawn;
+            if (isThisBlackPawnPassed(thisPieceSquare,whitePieceTypes[PAWN_CODE]))
+                pawnPackedEval -= hce::getPassedPawnOnSquareBonus(thisPieceSquare ^ 7);
+        } // end while piecesRemaining != 0ULL
+        // Now we put it in the pawn hash table and add it to packedScore
+        GLOBAL_PAWN_HASH_TABLE.put(whitePieceTypes[PAWN_CODE],blackPieceTypes[PAWN_CODE],pawnPackedEval);
+        packedScore += pawnPackedEval;
+    }
+
     return getEvalFromPacked(packedScore,phase);
 } // end getStaticEval
 

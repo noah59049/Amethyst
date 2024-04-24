@@ -17,3 +17,5 @@ public:
     void put (bitboard_t whitePawns, bitboard_t blackPawns, packed_eval_t packedEval);
     [[nodiscard]] std::pair<packed_eval_t,bool> get (bitboard_t whitePawns, bitboard_t blackPawns) const;
 };
+
+static PawnHashTable GLOBAL_PAWN_HASH_TABLE = PawnHashTable();
