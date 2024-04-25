@@ -66,8 +66,6 @@ private:
 
     // Part 6: Eval
     [[nodiscard]] eval_t getStaticEval () const;
-    [[nodiscard]] eval_t getStaticEvalNew() const;
-    [[nodiscard]] eval_t getStaticEvalOld() const;
 
     // Part 7: Algebraic notation
     void decomposeMove(move_t move, Piece& piece, bool& isCapture, int& startSquare, int& endSquare, move_t& flag) const;

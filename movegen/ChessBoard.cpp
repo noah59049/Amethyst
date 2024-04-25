@@ -1785,13 +1785,6 @@ int ChessBoard::capturePerft (const int depth) const {
 }
 
 eval_t ChessBoard::getStaticEval () const {
-    eval_t eval1 = getStaticEvalNew();
-    eval_t eval2 = getStaticEvalOld();
-    assert(eval1 == eval2);
-    return eval1;
-}
-
-eval_t ChessBoard::getStaticEvalNew () const {
     using namespace hce;
     if (whiteWonByCheckmate)
         return MATE_VALUE;
@@ -1935,96 +1928,6 @@ eval_t ChessBoard::getStaticEvalNew () const {
 
     return getEvalFromPacked(packedScore,phase);
 } // end getStaticEval
-
-eval_t ChessBoard::getStaticEvalOld () const {
-    using namespace hce;
-    if (whiteWonByCheckmate)
-        return MATE_VALUE;
-    else if (blackWonByCheckmate)
-        return -MATE_VALUE;
-    else if (drawByInsufficientMaterial or drawByStalemate)
-        return 0;
-
-    // Initialize king zones
-    const bitboard_t whiteKingZone = getMagicKingAttackedSquares(whiteKingPosition) | 1ULL << whiteKingPosition;
-    const bitboard_t blackKingZone = getMagicKingAttackedSquares(blackKingPosition) | 1ULL << blackKingPosition;
-    const bitboard_t allPieces = allWhitePieces | allBlackPieces;
-
-    // king PSTs
-    packed_eval_t packedScore = king_psts[whiteKingPosition] - king_psts[blackKingPosition ^ 7];
-    // king shelter
-    {
-        using namespace kingsafety;
-        packedScore += hce::king_shelter *
-                       (__builtin_popcountll(allWhitePieces & WHITE_SHIELD_ZONES[whiteKingPosition]) -
-                        __builtin_popcountll(allBlackPieces & BLACK_SHIELD_ZONES[blackKingPosition]));
-    }
-    // bishop pair
-    if (__builtin_popcountll(whitePieceTypes[BISHOP_CODE]) >= 2)
-        packedScore += bishop_pair;
-    if (__builtin_popcountll(blackPieceTypes[BISHOP_CODE]) >= 2)
-        packedScore -= bishop_pair;
-
-    int phase = 0; // 24 = mg, 0 = mg
-    bitboard_t piecesRemaining;
-    bitboard_t thisPieceMask;
-    int thisPieceSquare;
-    bitboard_t pieceAttacks;
-    for (int pieceType = QUEEN_CODE; pieceType <= PAWN_CODE; pieceType++) {
-        // phase transition
-        phase += __builtin_popcountll(whitePieceTypes[pieceType] | blackPieceTypes[pieceType]) * PHASE_PIECE_VALUES[pieceType];
-
-        // white PSTs
-        piecesRemaining = whitePieceTypes[pieceType];
-        while (piecesRemaining != 0ULL) {
-            thisPieceMask = piecesRemaining & -piecesRemaining;
-            piecesRemaining -= thisPieceMask;
-            thisPieceSquare = log2ll(thisPieceMask);
-            packedScore += piece_type_psts[pieceType][thisPieceSquare];
-
-            // Mobility
-            pieceAttacks = getMagicWhiteAttackedSquares(pieceType,thisPieceSquare,allPieces);
-            packedScore += mobility[pieceType] * __builtin_popcountll(pieceAttacks & ~allWhitePieces);
-            // King attacks
-            pieceAttacks &= blackKingZone;
-            packedScore += king_zone_attacks[pieceType] * __builtin_popcountll(pieceAttacks);
-
-            if (pieceType == PAWN_CODE) {
-                using namespace pawn_eval;
-                if (isThisPawnIsolated(thisPieceSquare,whitePieceTypes[PAWN_CODE]))
-                    packedScore += hce::isolated_pawn;
-                if (isThisWhitePawnPassed(thisPieceSquare,blackPieceTypes[PAWN_CODE]))
-                    packedScore += hce::getPassedPawnOnSquareBonus(thisPieceSquare);
-            }
-        }
-
-        // black PSTs
-        piecesRemaining = blackPieceTypes[pieceType];
-        while (piecesRemaining != 0ULL) {
-            thisPieceMask = piecesRemaining & -piecesRemaining;
-            piecesRemaining -= thisPieceMask;
-            thisPieceSquare = log2ll(thisPieceMask);
-            packedScore -= piece_type_psts[pieceType][thisPieceSquare ^ 7];
-
-            // Mobility
-            pieceAttacks = getMagicBlackAttackedSquares(pieceType,thisPieceSquare,allPieces);
-            packedScore -= mobility[pieceType] * __builtin_popcountll(pieceAttacks & ~allBlackPieces);
-            // King attacks
-            pieceAttacks &= whiteKingZone;
-            packedScore -= king_zone_attacks[pieceType] * __builtin_popcountll(pieceAttacks);
-
-            if (pieceType == PAWN_CODE) {
-                using namespace pawn_eval;
-                if (isThisPawnIsolated(thisPieceSquare,blackPieceTypes[PAWN_CODE]))
-                    packedScore -= hce::isolated_pawn;
-                if (isThisBlackPawnPassed(thisPieceSquare,whitePieceTypes[PAWN_CODE]))
-                    packedScore -= hce::getPassedPawnOnSquareBonus(thisPieceSquare ^ 7);
-            } // end if pieceType == PAWN_CODE
-        } // end while piecesRemaining != 0ULL
-    } // end for loop over piece type
-    return getEvalFromPacked(packedScore,phase);
-} // end getStaticEval
-
 
 eval_t ChessBoard::getNegaStaticEval () const {
     if (isItWhiteToMove)
