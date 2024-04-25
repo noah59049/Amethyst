@@ -57,17 +57,11 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         else if (ttValue.hashMove != SEARCH_FAILED_MOVE_CODE) // We add the hash move
             hashMove = ttValue.hashMove;
     }
-        // Otherwise, we do IID
     else {
-        for (int depthDecrease = 1; depthDecrease <= IID_DEPTH_DECREASE; depthDecrease++) {
-            if (depth <= depthDecrease)
-                break;
-            std::optional<TTValue> prevHashValue = data.transpositionTable.get(board.getZobristCode(),depth - depthDecrease);
-            if (prevHashValue != std::nullopt and prevHashValue->hashMove != SEARCH_FAILED_MOVE_CODE) {
-                hashMove = prevHashValue->hashMove;
-                break;
-            }
-        }
+        // Look for the best move from the TT at lower depths
+        std::optional<TTValue> prevHashValue = data.transpositionTable.get(board.getZobristCode(),max(1, depth - IID_DEPTH_DECREASE));
+        if (prevHashValue != std::nullopt and prevHashValue->hashMove != SEARCH_FAILED_MOVE_CODE)
+            hashMove = prevHashValue->hashMove;
     }
 
     if (depth == 0)
@@ -172,14 +166,9 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
 
     // Internal iterative deepening
     move_t hashMove = SEARCH_FAILED_MOVE_CODE;
-    for (int depthDecrease = 1; depthDecrease <= IID_DEPTH_DECREASE; depthDecrease++) {
-        if (depth <= depthDecrease)
-            break;
-        std::optional<TTValue> prevHashValue = data.transpositionTable.get(board.getZobristCode(),depth - depthDecrease);
-        if (prevHashValue != std::nullopt and prevHashValue->hashMove != SEARCH_FAILED_MOVE_CODE) {
-            hashMove = prevHashValue->hashMove;
-            break;
-        }
+    std::optional<TTValue> prevHashValue = data.transpositionTable.get(board.getZobristCode(),depth - 1);
+    if (prevHashValue != std::nullopt and prevHashValue->hashMove != SEARCH_FAILED_MOVE_CODE) {
+        hashMove = prevHashValue->hashMove;
     }
 
     MoveList legalMoves;
