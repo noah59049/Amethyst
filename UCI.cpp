@@ -115,7 +115,8 @@ void uciLoop () {
             mutexPrint("id name Amethyst");
             mutexPrint("id author Noah Holbrook");
             mutexPrint("option name Hash type spin default 32 min 1 max 1024");
-            mutexPrint("option name Threads type spin default 1 min 1 max 4");
+            mutexPrint("option name Threads type spin default 1 min 1 max 4"); // more threads does nothing
+            mutexPrint("option name SyzygyPath type string default <empty>");
             mutexPrint("option name Move Overhead type spin default 10 min 0 max 5000");
             mutexPrint("uciok");
         }
