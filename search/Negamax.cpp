@@ -32,7 +32,7 @@ eval_t search::getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t bet
     return alpha;
 }
 
-eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const eval_t beta, search::NegamaxData& data, int plyFromRoot) {
+eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const eval_t beta, search::NegamaxData& data) {
     if (board.hasGameEnded())
         return board.getNegaStaticEval();
     if (data.repetitionTable.count(board) >= 2) // If we go there a 3rd time, it's a draw.
@@ -78,9 +78,9 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
         ChessBoard nmBoard = board;
         nmBoard.makeNullMove();
-        if (-getNegamaxEval(nmBoard, max(0,depth - NMP_REDUCTION),-beta - 1, -beta, data, plyFromRoot + 1) > beta) {
+        if (-getNegamaxEval(nmBoard, max(0,depth - NMP_REDUCTION),-beta - 1, -beta, data) > beta) {
             // To guard against zugzwang, we do a search to depth - 4 without a null move, and if THAT causes a beta cutoff, then we return beta.
-            if (getNegamaxEval(board, max(0,depth - 4), beta , beta + 1, data, plyFromRoot + 1) > beta) {
+            if (getNegamaxEval(board, max(0,depth - 4), beta , beta + 1, data) > beta) {
                 // We know we caused a beta cutoff, but we don't know what the best move is
                 data.transpositionTable.put({beta,MAX_EVAL,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
                 return beta;
@@ -90,7 +90,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
     // clear the killer moves from irrelevant positions
     if (depth > KILLER_MAX_COUSIN_LEVEL)
-        data.killerMoves[plyFromRoot + KILLER_MAX_COUSIN_LEVEL].clear();
+        data.killerMoves[depth - KILLER_MAX_COUSIN_LEVEL].clear();
 
     MoveList legalMoves;
     board.getLegalMoves(legalMoves);
@@ -102,7 +102,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     // Set up late move pruning
     const unsigned int movesToKeep = depth <= MAX_LMP_DEPTH ? depth * LMP_MOVECOUNT : 234;
 
-    sortMoves(legalMoves,board,hashMove,data.killerMoves.at(plyFromRoot),
+    sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),
               board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory,
               movesToKeep);
 
@@ -123,11 +123,11 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
         // Late move reductions
         if (depth >= MIN_LMR_DEPTH and numMovesSearched > numMovesToNotReduce) {
-            eval_t reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - 1, -alpha, data, plyFromRoot + 1);
+            eval_t reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - 1, -alpha, data);
             if (reducedScore <= alpha)
                 continue;
         }
-        newscore = -getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data, plyFromRoot + 1);
+        newscore = -getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
 
         if (newscore > bestscore) {
             bestscore = newscore;
@@ -139,7 +139,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
             if (alpha >= beta) { // We caused a beta cutoff
                 if (!isCapture(move)) {
                     // Record a killer move
-                    data.killerMoves[plyFromRoot].recordKillerMove(move);
+                    data.killerMoves[depth].recordKillerMove(move);
                     // Record a move for history heuristic
                     if (board.getIsItWhiteToMove())
                         data.whiteQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
@@ -173,7 +173,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
 
     MoveList legalMoves;
     board.getLegalMoves(legalMoves);
-    sortMoves(legalMoves,board,hashMove,TwoKillerMoves(),
+    sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),
               board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory, 234);
 
     eval_t startAlpha = aspirationWindowCenter - ASPIRATION_WINDOW_RADIUS;
@@ -186,7 +186,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
         for (move_t move: legalMoves) {
             ChessBoard newBoard = board;
             newBoard.makemove(move);
-            newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data, 1);
+            newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
             if (newscore > alpha) {
                 alpha = newscore;
                 bestMove = bestmove = move;
@@ -217,7 +217,7 @@ void search::timeSearchFromFEN (const string& fenNotation, int maxDepth) {
         auto start = std::chrono::high_resolution_clock::now();
         bool* isCancelled = new bool(false);
         RepetitionTable repetitionTable;
-        NegamaxData data(isCancelled,repetitionTable);
+        NegamaxData data(isCancelled,repetitionTable,depth);
         move_t bestMove = SEARCH_FAILED_MOVE_CODE;
         getNegamaxBestMoveAndEval(board,depth,data,negaEval,bestMove,negaEval);
         string readableBestMove = board.moveToSAN(bestMove);
