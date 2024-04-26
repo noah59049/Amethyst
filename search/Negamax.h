@@ -33,24 +33,18 @@ namespace search {
         QuietHistory whiteQuietHistory;
         QuietHistory blackQuietHistory;
 
-        NegamaxData(bool* isCancelled, const RepetitionTable& repetitionTable, int depth) {
+        NegamaxData(bool* isCancelled, const RepetitionTable& repetitionTable) {
             this->isCancelled = isCancelled;
             this->repetitionTable = repetitionTable;
-            this->killerMoves = std::vector<TwoKillerMoves>(depth + 1);
+            this->killerMoves = std::vector<TwoKillerMoves>(128);
             this->whiteQuietHistory = QuietHistory();
             this->blackQuietHistory = QuietHistory();
-        }
-
-        void extendKillersToDepth(const int depth) {
-            while (killerMoves.size() <= depth) {
-                killerMoves.emplace_back();
-            }
         }
     };
 
     eval_t getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t beta);
 
-    eval_t getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, eval_t beta, NegamaxData& data);
+    eval_t getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, eval_t beta, NegamaxData& data, int plyFromRoot);
 
     void getNegamaxBestMoveAndEval(ChessBoard &board, int depth, NegamaxData& data, eval_t aspirationWindowCenter,
                                    move_t &bestMove, eval_t &eval);

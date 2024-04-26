@@ -46,11 +46,10 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
     // Set up the sleep thread
     bool* isSearchCancelled = new bool(false);
     std::thread* sleepThread = new std::thread(setPointerTrueLater,fut,isSearchCancelled,ms);
-    search::NegamaxData data(isSearchCancelled,repetitionTable,1);
+    search::NegamaxData data(isSearchCancelled,repetitionTable);
     for (depth = 1; depth < 100; depth++) {
         bestMove = bestMoveFromPrevious;
         try {
-            data.extendKillersToDepth(depth);
             search::getNegamaxBestMoveAndEval(board,depth,data,eval,bestMove,eval);
             if (bestMove != SEARCH_FAILED_MOVE_CODE)
                 bestMoveFromPrevious = bestMove;
