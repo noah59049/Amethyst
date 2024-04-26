@@ -4,6 +4,7 @@
 #include <iostream>
 #include <future>
 #include <thread>
+#include <cassert>
 #include "search/RepetitionTable.h"
 #include "search/Negamax.h"
 #include "hce/Eval.h"
@@ -115,6 +116,7 @@ void uciLoop () {
             mutexPrint("id author Noah Holbrook");
             mutexPrint("option name Hash type spin default 32 min 1 max 1024");
             mutexPrint("option name Threads type spin default 1 min 1 max 1");
+            mutexPrint("option name Move Overhead type spin default 10 min 0 max 5000");
             mutexPrint("uciok");
         }
         else if (command == "isready") {
@@ -130,6 +132,13 @@ void uciLoop () {
                 for (int i = 0; i < 3; i++)
                     ss >> word;
                 ss >> uci::HASH_MB;
+            }
+            if (command.rfind("setoption name Move Overhead value",0) == 0) {
+                stringstream ss(command);
+                string word;
+                for (int i = 0; i < 4; i++)
+                    ss >> word;
+                ss >> uci::MOVE_OVERHEAD;
             }
         }
         else if (command.rfind("position",0) == 0) {
@@ -220,6 +229,7 @@ void uciLoop () {
                     else
                         movetime = btime / 40 + binc * 9 / 10;
                 } // end if movetime == 0
+                movetime = max(movetime / 2, movetime - uci::MOVE_OVERHEAD);
 
                 // Step 1: Clean up the old pointers. We don't know if they're null or not
                 // The old search thread won't still be running; we will have received a "stop" command.
