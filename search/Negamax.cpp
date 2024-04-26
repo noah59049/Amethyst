@@ -63,9 +63,6 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         if (prevHashValue != std::nullopt and prevHashValue->hashMove != SEARCH_FAILED_MOVE_CODE)
             hashMove = prevHashValue->hashMove;
     }
-    // Internal iterative reductions
-    if (hashMove == SEARCH_FAILED_MOVE_CODE and depth >= MIN_IIR_DEPTH)
-        depth -= 1;
 
     if (depth == 0)
         return getNegaQuiescenceEval(board, alpha, beta);

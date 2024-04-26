@@ -8,7 +8,6 @@
 namespace search {
     constexpr const static int KILLER_MAX_COUSIN_LEVEL = 2;
     constexpr const static int IID_DEPTH_DECREASE = 5;
-    constexpr const static int MIN_IIR_DEPTH = 3;
     constexpr const static int NMP_REDUCTION = 3;
     constexpr const static unsigned int QUIETS_TO_NOT_REDUCE = 8;
     constexpr const static int MIN_LMR_DEPTH = 3;
