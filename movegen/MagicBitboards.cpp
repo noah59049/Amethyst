@@ -619,16 +619,16 @@ bitboard_t getMagicKingAttackedSquares (const int startingSquare) {
     return KING_ATTACKED_SQUARES_TABLE[startingSquare];
 }
 
-inline bitboard_t getMagicKnightAttackedSquares(const int startingSquare) {
+bitboard_t getMagicKnightAttackedSquares(const int startingSquare) {
     return KNIGHT_ATTACKED_SQUARES_TABLE[startingSquare];
 }
 
-inline bitboard_t getMagicBishopAttackedSquares (const int startingSquare, bitboard_t allPieces) {
+bitboard_t getMagicBishopAttackedSquares (const int startingSquare, bitboard_t allPieces) {
     allPieces &= BISHOP_RELEVANT_BLOCKERS[startingSquare];
     return BISHOP_MAGIC_BITBOARD_TABLE[startingSquare][(allPieces * bishop_magics[startingSquare]) >> bishop_shifts[startingSquare]];
 }
 
-inline bitboard_t getMagicRookAttackedSquares (const int startingSquare, bitboard_t allPieces) {
+bitboard_t getMagicRookAttackedSquares (const int startingSquare, bitboard_t allPieces) {
     allPieces &= ROOK_RELEVANT_BLOCKERS[startingSquare];
     return ROOK_MAGIC_BITBOARD_TABLE[startingSquare][(allPieces * rook_magics[startingSquare]) >> rook_shifts[startingSquare]];
 }

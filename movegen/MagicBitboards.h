@@ -7,9 +7,9 @@ bitboard_t getMagicKnightAttackedSquares(int startingSquare);
 bitboard_t getMagicBishopAttackedSquares (int startingSquare, bitboard_t allPieces);
 bitboard_t getMagicRookAttackedSquares (int startingSquare, bitboard_t allPieces);
 
-inline bitboard_t getMagicQueenAttackedSquares (const int startingSquare, const bitboard_t allPieces) {
-    return getMagicRookAttackedSquares(startingSquare, allPieces) | getMagicBishopAttackedSquares(startingSquare,allPieces);
-}
+//inline bitboard_t getMagicQueenAttackedSquares (const int startingSquare, const bitboard_t allPieces) {
+//    return getMagicRookAttackedSquares(startingSquare, allPieces) | getMagicBishopAttackedSquares(startingSquare,allPieces);
+//}
 
 bitboard_t getWhitePawnAttackedSquares(int startingSquare);
 bitboard_t getBlackPawnAttackedSquares(int startingSquare);
