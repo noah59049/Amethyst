@@ -2025,7 +2025,7 @@ string ChessBoard::moveToSAN (const move_t move) const {
     Piece piece;
     int startSquare;
     int endSquare;
-    u_int16_t flag;
+    move_t flag;
     // We get this by passing everything in by reference to decomposeMove
     decomposeMove(move,piece,isCapture,startSquare,endSquare,flag);
 
@@ -2033,7 +2033,7 @@ string ChessBoard::moveToSAN (const move_t move) const {
     Piece other_piece;
     int other_startSquare;
     int other_endSquare;
-    u_int16_t other_flag;
+    move_t other_flag;
 
     // The hard part: Find which other pieces could move here (There is more than one Rd1)
     bool mustSpecifyRank = false;
