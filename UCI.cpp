@@ -35,6 +35,7 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
     ChessBoard board = ChessBoard::boardFromFENNotation(fenNotation);
 
     // Set up search parameters
+    auto timeAtStart = std::chrono::high_resolution_clock::now();
     int depth;
     eval_t eval = board.getNegaStaticEval();
     move_t bestMove;
@@ -55,8 +56,15 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
             search::getNegamaxBestMoveAndEval(board,depth,data,eval,bestMove,eval);
             if (bestMove != SEARCH_FAILED_MOVE_CODE)
                 bestMoveFromPrevious = bestMove;
-            if (eval == hce::MATE_VALUE) // mate pruning. We find the fastest mate.
+            if (eval == hce::MATE_VALUE) { // mate pruning. We find the fastest mate.
                 break;
+            }
+            else { // soft time management
+                auto timeAfterIteration = std::chrono::high_resolution_clock::now();
+                auto elapsedTime = chrono::duration_cast<chrono::milliseconds>(timeAfterIteration - timeAtStart);
+                if (elapsedTime.count() * 3 >= ms)
+                    break;
+            }
         }
         catch (const search::SearchCancelledException& e) {
             if (bestMove != SEARCH_FAILED_MOVE_CODE)
@@ -227,9 +235,9 @@ void uciLoop () {
                 // Step 0: Determine the movetime
                 if (movetime == 0) {
                     if (game.getCurrentPosition().getIsItWhiteToMove())
-                        movetime = wtime / 40 + winc * 9 / 10;
+                        movetime = wtime / 25 + winc * 9 / 10;
                     else
-                        movetime = btime / 40 + binc * 9 / 10;
+                        movetime = btime / 25 + binc * 9 / 10;
                 } // end if movetime == 0
                 movetime = max(movetime / 2, movetime - uci::MOVE_OVERHEAD);
 
