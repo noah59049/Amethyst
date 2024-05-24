@@ -62,7 +62,7 @@ void uciSearch (const ChessGame* game, promise<void>* pr, const future<void>* fu
             else { // soft time management
                 auto timeAfterIteration = std::chrono::high_resolution_clock::now();
                 auto elapsedTime = chrono::duration_cast<chrono::milliseconds>(timeAfterIteration - timeAtStart);
-                if (elapsedTime.count() * 3 >= ms)
+                if (elapsedTime.count() * 2 >= ms)
                     break;
             }
         }
@@ -235,9 +235,9 @@ void uciLoop () {
                 // Step 0: Determine the movetime
                 if (movetime == 0) {
                     if (game.getCurrentPosition().getIsItWhiteToMove())
-                        movetime = wtime / 25 + winc * 9 / 10;
+                        movetime = wtime / 40 + winc * 9 / 10;
                     else
-                        movetime = btime / 25 + binc * 9 / 10;
+                        movetime = btime / 40 + binc * 9 / 10;
                 } // end if movetime == 0
                 movetime = max(movetime / 2, movetime - uci::MOVE_OVERHEAD);
 
