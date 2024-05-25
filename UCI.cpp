@@ -235,9 +235,9 @@ void uciLoop () {
                 // Step 0: Determine the movetime
                 if (movetime == 0) {
                     if (game.getCurrentPosition().getIsItWhiteToMove())
-                        movetime = wtime / 40 + winc * 9 / 10;
+                        movetime = wtime / 20 + winc / 2;
                     else
-                        movetime = btime / 40 + binc * 9 / 10;
+                        movetime = btime / 20 + binc / 2;
                 } // end if movetime == 0
                 movetime = max(movetime / 2, movetime - uci::MOVE_OVERHEAD);
 
