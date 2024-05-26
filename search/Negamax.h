@@ -17,6 +17,7 @@ namespace search {
     constexpr const static int MAX_RFP_DEPTH = 4;
     constexpr const static unsigned int MAX_LMP_DEPTH = 3;
     constexpr const static unsigned int LMP_MOVECOUNT = 7;
+    constexpr const static unsigned int MIN_NMP_DEPTH = 3;
 
     constexpr const static eval_t MAX_EVAL = 32767;
     constexpr const static eval_t MIN_EVAL = -32768;
