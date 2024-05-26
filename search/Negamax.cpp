@@ -1,6 +1,7 @@
 #include "Negamax.h"
 #include "MoveOrder.h"
 #include "../hce/Eval.h"
+#include "LMRTable.h"
 #include <iostream>
 using namespace std;
 
@@ -101,6 +102,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
     // Set up late move pruning
     const unsigned int movesToKeep = depth <= MAX_LMP_DEPTH ? depth * LMP_MOVECOUNT : 234;
+    // 234 is completely arbitrary. It just means "keep all the moves"
 
     sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),
               board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory,
@@ -109,7 +111,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     if (depth <= MAX_LMP_DEPTH)
         legalMoves.trimToSize(depth * LMP_MOVECOUNT);
 
-    const unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
+    //const unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
     unsigned int numMovesSearched = 0;
 
     eval_t newscore;
@@ -119,11 +121,16 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     for (move_t move: legalMoves) {
         ChessBoard newBoard = board;
         newBoard.makemoveLazy(move);
+
+        // Calculate the reduction for LMR
+        float reduction = lookupReduction(depth,numMovesSearched);
+        int realReduction = int(reduction);
+        assert(realReduction >= 0);
         numMovesSearched++;
 
         // Late move reductions
-        if (depth >= MIN_LMR_DEPTH and numMovesSearched > numMovesToNotReduce) {
-            eval_t reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - 1, -alpha, data);
+        if (depth >= MIN_LMR_DEPTH and realReduction >= 0) {
+            eval_t reducedScore = -getNegamaxEval(newBoard, depth - realReduction - 1, -alpha - 1, -alpha, data);
             if (reducedScore <= alpha)
                 continue;
         }
