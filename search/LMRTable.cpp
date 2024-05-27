@@ -9,7 +9,7 @@ inline float calculateReduction(unsigned int depth, unsigned int movesSearched) 
     // Double reduce after
     // At depth 8, reduce after 4 moves
 
-    float f = -4.00F + 1.44F * logf(float(depth))  + 1.44F * logf(float(movesSearched));
+    float f = -3.60F + 0.80F * logf(float(depth))  + 1.20F * logf(float(movesSearched));
     return f < 0 ? 0 : f;
 }
 
