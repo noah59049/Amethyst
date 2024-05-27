@@ -37,6 +37,4 @@ add_executable(amethyst_chess2 main.cpp
         search/Conthist.h
         hce/PawnHashTable.cpp
         hce/PawnHashTable.h
-        search/LMRTable.h
-        search/LMRTable.cpp
 )
