@@ -109,7 +109,9 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     if (depth <= MAX_LMP_DEPTH)
         legalMoves.trimToSize(depth * LMP_MOVECOUNT);
 
-    const unsigned int numMovesToNotReduce = QUIETS_TO_NOT_REDUCE;
+    const unsigned int numMovesToNotReduce = depth >= SECOND_LMR_DEPTH ?
+            SECOND_QUIETS_TO_NOT_REDUCE : QUIETS_TO_NOT_REDUCE;
+
     unsigned int numMovesSearched = 0;
 
     eval_t newscore;
@@ -122,8 +124,15 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         numMovesSearched++;
 
         // Late move reductions
+        int reduction = 0;
         if (depth >= MIN_LMR_DEPTH and numMovesSearched > numMovesToNotReduce) {
-            eval_t reducedScore = -getNegamaxEval(newBoard, depth - 2, -alpha - 1, -alpha, data);
+            reduction = 1;
+            if (numMovesSearched > 3 * numMovesToNotReduce)
+                reduction = 2;
+        }
+
+        if (reduction > 0) {
+            eval_t reducedScore = -getNegamaxEval(newBoard, depth - reduction - 1, -alpha - 1, -alpha, data);
             if (reducedScore <= alpha)
                 continue;
         }

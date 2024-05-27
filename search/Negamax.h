@@ -9,8 +9,10 @@ namespace search {
     constexpr const static int KILLER_MAX_COUSIN_LEVEL = 2;
     constexpr const static int IID_DEPTH_DECREASE = 5;
     constexpr const static int NMP_REDUCTION = 3;
-    constexpr const static unsigned int QUIETS_TO_NOT_REDUCE = 8;
     constexpr const static int MIN_LMR_DEPTH = 3;
+    constexpr const static unsigned int QUIETS_TO_NOT_REDUCE = 8;
+    constexpr const static int SECOND_LMR_DEPTH = 7;
+    constexpr const static unsigned int SECOND_QUIETS_TO_NOT_REDUCE = 5;
     constexpr const static eval_t ASPIRATION_WINDOW_RADIUS = 75;
     constexpr const static eval_t FULL_WINDOW_VALUE = 32000;
     constexpr const static eval_t RFP_MARGIN = 150;
