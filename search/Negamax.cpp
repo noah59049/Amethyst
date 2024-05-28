@@ -70,8 +70,8 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         throw SearchCancelledException();
 
     // Null move pruning (technically null move reductions)
+    eval_t staticEval = board.getNegaStaticEval();
     if (board.canMakeNullMove()) {
-        eval_t staticEval = board.getNegaStaticEval();
         // Reverse futility pruning
         if (depth <= MAX_RFP_DEPTH and staticEval - RFP_MARGIN * eval_t(depth) >= beta)
             return beta;
@@ -129,6 +129,9 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
             reduction = 1;
             if (numMovesSearched > 3 * numMovesToNotReduce)
                 reduction = 2;
+        }
+        if (depth >= 3 and staticEval < alpha - 250 and move != hashMove and !isCapture(move)) { // TODO: Make these constexpr constants
+            reduction += 1; // Futility reductions
         }
 
         if (reduction > 0) {
