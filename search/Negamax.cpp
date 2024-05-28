@@ -78,9 +78,9 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
         ChessBoard nmBoard = board;
         nmBoard.makeNullMove();
-        if (staticEval >= beta and depth >= MIN_NMP_DEPTH and -getNegamaxEval(nmBoard, max(0,depth - NMP_REDUCTION),-beta, -beta + 1, data) > beta) {
+        if (staticEval >= beta and depth >= MIN_NMP_DEPTH and -getNegamaxEval(nmBoard, max(0,depth - NMP_REDUCTION),-beta, -beta + 1, data) >= beta) {
             // To guard against zugzwang, we do a search to depth - 4 without a null move, and if THAT causes a beta cutoff, then we return beta.
-            if (depth < 9 or getNegamaxEval(board, depth - 4, beta - 1 , beta, data) > beta) {
+            if (depth < 9 or getNegamaxEval(board, depth - 4, beta - 1 , beta, data) >= beta) {
                 // We know we caused a beta cutoff, but we don't know what the best move is
                 data.transpositionTable.put({beta,MAX_EVAL,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
                 return beta;
