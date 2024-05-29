@@ -76,7 +76,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         if (depth <= MAX_RFP_DEPTH and staticEval - RFP_MARGIN * eval_t(depth) >= beta)
             return beta;
 
-        const int nmReduction = max(NMP_REDUCTION,depth / 2);
+        const int nmReduction = 2 + depth / 3; // TODO: Turn these into constants
         ChessBoard nmBoard = board;
         nmBoard.makeNullMove();
         if (staticEval >= beta and depth >= MIN_NMP_DEPTH and -getNegamaxEval(nmBoard, max(0,depth - nmReduction),-beta, -beta + 1, data) >= beta) {
