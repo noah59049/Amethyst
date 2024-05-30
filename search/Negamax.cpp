@@ -43,6 +43,10 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         depth++;
 
 
+    eval_t ttLowerBound = MIN_EVAL;
+    eval_t ttUpperBound = MAX_EVAL;
+    // ttLowerBound and ttUpperBound are used to replace staticEval, and have no depth minimum
+
     move_t hashMove = SEARCH_FAILED_MOVE_CODE;
     // Check if our result is in the transposition table, plus add hash move if it is
     std::optional<TTValue> ttHashValue = data.transpositionTable.get(board.getZobristCode(),depth);
@@ -56,21 +60,33 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
             return alpha;
         else if (ttValue.hashMove != SEARCH_FAILED_MOVE_CODE) // We add the hash move
             hashMove = ttValue.hashMove;
+
+        ttLowerBound = ttValue.lowerBoundEval;
+        ttUpperBound = ttValue.upperBoundEval;
     }
     else {
         // Look for the best move from the TT at lower depths
-        std::optional<TTValue> prevHashValue = data.transpositionTable.get(board.getZobristCode(),max(1, depth - IID_DEPTH_DECREASE));
-        if (prevHashValue != std::nullopt and prevHashValue->hashMove != SEARCH_FAILED_MOVE_CODE)
-            hashMove = prevHashValue->hashMove;
-    }
+        std::optional<TTValue> prevHashValue = data.transpositionTable.get(board.getZobristCode(),0);
+        if (prevHashValue != std::nullopt) {
+
+            // Get a TT move
+            if (prevHashValue->hashMove != SEARCH_FAILED_MOVE_CODE and prevHashValue->depth >= depth - IID_DEPTH_DECREASE)
+                hashMove = prevHashValue->hashMove;
+
+            // Set TT bounds for replacing static eval
+            ttLowerBound = prevHashValue->lowerBoundEval;
+            ttUpperBound = prevHashValue->upperBoundEval;
+        } // end if prevHashValue != nullopt
+    } // end else (we don't have a TT value from this depth)
 
     if (depth <= 0)
         return getNegaQuiescenceEval(board, alpha, beta);
     if (*data.isCancelled)
         throw SearchCancelledException();
 
-    // Null move pruning (technically null move reductions)
+    // Null move pruning
     eval_t staticEval = board.getNegaStaticEval();
+    staticEval = std::clamp(staticEval,ttLowerBound,ttUpperBound);
     if (board.canMakeNullMove()) {
         // Reverse futility pruning
         if (depth <= MAX_RFP_DEPTH and staticEval - RFP_MARGIN * eval_t(depth) >= beta)
@@ -80,7 +96,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         ChessBoard nmBoard = board;
         nmBoard.makeNullMove();
         if (staticEval >= beta and depth >= MIN_NMP_DEPTH and -getNegamaxEval(nmBoard, max(0,depth - nmReduction),-beta, -beta + 1, data) >= beta) {
-            // To guard against zugzwang, we do a search to depth - 4 without a null move, and if THAT causes a beta cutoff, then we return beta.
+            // Verification search at high depth to avoid zugzwang
             if (depth < 9 or getNegamaxEval(board, depth - nmReduction, beta - 1 , beta, data) >= beta) {
                 // We know we caused a beta cutoff, but we don't know what the best move is
                 data.transpositionTable.put({beta,MAX_EVAL,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
@@ -111,7 +127,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         legalMoves.trimToSize(depth * LMP_MOVECOUNT);
 
     const unsigned int numMovesToNotReduce = depth >= SECOND_LMR_DEPTH ?
-            SECOND_QUIETS_TO_NOT_REDUCE : QUIETS_TO_NOT_REDUCE;
+                                             SECOND_QUIETS_TO_NOT_REDUCE : QUIETS_TO_NOT_REDUCE;
 
     unsigned int numMovesSearched = 0;
 
@@ -175,7 +191,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 }
 
 void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, NegamaxData& data, const eval_t aspirationWindowCenter,
-                               move_t &bestMove, eval_t &eval) {
+                                       move_t &bestMove, eval_t &eval) {
 
     // Internal iterative deepening
     move_t hashMove = SEARCH_FAILED_MOVE_CODE;
