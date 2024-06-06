@@ -167,8 +167,8 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
             alpha = newscore;
             if (alpha >= beta) { // We caused a beta cutoff
                 if (!isCapture(move)) {
-                    // Record a killer move
-                    data.killerMoves[depth].recordKillerMove(move);
+                    // (REMOVED) Record a killer move
+                    // data.killerMoves[depth].recordKillerMove(move);
                     // Record a move for history heuristic
                     if (board.getIsItWhiteToMove())
                         data.whiteQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
