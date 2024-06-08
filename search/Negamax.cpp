@@ -10,9 +10,10 @@ eval_t search::getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t bet
     if (board.hasGameEnded())
         return board.getNegaStaticEval();
 
-    alpha = max(alpha, board.getNegaStaticEval());
-    if (alpha >= beta) {
-        return beta;
+    eval_t bestscore = board.getNegaStaticEval();
+    alpha = max(alpha, bestscore);
+    if (bestscore >= beta) {
+        return bestscore;
     }
 
     MoveList captures;
@@ -23,13 +24,17 @@ eval_t search::getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t bet
         ChessBoard newBoard = board;
         newBoard.makemoveLazy(move);
         newscore = -getNegaQuiescenceEval(newBoard, -beta, -alpha);
-        if (newscore >= beta)
-            return beta;
-        if (newscore > alpha)
-            alpha = newscore;
+        if (newscore > bestscore) {
+            bestscore = newscore;
+            if (newscore > alpha) {
+                alpha = newscore;
+                if (newscore >= beta)
+                    return newscore;
+            }
+        }
     }
 
-    return alpha;
+    return bestscore;
 }
 
 eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const eval_t beta, search::NegamaxData& data) {
@@ -55,9 +60,9 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         if (ttValue.lowerBoundEval == ttValue.upperBoundEval)
             return ttValue.lowerBoundEval;
         else if (ttValue.lowerBoundEval >= beta)
-            return beta;
+            return ttValue.lowerBoundEval;
         else if (ttValue.upperBoundEval <= alpha)
-            return alpha;
+            return ttValue.upperBoundEval;
         else if (ttValue.hashMove != SEARCH_FAILED_MOVE_CODE) // We add the hash move
             hashMove = ttValue.hashMove;
 
@@ -90,7 +95,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     if (board.canMakeNullMove()) {
         // Reverse futility pruning
         if (depth <= MAX_RFP_DEPTH and staticEval - RFP_MARGIN * eval_t(depth) >= beta)
-            return beta;
+            return staticEval - RFP_MARGIN * eval_t(depth);
 
         const int nmReduction = 2 + depth / 3; // TODO: Turn these into constants
         ChessBoard nmBoard = board;
@@ -100,7 +105,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
             if (depth < 9 or getNegamaxEval(board, depth - nmReduction, beta - 1 , beta, data) >= beta) {
                 // We know we caused a beta cutoff, but we don't know what the best move is
                 data.transpositionTable.put({beta,MAX_EVAL,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
-                return beta;
+                return beta; // TODO: Fail-soft here
             }
         }
     }
@@ -175,8 +180,8 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                     else
                         data.blackQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
                 }
-                data.transpositionTable.put({beta,MAX_EVAL,move,board.getZobristCode(),depth});
-                return beta;
+                data.transpositionTable.put({newscore,MAX_EVAL,move,board.getZobristCode(),depth});
+                return newscore;
             } // end if alpha > beta
         } // end if newscore > alpha
     } // end for loop over moves
@@ -185,9 +190,9 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     }
     else { // None of the moves improved alpha. The score is an upper bound
         // Change implemented in Amethyst 43: At an All-Node, we don't add the "best move" to the transposition table because that's just noise
-        data.transpositionTable.put({MIN_EVAL,alpha,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
+        data.transpositionTable.put({MIN_EVAL,bestscore,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
     }
-    return alpha;
+    return bestscore;
 }
 
 void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, NegamaxData& data, const eval_t aspirationWindowCenter,
