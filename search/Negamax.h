@@ -14,7 +14,6 @@ namespace search {
     constexpr const static int SECOND_LMR_DEPTH = 7;
     constexpr const static unsigned int SECOND_QUIETS_TO_NOT_REDUCE = 5;
     constexpr const static eval_t ASPIRATION_WINDOW_RADIUS = 75;
-    constexpr const static eval_t FULL_WINDOW_VALUE = 32000;
     constexpr const static eval_t RFP_MARGIN = 150;
     constexpr const static int MAX_RFP_DEPTH = 4;
     constexpr const static unsigned int MAX_LMP_DEPTH = 3;
@@ -23,6 +22,8 @@ namespace search {
 
     constexpr const static eval_t MAX_EVAL = 32767;
     constexpr const static eval_t MIN_EVAL = -32768;
+    constexpr const static eval_t FULL_WINDOW_VALUE = 32000;
+    constexpr const static eval_t FAIL_SOFT_MIN_SCORE = -31900;
 
     class SearchCancelledException : std::exception {
 

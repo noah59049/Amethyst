@@ -137,7 +137,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     unsigned int numMovesSearched = 0;
 
     eval_t newscore;
-    eval_t bestscore = MIN_EVAL;
+    eval_t bestscore = FAIL_SOFT_MIN_SCORE;
     move_t bestmove = SEARCH_FAILED_MOVE_CODE;
     bool improvedAlpha = false;
     for (move_t move: legalMoves) {
@@ -158,8 +158,10 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
         if (reduction > 0) {
             eval_t reducedScore = -getNegamaxEval(newBoard, depth - reduction - 1, -alpha - 1, -alpha, data);
-            if (reducedScore <= alpha)
+            if (reducedScore <= alpha) {
+                bestscore = max(bestscore, reducedScore);
                 continue;
+            }
         }
         newscore = -getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
 
