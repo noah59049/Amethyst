@@ -1,6 +1,7 @@
 #include "Negamax.h"
 #include "MoveOrder.h"
 #include "../hce/Eval.h"
+#include "DeltaPruning.h"
 #include <iostream>
 using namespace std;
 
@@ -10,7 +11,8 @@ eval_t search::getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t bet
     if (board.hasGameEnded())
         return board.getNegaStaticEval();
 
-    eval_t bestscore = board.getNegaStaticEval();
+    eval_t staticEval = board.getNegaStaticEval();
+    eval_t bestscore = staticEval;
     alpha = max(alpha, bestscore);
     if (bestscore >= beta) {
         return bestscore;
@@ -21,9 +23,14 @@ eval_t search::getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t bet
 
     eval_t newscore;
     for (move_t move: captures) {
-        ChessBoard newBoard = board;
-        newBoard.makemoveLazy(move);
-        newscore = -getNegaQuiescenceEval(newBoard, -beta, -alpha);
+        if (staticEval + getDelta(move) < alpha) { // Delta pruning
+            newscore = staticEval + getDelta(move);
+        }
+        else {
+            ChessBoard newBoard = board;
+            newBoard.makemoveLazy(move);
+            newscore = -getNegaQuiescenceEval(newBoard, -beta, -alpha);
+        }
         if (newscore > bestscore) {
             bestscore = newscore;
             if (newscore > alpha) {
