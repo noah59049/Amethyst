@@ -5,7 +5,6 @@
 #include "../search/Zobrist.h"
 #include "Logarithm.h"
 #include "MagicBitboards.h"
-#include "CheckBlock.h"
 #include "../search/SEE.h"
 #include "../hce/Eval.h"
 #include "../hce/PawnHashTable.h"

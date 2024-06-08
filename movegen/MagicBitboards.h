@@ -19,3 +19,5 @@ bitboard_t getMagicBlackAttackedSquares (int pieceType, int startingSquare, bitb
 
 bitboard_t getEmptyBoardMagicBishopAttackedSquares (int startingSquare);
 bitboard_t getEmptyBoardMagicRookAttackedSquares (int startingSquare);
+
+bitboard_t lookupCheckResponses(int kingSquare, int pieceSquare);

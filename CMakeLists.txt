@@ -11,8 +11,6 @@ add_executable(amethyst_chess2 main.cpp
         movegen/Logarithm.h
         movegen/Flags.h
         search/Zobrist.h
-        movegen/CheckBlock.cpp
-        movegen/CheckBlock.h
         movegen/ChessBoard.cpp
         movegen/ChessBoard.h
         search/SEE.cpp
