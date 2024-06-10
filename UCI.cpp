@@ -9,6 +9,7 @@
 #include "search/Negamax.h"
 #include "hce/Eval.h"
 #include "ChessGame.h"
+#include "search/Bench.h"
 using namespace std;
 // There are still some strange multithreading behaviors that I can't explain or reproduce
 
@@ -150,6 +151,16 @@ void uciLoop () {
                     ss >> word;
                 ss >> uci::MOVE_OVERHEAD;
             }
+        }
+        else if (command.rfind("bench",0) == 0) {
+            stringstream ss(command);
+            string word;
+            // "bench"
+            ss >> word;
+
+            int benchDepth = 10;
+            ss >> benchDepth;
+            bench(benchDepth);
         }
         else if (command.rfind("position",0) == 0) {
             stringstream ss(command);

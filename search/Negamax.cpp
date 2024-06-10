@@ -254,6 +254,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
 } // end getNegamaxBestMoveAndEval
 
 void search::timeSearchFromFEN (const string& fenNotation, int maxDepth) {
+    cout << "Position: " << fenNotation << endl;
     ChessBoard board = ChessBoard::boardFromFENNotation(fenNotation);
     eval_t negaEval = 0;
     for (int depth = 1; depth <= maxDepth; depth++) {
@@ -268,8 +269,9 @@ void search::timeSearchFromFEN (const string& fenNotation, int maxDepth) {
         auto end = std::chrono::high_resolution_clock::now();
         auto duration = std::chrono::duration_cast<chrono::milliseconds>(end - start);
         long ms = duration.count();
-        cout << "Nega eval is " << negaEval << " and best move is " << readableBestMove << " at depth " << depth << " in " << ms << " milliseconds." << endl;
+        cout << "info string score cp " << negaEval << " bestmove " << readableBestMove << " depth " << depth << " time " << ms << endl;
     } // end for loop
+    cout << endl;
 } // end timeSearchFromTraxler
 
 void search::timeSearchFromTraxler () {

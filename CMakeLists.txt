@@ -36,4 +36,6 @@ add_executable(amethyst_chess2 main.cpp
         hce/PawnHashTable.cpp
         hce/PawnHashTable.h
         search/DeltaPruning.h
+        search/Bench.cpp
+        search/Bench.h
 )
