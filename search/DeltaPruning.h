@@ -4,19 +4,19 @@
 
 inline eval_t getDelta(move_t move) {
     switch (getFlag(move)) {
-        case CAPTURE_PAWN_FLAG: return 400;
+        case CAPTURE_PAWN_FLAG: return 200;
 
         case CAPTURE_KNIGHT_FLAG:
         case CAPTURE_BISHOP_FLAG:
-            return 600;
+            return 500;
 
-        case CAPTURE_ROOK_FLAG: return 800;
+        case CAPTURE_ROOK_FLAG: return 700;
         case CAPTURE_QUEEN_FLAG: return 1200;
-        case EN_PASSANT_FLAG: return 400;
+        case EN_PASSANT_FLAG: return 200;
 
         case NORMAL_MOVE_FLAG:
         case PAWN_PUSH_TWO_SQUARES_FLAG:
-            return 300;
+            return 0;
 
         case PROMOTE_TO_QUEEN_FLAG: return 2100;
 

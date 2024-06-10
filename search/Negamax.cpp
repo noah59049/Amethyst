@@ -23,7 +23,7 @@ eval_t search::getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t bet
 
     eval_t newscore;
     for (move_t move: captures) {
-        if (staticEval + getDelta(move) < alpha) { // Delta pruning
+        if (staticEval + 350 + getDelta(move) < alpha) { // Delta pruning
             newscore = staticEval + getDelta(move);
         }
         else {
