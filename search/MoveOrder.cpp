@@ -94,14 +94,14 @@ void sortCapturesByMVVLVA(const ChessBoard& board, MoveList& captures) {
         move_t thisMove = captures.at(newIndex);
         int8_t thisMoveScore = moveScores[thisMove >> 4];
         int insertIndex;
-        for (insertIndex = newIndex - 1; insertIndex > 0; insertIndex--) {
+        for (insertIndex = newIndex - 1; insertIndex >= 0; insertIndex--) {
             move_t newMove = captures.at(insertIndex);
             int8_t newMoveScore = moveScores[newMove >> 4];
-            if (newMoveScore > thisMoveScore)
+            if (thisMoveScore > newMoveScore)
                 captures.moveList[insertIndex + 1] = captures.at(insertIndex);
             else
                 break;
         }
-        captures.moveList[insertIndex + 1] = newIndex;
+        captures.moveList[insertIndex + 1] = thisMove;
     }
 }
