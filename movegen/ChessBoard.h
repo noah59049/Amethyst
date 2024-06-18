@@ -13,12 +13,12 @@ private:
     uint8_t blackKingPosition;
 
     bitboard_t whitePieceTypes[5] = {1ULL << 24, (1ULL << 0) + (1ULL << 56), (1ULL << 16) + (1ULL << 40),
-                                        (1ULL << 8) + (1ULL << 48), 0x0202020202020202ULL};
+                                     (1ULL << 8) + (1ULL << 48), 0x0202020202020202ULL};
     // As initialized in default constructor to start up a new game.
     bitboard_t allWhitePieces;
 
     bitboard_t blackPieceTypes[5] = {1ULL << 31, (1ULL << 7) + (1ULL << 63), (1ULL << 23) + (1ULL << 47),
-                                        (1ULL << 15) + (1ULL << 55), 0x4040404040404040ULL};
+                                     (1ULL << 15) + (1ULL << 55), 0x4040404040404040ULL};
     // As initialized in default constructor to start up a new game.
     bitboard_t allBlackPieces;
 
@@ -69,7 +69,6 @@ private:
 
     // Part 7: Algebraic notation
     void decomposeMove(move_t move, Piece& piece, bool& isCapture, int& startSquare, int& endSquare, move_t& flag) const;
-    [[nodiscard]] Piece getMovingPiece(move_t move) const;
     [[nodiscard]] move_t getMoveFromSAN (const std::string& SAN) const;
 
 public:
@@ -114,6 +113,7 @@ public:
     [[nodiscard]] move_t getMoveFromPureAlgebraicNotation (const std::string& pureAlgebraicNotation) const;
     bool makePureAlgebraicNotationMove (const std::string& pureAlgebraicNotation);
     static std::string moveToPureAlgebraicNotation(move_t move);
+    [[nodiscard]] Piece getMovingPiece(move_t move) const;
 
     // Part 8: Getters
 
@@ -121,9 +121,6 @@ public:
     [[nodiscard]] uint16_t getConthistIndex(move_t move) const;
     [[nodiscard]] uint16_t getConthistPrevIndex(move_t move) const {
         return getConthistIndex(move) + (isCapture(move) ? (64 * 12) : 0);
-    }
-    [[nodiscard]] inline uint16_t getConthistNullIndex () {
-        return 64 * colored_pieces::WHITE_PAWN + 0; // white pawn to a1, an impossible move
     }
 
     [[nodiscard]] bool isDrawByInsufficientMaterial() const {

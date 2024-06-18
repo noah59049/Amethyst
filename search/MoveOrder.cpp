@@ -60,3 +60,48 @@ void sortMoves(MoveList& legalMoves, const ChessBoard &board, move_t hashMove, c
     // Step 5: Sort quiets by history heuristic
     quietHistory.sortMovesByCutoffs(legalMoves.moveList,sortedIndex,backIndex, movesToKeep);
 }
+
+inline int8_t getCaptureMVVLVAScore(const ChessBoard& board, move_t capture) {
+    int8_t mvvlvaScore;
+    switch(getFlag(capture)) {
+        case CAPTURE_QUEEN_FLAG: mvvlvaScore = 90; break;
+        case CAPTURE_ROOK_FLAG: mvvlvaScore = 50; break;
+        case CAPTURE_BISHOP_FLAG: mvvlvaScore = 35; break;
+        case CAPTURE_KNIGHT_FLAG: mvvlvaScore = 32; break;
+        case CAPTURE_PAWN_FLAG: mvvlvaScore = 10; break;
+        case PROMOTE_TO_QUEEN_FLAG: return 120;
+        case EN_PASSANT_FLAG: return 0;
+        default: mvvlvaScore = 0; break;
+    }
+    switch(board.getMovingPiece(capture)) {
+        case KING: mvvlvaScore -= 0; break;
+        case QUEEN: mvvlvaScore -= 90; break;
+        case ROOK: mvvlvaScore -= 50; break;
+        case BISHOP: mvvlvaScore -= 35; break;
+        case KNIGHT: mvvlvaScore -= 32; break;
+        case PAWN: mvvlvaScore -= 10; break;
+    }
+    return mvvlvaScore;
+}
+
+void sortCapturesByMVVLVA(const ChessBoard& board, MoveList& captures) {
+    std::array<int8_t,4096> moveScores;
+    for (move_t move : captures) {
+        moveScores[move >> 4] = getCaptureMVVLVAScore(board,move);
+    }
+
+    for (int newIndex = 1; newIndex < captures.size; newIndex++) {
+        move_t thisMove = captures.at(newIndex);
+        int8_t thisMoveScore = moveScores[thisMove >> 4];
+        int insertIndex;
+        for (insertIndex = newIndex - 1; insertIndex > 0; insertIndex--) {
+            move_t newMove = captures.at(insertIndex);
+            int8_t newMoveScore = moveScores[newMove >> 4];
+            if (newMoveScore > thisMoveScore)
+                captures.moveList[insertIndex + 1] = captures.at(insertIndex);
+            else
+                break;
+        }
+        captures.moveList[insertIndex + 1] = newIndex;
+    }
+}
