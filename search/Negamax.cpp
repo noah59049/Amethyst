@@ -18,6 +18,8 @@ eval_t search::getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t bet
 
     MoveList captures;
     board.getNonnegativeSEECapturesOnly(captures);
+    if (captures.size > 1)
+        sortCapturesByMVVLVA(board,captures);
 
     eval_t newscore;
     for (move_t move: captures) {
