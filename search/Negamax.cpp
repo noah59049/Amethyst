@@ -179,7 +179,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                     // Record a killer move
                     data.killerMoves[depth].recordKillerMove(move);
                     // Record a move for history heuristic
-                    int historyBonus = int(staticEval < alpha) * 2 * depth;
+                    int historyBonus = (newscore - staticEval) * depth / 128;
                     if (board.getIsItWhiteToMove())
                         data.whiteQuietHistory.recordKillerMove(move, legalMoves, depth * depth + historyBonus);
                     else
