@@ -179,11 +179,10 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                     // Record a killer move
                     data.killerMoves[depth].recordKillerMove(move);
                     // Record a move for history heuristic
-                    int historyBonus = (newscore - staticEval) * depth / 128;
                     if (board.getIsItWhiteToMove())
-                        data.whiteQuietHistory.recordKillerMove(move, legalMoves, depth * depth + historyBonus);
+                        data.whiteQuietHistory.recordKillerMove(move, legalMoves, 1 << max(depth, 8));
                     else
-                        data.blackQuietHistory.recordKillerMove(move, legalMoves, depth * depth + historyBonus);
+                        data.blackQuietHistory.recordKillerMove(move, legalMoves, 1 << max(depth, 8));
                 }
                 data.transpositionTable.put({newscore,MAX_EVAL,move,board.getZobristCode(),depth});
                 return newscore;
