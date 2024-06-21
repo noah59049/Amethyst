@@ -165,6 +165,14 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                 continue;
             }
         }
+        else if (move != legalMoves.at(0)) { // PVS
+            newscore = -search::getNegamaxEval(newBoard, depth - 1, -alpha - 1, -alpha, data);
+            if (alpha < newscore and newscore < beta) // Search with full if score is better than alpha but worse than beta
+                newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
+        }
+        else { // Search with full window for first move
+            newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
+        }
         newscore = -getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
 
         if (newscore > bestscore) {
@@ -224,7 +232,14 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
         for (move_t move: legalMoves) {
             ChessBoard newBoard = board;
             newBoard.makemove(move);
-            newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
+            if (move != legalMoves.at(0)) { // PVS
+                newscore = -search::getNegamaxEval(newBoard, depth - 1, -alpha - 1, -alpha, data);
+                if (alpha < newscore and newscore < beta) // Search with full if score is better than alpha but worse than beta
+                    newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
+            }
+            else { // Search with full window for first move
+                newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
+            }
             if (newscore > alpha) {
                 alpha = newscore;
                 bestMove = bestmove = move;
