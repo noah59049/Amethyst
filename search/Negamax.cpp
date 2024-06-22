@@ -164,6 +164,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                 bestscore = max(bestscore, reducedScore);
                 continue;
             }
+            newscore = -getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
         }
         else if (move != legalMoves.at(0)) { // PVS
             newscore = -search::getNegamaxEval(newBoard, depth - 1, -alpha - 1, -alpha, data);
@@ -173,7 +174,6 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         else { // Search with full window for first move
             newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
         }
-        newscore = -getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
 
         if (newscore > bestscore) {
             bestscore = newscore;
