@@ -210,7 +210,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, NegamaxData& data, const eval_t aspirationWindowCenter,
                                        move_t &bestMove, eval_t &eval) {
 
-    // Internal iterative deepening
+    // Get TT move from depth - 1
     move_t hashMove = SEARCH_FAILED_MOVE_CODE;
     std::optional<TTValue> prevHashValue = data.transpositionTable.get(board.getZobristCode(),depth - 1);
     if (prevHashValue != std::nullopt and prevHashValue->hashMove != SEARCH_FAILED_MOVE_CODE) {
@@ -234,8 +234,10 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
             newBoard.makemove(move);
             if (move != legalMoves.at(0)) { // PVS
                 newscore = -search::getNegamaxEval(newBoard, depth - 1, -alpha - 1, -alpha, data);
-                if (alpha < newscore and newscore < beta) // Search with full if score is better than alpha but worse than beta
+                if (alpha < newscore and newscore < beta) { // Search with full if score is better than alpha but worse than beta
+                    bestMove = bestmove = move;
                     newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -newscore, data);
+                }
             }
             else { // Search with full window for first move
                 newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -alpha, data);
