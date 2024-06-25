@@ -235,7 +235,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
             if (move != legalMoves.at(0)) { // PVS
                 newscore = -search::getNegamaxEval(newBoard, depth - 1, -alpha - 1, -alpha, data);
                 if (alpha < newscore and newscore < beta) { // Search with full if score is better than alpha but worse than beta
-                    bestMove = bestmove = move;
+                    bestMove = bestmove = move; // This seemingly inconsequential line is worth 32 Elo
                     newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -newscore, data);
                 }
             }
