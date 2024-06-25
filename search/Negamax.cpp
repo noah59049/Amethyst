@@ -50,7 +50,6 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         depth++;
 
 
-    const bool pvNode = beta - alpha > 1;
     eval_t ttLowerBound = MIN_EVAL;
     eval_t ttUpperBound = MAX_EVAL;
     // ttLowerBound and ttUpperBound are used to replace staticEval, and have no depth minimum
@@ -103,7 +102,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         const int nmReduction = 2 + depth / 3; // TODO: Turn these into constants
         ChessBoard nmBoard = board;
         nmBoard.makeNullMove();
-        if (!pvNode and staticEval >= beta and depth >= MIN_NMP_DEPTH and -getNegamaxEval(nmBoard, max(0,depth - nmReduction),-beta, -beta + 1, data) >= beta) {
+        if (staticEval >= beta and depth >= MIN_NMP_DEPTH and -getNegamaxEval(nmBoard, max(0,depth - nmReduction),-beta, -beta + 1, data) >= beta) {
             // Verification search at high depth to avoid zugzwang
             if (depth < 9 or getNegamaxEval(board, depth - nmReduction, beta - 1 , beta, data) >= beta) {
                 // We know we caused a beta cutoff, but we don't know what the best move is
