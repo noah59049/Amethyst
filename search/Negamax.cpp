@@ -49,6 +49,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     if (board.isInCheck())
         depth++;
 
+    const bool pvNode = beta - alpha > 1;
 
     eval_t ttLowerBound = MIN_EVAL;
     eval_t ttUpperBound = MAX_EVAL;
@@ -124,14 +125,13 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         return board.isInCheck() ? -hce::MATE_VALUE : 0;
 
     // Set up late move pruning
-    const unsigned int movesToKeep = depth <= MAX_LMP_DEPTH ? depth * LMP_MOVECOUNT : 234;
+    const unsigned int movesToKeep = !pvNode and depth <= MAX_LMP_DEPTH ? depth * LMP_MOVECOUNT : 234;
 
     sortMoves(legalMoves,board,hashMove,data.killerMoves.at(depth),
               board.getIsItWhiteToMove() ? data.whiteQuietHistory : data.blackQuietHistory,
               movesToKeep);
 
-    if (depth <= MAX_LMP_DEPTH)
-        legalMoves.trimToSize(depth * LMP_MOVECOUNT);
+    legalMoves.trimToSize(movesToKeep);
 
     const unsigned int numMovesToNotReduce = depth >= SECOND_LMR_DEPTH ?
                                              SECOND_QUIETS_TO_NOT_REDUCE : QUIETS_TO_NOT_REDUCE;
