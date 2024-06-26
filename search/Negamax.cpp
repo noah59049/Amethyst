@@ -154,8 +154,8 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
             if (numMovesSearched > 3 * numMovesToNotReduce)
                 reduction = 2;
         }
-        if (depth >= MIN_FR_DEPTH and move != hashMove and !isCapture(move)) {
-            reduction += (alpha - staticEval) / FR_MARGIN; // Futility reductions
+        if (depth >= 3 and move != hashMove and !isCapture(move)) { // TODO: Make these constexpr constants
+            reduction += (alpha - staticEval) / 256; // Futility reductions
         }
 
         if (reduction > 0) {
