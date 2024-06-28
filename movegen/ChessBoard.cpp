@@ -3026,3 +3026,129 @@ colored_piece_t ChessBoard::getPieceMoving(const move_t move) const {
 uint16_t ChessBoard::getConthistIndex(move_t move) const {
     return 64 * getPieceMoving(move) + getEndSquare(move);
 }
+
+int ChessBoard::getQuietSEE(const move_t quietMove) const {
+    const int startSquare = getStartSquare(quietMove);
+    const bitboard_t startSquareMask = 1ULL << startSquare;
+    int movingPieceType;
+    if (isItWhiteToMove) {
+        if (whiteKingPosition == startSquare)
+            return 0;
+        else if (whitePieceTypes[QUEEN_CODE] & startSquareMask)
+            movingPieceType = QUEEN_CODE;
+        else if (whitePieceTypes[ROOK_CODE] & startSquareMask)
+            movingPieceType = ROOK_CODE;
+        else if (whitePieceTypes[BISHOP_CODE] & startSquareMask)
+            movingPieceType = BISHOP_CODE;
+        else if (whitePieceTypes[KNIGHT_CODE] & startSquareMask)
+            movingPieceType = KNIGHT_CODE;
+        else if (whitePieceTypes[PAWN_CODE] & startSquareMask)
+            movingPieceType = PAWN_CODE;
+        else
+            assert(false);
+    }
+    else {
+        if (blackKingPosition == startSquare)
+            return 0;
+        else if (blackPieceTypes[QUEEN_CODE] & startSquareMask)
+            movingPieceType = QUEEN_CODE;
+        else if (blackPieceTypes[ROOK_CODE] & startSquareMask)
+            movingPieceType = ROOK_CODE;
+        else if (blackPieceTypes[BISHOP_CODE] & startSquareMask)
+            movingPieceType = BISHOP_CODE;
+        else if (blackPieceTypes[KNIGHT_CODE] & startSquareMask)
+            movingPieceType = KNIGHT_CODE;
+        else if (blackPieceTypes[PAWN_CODE] & startSquareMask)
+            movingPieceType = PAWN_CODE;
+        else
+            assert(false);
+    }
+
+    return getQuietSEE(movingPieceType,quietMove);
+}
+
+int ChessBoard::getQuietSEE (const int capturingPieceType, const move_t quietMove) const {
+    int startSquare = getStartSquare(quietMove);
+    int endSquare = getEndSquare(quietMove);
+
+    int whiteSEEMask;
+    if (((getMagicKingAttackedSquares(whiteKingPosition) >> endSquare) & 1ULL) == 1ULL)
+        whiteSEEMask = see::ONLY_KING_ATTACKING;
+    else
+        whiteSEEMask = 0;
+    int blackSEEMask;
+    if (((getMagicKingAttackedSquares(blackKingPosition) >> endSquare) & 1ULL) == 1ULL)
+        blackSEEMask = see::ONLY_KING_ATTACKING;
+    else
+        blackSEEMask = 0;
+
+    bitboard_t squaresExceptStartSquare = ~(1ULL << startSquare);
+    bitboard_t effectiveAllPieces = (allWhitePieces | allBlackPieces) & squaresExceptStartSquare;
+
+    bitboard_t effectiveWhiteBishops = (whitePieceTypes[BISHOP_CODE] | whitePieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
+    bitboard_t effectiveWhiteRooks = (whitePieceTypes[ROOK_CODE] | whitePieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
+    bitboard_t effectiveBlackBishops = (blackPieceTypes[BISHOP_CODE] | blackPieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
+    bitboard_t effectiveBlackRooks = (blackPieceTypes[ROOK_CODE] | blackPieceTypes[QUEEN_CODE]) & ~(1ULL << endSquare) & ~(1ULL << startSquare);
+
+    bitboard_t whiteBlockers;
+    bitboard_t whiteAttackers;
+    bitboard_t blackBlockers;
+    bitboard_t blackAttackers;
+    bitboard_t thisPieceMask;
+    for (int pieceType = QUEEN_CODE; pieceType <= PAWN_CODE; pieceType++) {
+        // white
+        whiteBlockers = effectiveAllPieces & ~whitePieceTypes[pieceType];
+        // We don't count other pieces making a battery with it as blocking
+        // We do count queens in front of bishops or rooks as blocking
+        if (pieceType == QUEEN_CODE) {
+            whiteBlockers &= ~(getMagicRookAttackedSquares(endSquare, 0) & whitePieceTypes[ROOK_CODE]);
+            whiteBlockers &= ~(getMagicBishopAttackedSquares(endSquare, 0) & whitePieceTypes[BISHOP_CODE]);
+        }
+        else if (pieceType == ROOK_CODE or pieceType == BISHOP_CODE) {
+            whiteBlockers &= ~whitePieceTypes[QUEEN_CODE];
+        }
+        whiteAttackers = whitePieceTypes[pieceType] & getMagicBlackAttackedSquares(pieceType,endSquare,whiteBlockers) & squaresExceptStartSquare;
+        while (whiteAttackers != 0ULL) {
+            thisPieceMask = whiteAttackers & -whiteAttackers;
+            whiteAttackers -= thisPieceMask;
+            // Now we put this piece into the SEE mask as long as it is not pinned.
+            if ((getMagicRookAttackedSquares(whiteKingPosition,effectiveAllPieces - thisPieceMask) & effectiveBlackRooks) == 0ULL and (getMagicBishopAttackedSquares(whiteKingPosition,effectiveAllPieces - thisPieceMask) & effectiveBlackBishops) == 0ULL)
+                whiteSEEMask += 1 << ((4 - (pieceType - QUEEN_CODE)) * 4);
+            else
+                blackSEEMask &= ~see::ONLY_KING_ATTACKING;
+        }
+
+        // black
+        blackBlockers = effectiveAllPieces & ~blackPieceTypes[pieceType];
+        // We don't count other pieces making a battery with it as blocking
+        // We do count queens in front of bishops or rooks as blocking
+        if (pieceType == QUEEN_CODE) {
+            blackBlockers &= ~(getMagicRookAttackedSquares(endSquare, 0) & blackPieceTypes[ROOK_CODE]);
+            blackBlockers &= ~(getMagicBishopAttackedSquares(endSquare, 0) & blackPieceTypes[BISHOP_CODE]);
+        }
+        else if (pieceType == ROOK_CODE or pieceType == BISHOP_CODE) {
+            blackBlockers &= ~blackPieceTypes[QUEEN_CODE];
+        }
+        blackAttackers = blackPieceTypes[pieceType] & getMagicWhiteAttackedSquares(pieceType,endSquare,blackBlockers) & squaresExceptStartSquare;
+        while (blackAttackers != 0ULL) {
+            thisPieceMask = blackAttackers & -blackAttackers;
+            blackAttackers -= thisPieceMask;
+            // Now we put this piece into the SEE mask as long as it is not pinned.
+            if ((getMagicRookAttackedSquares(blackKingPosition,effectiveAllPieces - thisPieceMask) & effectiveWhiteRooks) == 0ULL and (getMagicBishopAttackedSquares(blackKingPosition,effectiveAllPieces - thisPieceMask) & effectiveWhiteBishops) == 0ULL)
+                blackSEEMask += 1 << ((4 - (pieceType - QUEEN_CODE)) * 4);
+            else
+                whiteSEEMask &= ~see::ONLY_KING_ATTACKING; // Effectively, white can't take with the king because a pinned piece is attacking.
+        }
+    } // end for loop over piece types
+    if (isItWhiteToMove)
+        return 0 - see::getSEE(capturingPieceType, blackSEEMask, whiteSEEMask);
+    else
+        return 0 - see::getSEE(capturingPieceType, whiteSEEMask, blackSEEMask);
+} // end getQuietSEE
+
+int ChessBoard::getSEE(move_t move) const {
+    if (isCapture(move))
+        return getCaptureSEE(move);
+    else
+        return getQuietSEE(move);
+}

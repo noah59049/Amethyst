@@ -63,6 +63,7 @@ private:
 
     // Part 5: SEE
     [[nodiscard]] int getCaptureSEE (int capturingPieceType, move_t captureMove) const;
+    [[nodiscard]] int getQuietSEE (int capturingPieceType, move_t quietMove) const;
 
     // Part 6: Eval
     [[nodiscard]] eval_t getStaticEval () const;
@@ -106,6 +107,8 @@ public:
 
     // Part 6: SEE
     [[nodiscard]] int getCaptureSEE(move_t captureMove) const;
+    [[nodiscard]] int getQuietSEE(move_t quietMove) const;
+    [[nodiscard]] int getSEE(move_t move) const;
 
     // Part 7: Algebraic notation
     [[nodiscard]] std::string moveToSAN (move_t move) const;
