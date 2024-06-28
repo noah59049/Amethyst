@@ -1380,9 +1380,11 @@ void ChessBoard::getLegalCapturesOnly (std::vector<move_t>& captures) const {
 } // end getLegalCapturesOnly
 
 int ChessBoard::getCaptureSEE (const int capturingPieceType, const move_t captureMove) const {
-    int startSquare = captureMove >> 10;
-    int endSquare = (captureMove >> 4) & 63;
+    int startSquare = getStartSquare(captureMove);
+    int endSquare = getEndSquare(captureMove);
     int pieceTypeCaptured = getFlag(captureMove) - CAPTURE_QUEEN_FLAG;
+    if (getFlag(captureMove) == EN_PASSANT_FLAG)
+        pieceTypeCaptured = PAWN_CODE;
 
     int whiteSEEMask;
     if (((getMagicKingAttackedSquares(whiteKingPosition) >> endSquare) & 1ULL) == 1ULL)
