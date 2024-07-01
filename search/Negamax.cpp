@@ -157,6 +157,9 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         if (depth >= MIN_FR_DEPTH and move != hashMove and !isCapture(move) and alpha - staticEval > FR_MARGIN) {
             reduction += 1;
         }
+        if (depth >= MIN_SEE_REDUCTION_DEPTH and move != hashMove and board.getSEE(move) < 0) {
+            reduction += 1;
+        }
 
         if (reduction > 0) {
             eval_t reducedScore = -getNegamaxEval(newBoard, depth - reduction - 1, -alpha - 1, -alpha, data);
