@@ -1385,6 +1385,8 @@ int ChessBoard::getCaptureSEE (const int capturingPieceType, const move_t captur
     int pieceTypeCaptured = getFlag(captureMove) - CAPTURE_QUEEN_FLAG;
     if (getFlag(captureMove) == EN_PASSANT_FLAG)
         pieceTypeCaptured = PAWN_CODE;
+    if (isCapturePromotion(captureMove))
+        return see::TEXTBOOK_PIECE_VALUES[QUEEN_CODE];
 
     int whiteSEEMask;
     if (((getMagicKingAttackedSquares(whiteKingPosition) >> endSquare) & 1ULL) == 1ULL)
