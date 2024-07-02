@@ -15,7 +15,6 @@ namespace search {
     constexpr const static unsigned int SECOND_QUIETS_TO_NOT_REDUCE = 5;
     constexpr const static int MIN_FR_DEPTH = 3;
     constexpr const static int MIN_SEE_REDUCTION_DEPTH = 5;
-    constexpr const static int DOUBLE_REDUCTION_SEE_MARGIN = 300;
     constexpr const static int FR_MARGIN = 256;
     constexpr const static eval_t ASPIRATION_WINDOW_RADIUS = 75;
     constexpr const static eval_t RFP_MARGIN = 150;
