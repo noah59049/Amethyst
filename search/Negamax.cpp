@@ -49,6 +49,9 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     if (board.isInCheck())
         depth++;
 
+    if (depth <= 0)
+        return getNegaQuiescenceEval(board, alpha, beta);
+
     const bool pvNode = beta - alpha > 1;
 
     eval_t ttLowerBound = MIN_EVAL;
@@ -87,8 +90,6 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
         } // end if prevHashValue != nullopt
     } // end else (we don't have a TT value from this depth)
 
-    if (depth <= 0)
-        return getNegaQuiescenceEval(board, alpha, beta);
     if (*data.isCancelled)
         throw SearchCancelledException();
 
@@ -211,7 +212,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 }
 
 void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, NegamaxData& data, const eval_t aspirationWindowCenter,
-                                       move_t &bestMove, eval_t &eval) {
+                                       move_t &rootBestMoveExternal, eval_t &eval) {
 
     // Get TT move from depth - 1
     move_t hashMove = SEARCH_FAILED_MOVE_CODE;
@@ -238,7 +239,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
             if (move != legalMoves.at(0)) { // PVS
                 newscore = -search::getNegamaxEval(newBoard, depth - 1, -alpha - 1, -alpha, data);
                 if (alpha < newscore and newscore < beta) { // Search with full if score is better than alpha but worse than beta
-                    bestMove = bestmove = move; // This seemingly inconsequential line is worth 32 Elo
+                    rootBestMoveExternal = bestmove = move; // This seemingly inconsequential line is worth 32 Elo
                     newscore = -search::getNegamaxEval(newBoard, depth - 1, -beta, -newscore, data);
                 }
             }
@@ -247,14 +248,14 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
             }
             if (newscore > alpha) {
                 alpha = newscore;
-                bestMove = bestmove = move;
+                rootBestMoveExternal = bestmove = move;
                 if (alpha >= beta) {
                     break;
                 }
             }
         }
         if (startAlpha < alpha and alpha < beta) {
-            bestMove = bestmove;
+            rootBestMoveExternal = bestmove;
             eval = alpha;
             data.transpositionTable.put({alpha,alpha,bestmove,board.getZobristCode(),depth});
         }
