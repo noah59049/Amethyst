@@ -8,7 +8,8 @@ void TranspositionTable::put (const TTValue& value) {
             (!buckets.at(bucketIndex).isExact() or value.isExact()))) { // as long as it's not replacing exact with inexact
         buckets[bucketIndex].lowerBoundEval = value.lowerBoundEval;
         buckets[bucketIndex].upperBoundEval = value.upperBoundEval;
-        buckets[bucketIndex].hashMove = value.hashMove;
+        if (value.hashMove != SEARCH_FAILED_MOVE_CODE)
+            buckets[bucketIndex].hashMove = value.hashMove;
         buckets[bucketIndex].zobristCode = value.zobristCode;
         buckets[bucketIndex].depth = value.depth;
     }
