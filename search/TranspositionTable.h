@@ -6,11 +6,11 @@
 
 struct TTValue {
     constexpr const static move_t TT_NULL_MOVE = 3120; //a4a4
-    eval_t lowerBoundEval = NAN;
-    eval_t upperBoundEval = NAN;
+    ttbound_t lowerBoundEval = 0;
+    ttbound_t upperBoundEval = 0;
     move_t hashMove = TT_NULL_MOVE;
     zobrist_t zobristCode = 0;
-    int depth = -1;
+    depth_t depth = -1;
     TTValue()=default;
 
     [[nodiscard]] inline bool isNull() const {

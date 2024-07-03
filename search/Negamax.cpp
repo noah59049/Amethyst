@@ -107,7 +107,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
             // Verification search at high depth to avoid zugzwang
             if (depth < 9 or getNegamaxEval(board, depth - nmReduction, beta - 1 , beta, data) >= beta) {
                 // We know we caused a beta cutoff, but we don't know what the best move is
-                data.transpositionTable.put({beta,MAX_EVAL,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
+                data.transpositionTable.put({ttbound_t(beta),MAX_EVAL,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth_t(depth)});
                 return beta; // TODO: Fail-soft here
             }
         }
@@ -195,17 +195,17 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                     else
                         data.blackQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
                 }
-                data.transpositionTable.put({newscore,MAX_EVAL,move,board.getZobristCode(),depth});
+                data.transpositionTable.put({ttbound_t(newscore),MAX_EVAL,move,board.getZobristCode(),depth_t(depth)});
                 return newscore;
             } // end if alpha > beta
         } // end if newscore > alpha
     } // end for loop over moves
     if (improvedAlpha) { // This is a PV node, and score is exact
-        data.transpositionTable.put({alpha,alpha,bestmove,board.getZobristCode(),depth});
+        data.transpositionTable.put({ttbound_t(alpha),ttbound_t(alpha),bestmove,board.getZobristCode(),depth_t(depth)});
     }
     else { // None of the moves improved alpha. The score is an upper bound
         // Change implemented in Amethyst 43: At an All-Node, we don't add the "best move" to the transposition table because that's just noise
-        data.transpositionTable.put({MIN_EVAL,bestscore,SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth});
+        data.transpositionTable.put({MIN_EVAL,ttbound_t(bestscore),SEARCH_FAILED_MOVE_CODE,board.getZobristCode(),depth_t(depth)});
     }
     return bestscore;
 }
@@ -256,7 +256,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
         if (startAlpha < alpha and alpha < beta) {
             bestMove = bestmove;
             eval = alpha;
-            data.transpositionTable.put({alpha,alpha,bestmove,board.getZobristCode(),depth});
+            data.transpositionTable.put({ttbound_t(alpha),ttbound_t(alpha),bestmove,board.getZobristCode(),depth_t(depth)});
         }
         else {
             // Search returned an evaluation outside the aspiration window
