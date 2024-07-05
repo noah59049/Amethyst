@@ -32,7 +32,7 @@ namespace search {
 
     };
 
-    TranspositionTable GLOBAL_TT = TranspositionTable(uci::HASH_MB * 1000000 / int(sizeof(TTValue)));
+    static TranspositionTable GLOBAL_TT = TranspositionTable(uci::HASH_MB * 1000000 / int(sizeof(TTValue)));
 
     struct NegamaxData {
         const bool* isCancelled;
