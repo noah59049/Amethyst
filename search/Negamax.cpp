@@ -42,7 +42,7 @@ eval_t search::getNegaQuiescenceEval(ChessBoard &board, eval_t alpha, eval_t bet
 eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const eval_t beta, search::NegamaxData& data) {
     if (board.hasGameEnded())
         return board.getNegaStaticEval();
-    if (data.repetitionTable.count(board) >= 2) // If we go there a 3rd time, it's a draw.
+    if (data.repetitionTable.count(board) >= 1)
         return 0;
 
     // Check move extension
