@@ -57,7 +57,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
 
     move_t hashMove = SEARCH_FAILED_MOVE_CODE;
     // Check if our result is in the transposition table, plus add hash move if it is
-    std::optional<TTValue> ttHashValue = data.transpositionTable.get(board.getZobristCode(),depth);
+    std::optional<TTValue> ttHashValue = GLOBAL_TT.get(board.getZobristCode(),depth);
     if (ttHashValue != std::nullopt) { // our thing was in the transposition table! Yay!
         TTValue ttValue = ttHashValue.value();
         if (ttValue.lowerBoundEval == ttValue.upperBoundEval)
@@ -74,7 +74,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     }
     else {
         // Look for the best move from the TT at lower depths
-        std::optional<TTValue> prevHashValue = data.transpositionTable.get(board.getZobristCode(),0);
+        std::optional<TTValue> prevHashValue = GLOBAL_TT.get(board.getZobristCode(),0);
         if (prevHashValue != std::nullopt) {
 
             // Get a TT move
@@ -107,7 +107,7 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
             // Verification search at high depth to avoid zugzwang
             if (depth < 9 or getNegamaxEval(board, depth - nmReduction, beta - 1 , beta, data) >= beta) {
                 // We know we caused a beta cutoff, but we don't know what the best move is
-                data.transpositionTable.put({board.getZobristCode(),ttbound_t(beta),MAX_EVAL,SEARCH_FAILED_MOVE_CODE,depth_t(depth)});
+                GLOBAL_TT.put({board.getZobristCode(),ttbound_t(beta),MAX_EVAL,SEARCH_FAILED_MOVE_CODE,depth_t(depth)});
                 return beta; // TODO: Fail-soft here
             }
         }
@@ -195,17 +195,17 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
                     else
                         data.blackQuietHistory.recordKillerMove(move, legalMoves, depth * depth);
                 }
-                data.transpositionTable.put({board.getZobristCode(),ttbound_t(newscore),MAX_EVAL,move,depth_t(depth)});
+                GLOBAL_TT.put({board.getZobristCode(),ttbound_t(newscore),MAX_EVAL,move,depth_t(depth)});
                 return newscore;
             } // end if alpha > beta
         } // end if newscore > alpha
     } // end for loop over moves
     if (improvedAlpha) { // This is a PV node, and score is exact
-        data.transpositionTable.put({board.getZobristCode(),ttbound_t(alpha),ttbound_t(alpha),bestmove,depth_t(depth)});
+        GLOBAL_TT.put({board.getZobristCode(),ttbound_t(alpha),ttbound_t(alpha),bestmove,depth_t(depth)});
     }
     else { // None of the moves improved alpha. The score is an upper bound
         // Change implemented in Amethyst 43: At an All-Node, we don't add the "best move" to the transposition table because that's just noise
-        data.transpositionTable.put({board.getZobristCode(),MIN_EVAL,ttbound_t(bestscore),SEARCH_FAILED_MOVE_CODE,depth_t(depth)});
+        GLOBAL_TT.put({board.getZobristCode(),MIN_EVAL,ttbound_t(bestscore),SEARCH_FAILED_MOVE_CODE,depth_t(depth)});
     }
     return bestscore;
 }
@@ -215,7 +215,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
 
     // Get TT move from depth - 1
     move_t hashMove = SEARCH_FAILED_MOVE_CODE;
-    std::optional<TTValue> prevHashValue = data.transpositionTable.get(board.getZobristCode(),depth - 1);
+    std::optional<TTValue> prevHashValue = GLOBAL_TT.get(board.getZobristCode(),depth - 1);
     if (prevHashValue != std::nullopt and prevHashValue->hashMove != SEARCH_FAILED_MOVE_CODE) {
         hashMove = prevHashValue->hashMove;
     }
@@ -256,7 +256,7 @@ void search::getNegamaxBestMoveAndEval(ChessBoard &board, const int depth, Negam
         if (startAlpha < alpha and alpha < beta) {
             bestMove = bestmove;
             eval = alpha;
-            data.transpositionTable.put({board.getZobristCode(),ttbound_t(alpha),ttbound_t(alpha),bestmove,depth_t(depth)});
+            GLOBAL_TT.put({board.getZobristCode(),ttbound_t(alpha),ttbound_t(alpha),bestmove,depth_t(depth)});
         }
         else {
             // Search returned an evaluation outside the aspiration window

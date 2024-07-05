@@ -134,7 +134,7 @@ void uciLoop () {
             mutexPrint("readyok");
         }
         else if (command == "ucinewgame") {
-            // I don't need to do anything yet
+            search::GLOBAL_TT = TranspositionTable(uci::HASH_MB * 1000000 / int(sizeof(TTValue)));
         }
         else if (command.rfind("setoption",0) == 0) {
             if (command.rfind("setoption name Hash value",0) == 0) {
