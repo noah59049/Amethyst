@@ -95,10 +95,12 @@ eval_t search::getNegamaxEval(ChessBoard &board, int depth, eval_t alpha, const 
     // Null move pruning
     eval_t staticEval = board.getNegaStaticEval();
     staticEval = std::clamp(staticEval,ttLowerBound,ttUpperBound);
+
+    // Reverse futility pruning
+    if (!board.isInCheck() and depth <= MAX_RFP_DEPTH and staticEval - RFP_MARGIN * eval_t(depth) >= beta)
+        return staticEval - RFP_MARGIN * eval_t(depth);
+
     if (board.canMakeNullMove()) {
-        // Reverse futility pruning
-        if (depth <= MAX_RFP_DEPTH and staticEval - RFP_MARGIN * eval_t(depth) >= beta)
-            return staticEval - RFP_MARGIN * eval_t(depth);
 
         const int nmReduction = 2 + depth / 3; // TODO: Turn these into constants
         ChessBoard nmBoard = board;
