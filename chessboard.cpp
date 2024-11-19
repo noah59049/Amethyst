@@ -450,6 +450,10 @@ void ChessBoard::makemove(move_t move) {
     updatePieceGivingCheck();
 }
 
+void ChessBoard::makeLANMove(const std::string &move) {
+    exit(0); // TODO: Implement
+}
+
 bool ChessBoard::canTheKingBeTaken() const {
     // Can stm take nstm's king
     // This is the same as
