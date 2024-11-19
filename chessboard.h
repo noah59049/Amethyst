@@ -31,7 +31,10 @@ public:
     [[nodiscard]] bool areBitboardsCorrect() const;
     void printAllBitboards() const;
     void makemove(move_t move);
-    void makeLANMove(const std::string& move);
+    move_t parseLANMove(const std::string& move) const;
+    inline void makeLANMove(const std::string& move) {
+        makemove(parseLANMove(move));
+    }
     [[nodiscard]] bool canTheKingBeTaken() const;
     void updatePieceGivingCheck();
     [[nodiscard]] piece_t getPieceAt(square_t square) const;

@@ -450,8 +450,75 @@ void ChessBoard::makemove(move_t move) {
     updatePieceGivingCheck();
 }
 
-void ChessBoard::makeLANMove(const std::string &move) {
-    exit(0); // TODO: Implement
+move_t ChessBoard::parseLANMove(const std::string &move) const {
+    // Step 1: Get the from and to squares
+    square_t fromFile = move[0] - 'a';
+    square_t fromRank = move[1] - '1';
+    square_t toFile = move[2] - 'a';
+    square_t toRank = move[3] - '1';
+    square_t from = squares::squareFromFileRank(fromFile, fromRank);
+    square_t to = squares::squareFromFileRank(toFile, toRank);
+
+    // Step 2: Get the moving piece
+    bitboard_t fromBB = 1ULL << from;
+    piece_t piece;
+    for (piece = pcs::PAWN; piece <= pcs::KING; piece++) {
+        if (pieceTypes[piece] & fromBB)
+            break;
+    }
+
+    // Step 2.5: If there isn't any piece on the start square, throw an error
+    if (piece > pcs::KING) {
+        std::cout << "Error in ChessBoard::makeLANMove: No piece on start square" << std::endl;
+        std::cout << "FEN is " << toFEN() << std::endl;
+        std::cout << "move is " << move << std::endl;
+        exit(1);
+    }
+
+    // Step 3: Get the captured piece
+    // Note that we consider a move a capture here if there is a piece on the "to" square
+    // This means that en passant is not counted as a capture
+    // We will handle en passant later
+    bitboard_t toBB = 1ULL << to;
+    piece_t capturedPiece;
+    bool isCapture = false;
+    for (capturedPiece = pcs::PAWN; capturedPiece < pcs::KING; capturedPiece++) {
+        if (pieceTypes[capturedPiece] & toBB) {
+            isCapture = true;
+            break;
+        }
+    }
+    if (!isCapture)
+        capturedPiece = 0;
+
+    // Step 4: Get the promoted piece
+    bool isPromo = move.size() - 4;
+    piece_t promoPiece = isPromo ? blackPieceChars.find(move[4]) : 0;
+
+    // Step 5: Get the flag
+
+    // Step 5.1: Captures / quiets flag
+    move_t flag = isCapture ? flags::CAPTURE_FLAG : flags::QUIET_FLAG;
+
+    // Step 5.2: Promo flag
+    if (isPromo)
+        flag = isCapture ? flags::KNIGHT_CAP_PROMO_FLAG + promoPiece - pcs::KNIGHT : flags::KNIGHT_PROMO_FLAG + promoPiece - pcs::KNIGHT;
+
+    // Step 5.3: Castle flag
+    if (piece == pcs::KING and fromFile == 4 and toFile == 6)
+        flag = flags::SHORT_CASTLE_FLAG;
+    else if (piece == pcs::KING and fromFile == 4 and toFile == 2)
+        flag = flags::LONG_CASTLE_FLAG;
+
+    // Step 5.4: En passant flags
+    if (piece == pcs::PAWN and fromFile != toFile and !isCapture)
+        flag = flags::EN_PASSANT_FLAG;
+
+    // Step 5.5: Double pawn push flags
+    if (piece == pcs::PAWN and (from == to + 2 or to == from + 2))
+        flag = flags::DOUBLE_PAWN_PUSH_FLAG;
+
+    return mvs::constructMove(from,to,flag,piece,capturedPiece);
 }
 
 bool ChessBoard::canTheKingBeTaken() const {
