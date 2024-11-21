@@ -1,8 +1,16 @@
 #pragma once
 
-namespace sg {
-    // Insert TT
+#include "typedefs.h"
 
+namespace sg {
+    struct ThreadData {
+        move_t rootBestMove;
+    };
+
+    static int timeLeft;
+    static int increment;
+
+    // Insert TT
 
 }
 

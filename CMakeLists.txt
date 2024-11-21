@@ -9,6 +9,7 @@ add_executable(amethyst_chess3 main.cpp
         movegenerator.cpp
         perft.cpp
         uci.cpp
+        search.cpp
 )
 
 add_executable(amethyst_chess3_test tests.cpp
@@ -17,4 +18,5 @@ add_executable(amethyst_chess3_test tests.cpp
         movegenerator.cpp
         perft.cpp
         uci.cpp
+        search.cpp
 )
