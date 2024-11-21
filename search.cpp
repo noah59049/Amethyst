@@ -10,7 +10,7 @@ void rootSearch(ChessBoard board) {
     for (move_t move : moves) {
         if (board.isLegal(move)) {
             std::cout << "bestmove " << moveToLAN(move) << std::endl;
-            break;
+            return;
         }
     }
 
