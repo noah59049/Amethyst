@@ -7,8 +7,8 @@ namespace sg {
         move_t rootBestMove;
     };
 
-    static int timeLeft;
-    static int increment;
+    static int softTimeLimit = 0;
+    static int hardTimeLimit = 0;
 
     // Insert TT
 

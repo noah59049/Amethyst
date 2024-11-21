@@ -6,10 +6,12 @@
 
 #include "searchglobals.h"
 #include "chessboard.h"
+#include "search.h"
 
 
 void uciLoop() {
     std::string command;
+    ChessBoard position = ChessBoard::startpos();
 
     while (true) {
         getline(std::cin, command);
@@ -35,7 +37,7 @@ void uciLoop() {
         else if (command.starts_with("position")) {
             std::stringstream ss(command);
             std::string word;
-            ChessBoard position = ChessBoard::startpos();
+            position = ChessBoard::startpos();
             bool parsingMoves;
             while (ss >> word) {
                 if (parsingMoves) {
@@ -94,7 +96,9 @@ void uciLoop() {
                     movetime = 1000000000; // search for 1 million seconds
             } // end while ss >> word
 
-            // TODO: Actually call search here
+            // TODO: Set time limits here
+
+            rootSearch(position);
 
         } // end if command starts with go
 
