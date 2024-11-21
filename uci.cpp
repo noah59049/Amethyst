@@ -38,7 +38,7 @@ void uciLoop() {
             std::stringstream ss(command);
             std::string word;
             position = ChessBoard::startpos();
-            bool parsingMoves;
+            bool parsingMoves = false;
             while (ss >> word) {
                 if (parsingMoves) {
                     position.makeLANMove(word); // TODO: Keep track of repetitions
