@@ -539,6 +539,18 @@ bool ChessBoard::canTheKingBeTaken() const {
     return false;
 }
 
+bool ChessBoard::isLegal(move_t move) const {
+    ChessBoard newBoard = *this;
+    if (mvs::isCastle(move)) {
+        newBoard.makemove(mvs::castleToKingSlide(move));
+        if (newBoard.canTheKingBeTaken())
+            return false;
+        newBoard = *this;
+    }
+    newBoard.makemove(move);
+    return !newBoard.canTheKingBeTaken();
+}
+
 void ChessBoard::updatePieceGivingCheck() {
     const side_t nstm = stm ^ 1;
     const bitboard_t allPieces = colors[sides::WHITE] ^ colors[sides::BLACK];

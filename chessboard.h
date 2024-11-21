@@ -36,6 +36,7 @@ public:
         makemove(parseLANMove(move));
     }
     [[nodiscard]] bool canTheKingBeTaken() const;
+    [[nodiscard]] bool isLegal(move_t move) const;
     void updatePieceGivingCheck();
     [[nodiscard]] piece_t getPieceAt(square_t square) const;
     [[nodiscard]] MoveList getPseudoLegalMoves() const;
