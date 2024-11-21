@@ -10,17 +10,7 @@ perft_t perft(const ChessBoard& board, depth_t depth) {
 
     perft_t count = 0;
     for (move_t move : moves) {
-        ChessBoard newBoard = board;
-        newBoard.makemove(move);
-        bool canKingBeTaken;
-        if (mvs::isCastle(move)) {
-            ChessBoard slideBoard = board;
-            slideBoard.makemove(mvs::castleToKingSlide(move));
-            canKingBeTaken = slideBoard.canTheKingBeTaken() or newBoard.canTheKingBeTaken();
-        }
-        else
-            canKingBeTaken = newBoard.canTheKingBeTaken();
-        if (!canKingBeTaken) {
+        if (board.isLegal(move)) {
             // Here we do checks that the move is the same when we convert it to LAN and back
             std::string move1 = moveToLAN(move);
             move_t move2 = board.parseLANMove(move1);
@@ -37,7 +27,8 @@ perft_t perft(const ChessBoard& board, depth_t depth) {
                 std::cout << "move1 is " << move1 << " and move3 is " << move3 << std::endl;
                 std::cout << std::endl;
             }
-
+            ChessBoard newBoard = board;
+            newBoard.makemove(move);
             count += perft(newBoard, depth_t(depth - 1));
         }
     }
