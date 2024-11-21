@@ -11,3 +11,5 @@ using zobrist_t = uint64_t;
 using outcome_t = uint8_t;
 using perft_t = int64_t;
 using depth_t = int8_t;
+using packed_eval_t = uint32_t;
+using phase_t = int16_t;

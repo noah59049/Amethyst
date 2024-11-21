@@ -2,12 +2,14 @@
 #include <string>
 #include <cassert>
 #include <iostream>
+#include <bit>
 
 #include "chessboard.h"
 #include "logarithm.h"
 #include "attacks.h"
 #include "bitmasks.h"
 #include "zobrist.h"
+#include "hce.h"
 
 const static std::string whitePieceChars = "PNBRQK";
 const static std::string blackPieceChars = "pnbrqk";
@@ -753,4 +755,26 @@ zobrist_t ChessBoard::calcZobristCode() const {
 
 zobrist_t ChessBoard::getZobristCode() const {
     return zobristCode;
+}
+
+eval_t ChessBoard::getEval() const {
+    // Step 0: initialize eval and phase
+    packed_eval_t packedEval = 0;
+    phase_t phase = 0;
+
+    // Step 2: Loop through all the piece types, adding up their values
+    // We don't add the king's material value since every side always has exactly 1 king
+    for (piece_t piece = pcs::PAWN; piece < pcs::KING; piece++) {
+        int whitePieceCount = std::popcount(pieceTypes[piece] & colors[sides::WHITE]);
+        int blackPieceCount = std::popcount(pieceTypes[piece] & colors[sides::WHITE]);
+        phase += (whitePieceCount + blackPieceCount) * hce::PHASE_PIECE_VALUES[piece];
+
+        packedEval += hce::material[piece] * (whitePieceCount - blackPieceCount);
+    }
+
+    // Step 3: Unpack the eval
+    eval_t whiteRelativeEval = hce::evalFromPacked(packedEval, phase);
+
+    // Step 4: Return the eval from the perspective of stm
+    return (stm == sides::WHITE) ? whiteRelativeEval : -whiteRelativeEval;
 }

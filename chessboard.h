@@ -43,7 +43,7 @@ public:
     [[nodiscard]] zobrist_t calcZobristCode() const;
     [[nodiscard]] zobrist_t getZobristCode() const;
 
-    eval_t getEval();
+    eval_t getEval() const;
 
     [[nodiscard]] inline bool isInCheck() const {
         return pieceGivingCheck != NOT_IN_CHECK_CODE;
