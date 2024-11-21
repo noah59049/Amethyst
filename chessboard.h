@@ -31,7 +31,7 @@ public:
     [[nodiscard]] bool areBitboardsCorrect() const;
     void printAllBitboards() const;
     void makemove(move_t move);
-    move_t parseLANMove(const std::string& move) const;
+    [[nodiscard]] move_t parseLANMove(const std::string& move) const;
     inline void makeLANMove(const std::string& move) {
         makemove(parseLANMove(move));
     }
@@ -43,7 +43,7 @@ public:
     [[nodiscard]] zobrist_t calcZobristCode() const;
     [[nodiscard]] zobrist_t getZobristCode() const;
 
-    eval_t getEval() const;
+    [[nodiscard]] eval_t getEval() const;
 
     [[nodiscard]] inline bool isInCheck() const {
         return pieceGivingCheck != NOT_IN_CHECK_CODE;
