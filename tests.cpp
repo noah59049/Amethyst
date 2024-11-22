@@ -505,17 +505,65 @@ void runZobristPerftSuite(const std::string& filename, bool verbose) {
     file.close();
 }
 
+void runEvalTestSuite(const std::string& bookFilename, const std::string& evalsFilename) {
+    std::vector<ChessBoard> boards;
+    std::ifstream bookFile(bookFilename);
+    std::string fen;
+    while (bookFile.peek() != EOF) {
+        getline(bookFile, fen);
+        boards.push_back(ChessBoard::fromFEN(fen));
+    }
+
+    std::vector<eval_t> evals;
+    std::ifstream evalsFile(evalsFilename);
+    while (evalsFile.peek() != EOF) {
+        eval_t eval = 0;
+        evalsFile >> eval;
+        evals.push_back(eval);
+    }
+
+    bool passed = true;
+
+    if (evals.size() != boards.size()) {
+        std::cout
+                << "FAILED runEvalTestSuite: boards and expected evals are not the same length. Check that you have the correct files."
+                << std::endl;
+        passed = false;
+    }
+
+    if (passed) {
+        for (int i = 0; i < evals.size(); i++) {
+            ChessBoard board = boards[i];
+            eval_t eval = board.getEval();
+            eval_t whiteRelativeEval = board.getSTM() == sides::WHITE ? eval : -eval;
+
+            if (whiteRelativeEval != evals[i]) {
+                std::cout << "FAILED eval test suite: evals don't match" << std::endl;
+                std::cout << "FEN is " << board.toFEN() << std::endl;
+                std::cout << "Eval from tuner is " << evals[i] << std::endl;
+                std::cout << "Eval from board is " << whiteRelativeEval << std::endl;
+                passed = false;
+            }
+        }
+    }
+
+    if (passed) {
+        std::cout << "PASSED eval test suite";
+    }
+}
+
 int main() {
     std::cout << "Hello, World!" << std::endl;
-    runAllMovesTests();
-    runAllMoveConstructorTests();
+//    runAllMovesTests();
+//    runAllMoveConstructorTests();
 //    fenTestSuite("8moves_v3.epd"); // This passed
 //    fenTestSuite("Pohl.epd"); // This passed
-    splitperft("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -",1);
+//    splitperft("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -",1);
 //    fenTestSuite("lichess-big3-scrubbed.epd"); // This passed
 //    startposPerft(6); // This looks good
-    runPerftSuite("standard.epd", true);
+//    runPerftSuite("standard.epd", true);
 //    runZobristPerftSuite("standard.epd", true); // This only works if we stop printing halfmove and fullmove in fens
+    runEvalTestSuite("tiny_tests.txt", "expected_eval.txt");
 
     return 0;
 }
