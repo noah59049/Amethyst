@@ -10,6 +10,8 @@
 
 
 void uciLoop() {
+    std::cout << "info string AMETHYST by Noah Holbrook" << std::endl;
+
     std::string command;
     ChessBoard position = ChessBoard::startpos();
 
