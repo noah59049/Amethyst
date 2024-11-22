@@ -100,4 +100,8 @@ public:
     [[nodiscard]] inline bool isInCheck() const {
         return pieceGivingCheck != NOT_IN_CHECK_CODE;
     }
+
+    [[nodiscard]] inline side_t getSTM() const {
+        return stm;
+    }
 };
