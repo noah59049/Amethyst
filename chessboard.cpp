@@ -766,7 +766,7 @@ eval_t ChessBoard::getEval() const {
     // We don't add the king's material value since every side always has exactly 1 king
     for (piece_t piece = pcs::PAWN; piece < pcs::KING; piece++) {
         int whitePieceCount = std::popcount(pieceTypes[piece] & colors[sides::WHITE]);
-        int blackPieceCount = std::popcount(pieceTypes[piece] & colors[sides::WHITE]);
+        int blackPieceCount = std::popcount(pieceTypes[piece] & colors[sides::BLACK]);
         phase += (whitePieceCount + blackPieceCount) * hce::PHASE_PIECE_VALUES[piece];
 
         packedEval += hce::material[piece] * (whitePieceCount - blackPieceCount);
