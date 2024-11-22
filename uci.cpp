@@ -16,8 +16,8 @@ void uciLoop() {
     while (true) {
         getline(std::cin, command);
         if (command == "uci") {
-            std::cout << "id name Amethyst";
-            std::cout << "id author Noah Holbrook";
+            std::cout << "id name Amethyst" << std::endl;
+            std::cout << "id author Noah Holbrook" << std::endl;
             std::cout << "option name Hash type spin default " << uciopt::HASH_DEFAULT << " min " << uciopt::HASH_MIN << " max " << uciopt::HASH_MAX << std::endl;
             std::cout << "option name Threads type spin default " << uciopt::HASH_DEFAULT << " min " << uciopt::HASH_MIN << " max " << uciopt::HASH_MAX << std::endl;
             std::cout << "option name SyzygyPath type string default <empty>" << std::endl;
