@@ -542,6 +542,7 @@ void runEvalTestSuite(const std::string& bookFilename, const std::string& evalsF
                 std::cout << "FEN is " << board.toFEN() << std::endl;
                 std::cout << "Eval from tuner is " << evals[i] << std::endl;
                 std::cout << "Eval from board is " << whiteRelativeEval << std::endl;
+                std::cout << std::endl;
                 passed = false;
             }
         }
