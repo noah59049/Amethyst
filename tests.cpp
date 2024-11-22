@@ -531,6 +531,9 @@ void runEvalTestSuite(const std::string& bookFilename, const std::string& evalsF
         passed = false;
     }
 
+    int numPassed = 0;
+    int numFailed = 0;
+
     if (passed) {
         for (int i = 0; i < evals.size(); i++) {
             ChessBoard board = boards[i];
@@ -544,9 +547,15 @@ void runEvalTestSuite(const std::string& bookFilename, const std::string& evalsF
                 std::cout << "Eval from board is " << whiteRelativeEval << std::endl;
                 std::cout << std::endl;
                 passed = false;
+                numFailed++;
+            }
+            else {
+                numPassed++;
             }
         }
     }
+
+    std::cout << "eval test suite: passed " << numPassed << ", failed " << numFailed << std::endl;
 
     if (passed) {
         std::cout << "PASSED eval test suite";
