@@ -18,6 +18,6 @@ namespace hce {
         if (phase >= MAX_PHASE)
             return mg;
         else
-            return (mg * phase + eg * (phase - MAX_PHASE)) / MAX_PHASE;
+            return (mg * phase + eg * (MAX_PHASE - phase)) / MAX_PHASE;
     }
 }
