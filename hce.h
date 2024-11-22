@@ -10,7 +10,7 @@ namespace hce {
         return (uint32_t(uint16_t(mg)) << 16) + eg;
     }
 
-    constexpr packed_eval_t material[6] = {S(102, 196), S(394, 512), S(433, 539), S(499, 920), S(1103, 1629), S(0, 0)};
+    constexpr packed_eval_t material[6] = {S(102, 196), S(394, 511), S(432, 538), S(499, 919), S(1103, 1628), S(0, 0)};
 
     inline eval_t evalFromPacked(packed_eval_t packed, phase_t phase) {
         int32_t mg = int32_t(int16_t(uint16_t((packed + (1U << 15)) >> 16)));
