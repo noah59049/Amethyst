@@ -17,10 +17,10 @@ namespace sg {
     };
 
     // softTimeLimit and hardTimeLimit are measured in milliseconds
-    static int softTimeLimit = 0;
-    static int hardTimeLimit = 0;
-    static depth_t depthLimit = 100;
-    static perft_t nodesLimit = INT64_MAX;
+    extern int softTimeLimit;
+    extern int hardTimeLimit;
+    extern int depthLimit;
+    extern perft_t nodesLimit;
 
     // Insert TT
 

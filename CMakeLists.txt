@@ -10,6 +10,7 @@ add_executable(amethyst_chess3 main.cpp
         perft.cpp
         uci.cpp
         search.cpp
+        searchglobals.cpp
 )
 
 add_executable(amethyst_chess3_test tests.cpp
@@ -19,4 +20,5 @@ add_executable(amethyst_chess3_test tests.cpp
         perft.cpp
         uci.cpp
         search.cpp
+        searchglobals.cpp
 )
