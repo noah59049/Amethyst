@@ -4,6 +4,7 @@
 #include <iostream>
 #include <sstream>
 #include <climits>
+#include <algorithm>
 
 #include "searchglobals.h"
 #include "chessboard.h"
@@ -89,6 +90,7 @@ void uciLoop() {
                     ss >> movestogo;
                 else if (word == "depth") {
                     ss >> sg::depthLimit;
+                    sg::depthLimit = std::clamp(sg::depthLimit, 1, 100);
                     sg::nodesLimit = INT64_MAX;
                     movetime = 1000000000;
                 }
