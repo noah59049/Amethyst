@@ -11,6 +11,7 @@
 #include "flags.h"
 #include "chessboard.h"
 #include "perft.h"
+#include "search.h"
 
 // I don't think this is really necessary
 // But why not leave it in
@@ -565,6 +566,67 @@ void runEvalTestSuite(const std::string& bookFilename, const std::string& evalsF
     }
 }
 
+void runEasyPuzzleTestSuite(const std::string& bookFilename, const std::string& bestMovesFilename) {
+    std::vector<ChessBoard> boards;
+    std::ifstream bookFile(bookFilename);
+    std::string fen;
+    while (bookFile.peek() != EOF) {
+        getline(bookFile, fen);
+        boards.push_back(ChessBoard::fromFEN(fen));
+    }
+
+    std::vector<std::string> bestMoves;
+    std::ifstream bestMovesFile(bestMovesFilename);
+    std::string bestMove;
+    while (bestMovesFile.peek() != EOF) {
+        getline(bestMovesFile, bestMove);
+        bestMoves.push_back(bestMove);
+    }
+
+    bool passed = true;
+
+    if (bestMoves.size() != boards.size()) {
+        std::cout
+                << "FAILED runEasyPuzzleTestSuite: boards and expected best moves are not the same length. Check that you have the correct files."
+                << std::endl;
+        std::cout << "bestMoves.size() is " << bestMoves.size() << std::endl;
+        std::cout << "boards.size() is " << boards.size() << std::endl;
+        passed = false;
+    }
+
+    int numPassed = 0;
+    int numFailed = 0;
+
+    if (passed) {
+        for (int i = 0; i < boards.size(); i++) {
+            ChessBoard board = boards[i];
+            sg::ThreadData data = rootSearch(board);
+            std::string searchBestMove = moveToLAN(data.rootBestMove);
+            bestMove = bestMoves[i];
+
+            if (bestMove != searchBestMove) {
+                std::cout << "FAILED easy puzzle test: engine did not play the best move" << std::endl;
+                std::cout << "FEN is " << board.toFEN() << std::endl;
+                std::cout << "Search best move is " << searchBestMove << std::endl;
+                std::cout << "Expected best move is " << bestMove << std::endl;
+                std::cout << std::endl;
+                passed = false;
+                numFailed++;
+            }
+            else {
+                numPassed++;
+            } // end else
+        } // end for loop over boards.size()
+    } // end if passed
+
+    if (numPassed == 0 and numFailed == 0) {
+        std:: cout << "FAILED easy puzzle test suite: could not find file" << std::endl;
+    }
+    else if (passed) {
+        std::cout << "PASSED easy puzzle test suite" << std::endl;
+    }
+} // end runEasyPuzzleTestSuite
+
 int main() {
     std::cout << "Hello, World!" << std::endl;
 //    runAllMovesTests();
@@ -577,6 +639,7 @@ int main() {
 //    runPerftSuite("standard.epd", true);
 //    runZobristPerftSuite("standard.epd", true); // This only works if we stop printing halfmove and fullmove in fens
     runEvalTestSuite("tiny_tests.txt", "expected_eval.txt");
+    runEasyPuzzleTestSuite("easy_puzzles.txt", "easy_puzzle_answers.txt");
 
     return 0;
 }
