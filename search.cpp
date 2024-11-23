@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-void rootSearch(const ChessBoard board) {
+sg::ThreadData rootSearch(const ChessBoard board) {
     // Step 1: Initialize thread data
     sg::ThreadData rootThreadData;
 
@@ -13,6 +13,9 @@ void rootSearch(const ChessBoard board) {
     std::string rootBestMove = moveToLAN(rootThreadData.rootBestMove);
     std::cout << "info depth 3 nodes " << rootThreadData.nodes << " score cp " << score << " pv " << rootBestMove << std::endl;
     std::cout << "bestmove " << rootBestMove << std::endl;
+
+    // Step 4: Return the thread data
+    return rootThreadData;
 }
 
 eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t depth, depth_t ply) {
