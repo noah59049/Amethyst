@@ -104,6 +104,9 @@ void uciLoop() {
 
         } // end if command starts with go
 
+        else if (command == "staticeval") {
+            std::cout << position.getEval() << std::endl;
+        }
 
         else if (command == "quit") {
             exit(0);
