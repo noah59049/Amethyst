@@ -3,6 +3,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <climits>
 
 #include "searchglobals.h"
 #include "chessboard.h"
@@ -69,8 +70,8 @@ void uciLoop() {
             int winc = 0;
             int binc = 0;
             int movestogo = 0;
-            sg::depthLimit = -1;
-            sg::nodesLimit = -1;
+            sg::depthLimit = 100;
+            sg::nodesLimit = INT64_MAX;
             int mate = 0;
             int movetime = -1;
             std::stringstream ss(command);
@@ -86,10 +87,16 @@ void uciLoop() {
                     ss >> binc;
                 else if (word == "movestogo")
                     ss >> movestogo;
-                else if (word == "depth")
+                else if (word == "depth") {
                     ss >> sg::depthLimit;
-                else if (word == "nodes")
+                    sg::nodesLimit = INT64_MAX;
+                    movetime = 1000000000;
+                }
+                else if (word == "nodes") {
                     ss >> sg::nodesLimit;
+                    sg::depthLimit = 100;
+                    movetime = 1000000000;
+                }
                 else if (word == "mate")
                     ss >> mate;
                 else if (word == "movetime")
@@ -99,7 +106,8 @@ void uciLoop() {
             } // end while ss >> word
 
             if (movetime >= 0) {
-                sg::softTimeLimit = sg::hardTimeLimit = movetime;
+                sg::softTimeLimit = movetime;
+                sg::hardTimeLimit = movetime;
             }
             else if (position.getSTM() == sides::WHITE) {
                 sg::softTimeLimit = spsa::calcSoftTimeLimit(wtime, winc);

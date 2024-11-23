@@ -20,11 +20,15 @@ sg::ThreadData rootSearch(const ChessBoard board) {
         std::string rootBestMove = moveToLAN(rootThreadData.rootBestMove);
         std::cout << "info depth " << int(depth) << " nodes " << rootThreadData.nodes << " time " << msElapsed << " score cp " << score << " pv " << rootBestMove << std::endl;
 
-        // Step 2.4: Check for soft time limit
-        if (msElapsed > sg::softTimeLimit) {
+        // Step 2.4: Check for soft time/depth/nodes limit
+        if (msElapsed > sg::softTimeLimit or
+        rootThreadData.nodes >= sg::nodesLimit or
+        depth >= sg::depthLimit) {
+//            std::cout << "info string msElapsed " << msElapsed << " stl " << sg::softTimeLimit << " nodes " << rootThreadData.nodes << " nodeslimit " << sg::nodesLimit << " depth " << int(depth) << " depthlimit " << int(sg::depthLimit) << std::endl;
             std::cout << "bestmove " << rootBestMove << std::endl;
             break;
         }
+
     }
 
     // Step 3: Return the thread data

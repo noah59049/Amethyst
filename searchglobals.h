@@ -1,6 +1,8 @@
 #pragma once
 
 #include <chrono>
+#include <climits>
+
 #include "typedefs.h"
 
 
@@ -17,8 +19,8 @@ namespace sg {
     // softTimeLimit and hardTimeLimit are measured in milliseconds
     static int softTimeLimit = 0;
     static int hardTimeLimit = 0;
-    static depth_t depthLimit = -1;
-    static perft_t nodesLimit = -1;
+    static depth_t depthLimit = 100;
+    static perft_t nodesLimit = INT64_MAX;
 
     // Insert TT
 
