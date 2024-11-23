@@ -48,7 +48,7 @@ void uciLoop() {
 
                 else if (word == "fen") {
                     std::string fen;
-                    for (int i = 0; i < 6; i++) {
+                    for (int i = 0; i < 6; i++) { // TODO: Handle 4-field fens
                         if (i)
                             fen += " ";
                         ss >> word;
