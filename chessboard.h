@@ -104,4 +104,8 @@ public:
     [[nodiscard]] inline side_t getSTM() const {
         return stm;
     }
+
+    [[nodiscard]] inline auto getHalfmove() const {
+        return halfmove;
+    }
 };
