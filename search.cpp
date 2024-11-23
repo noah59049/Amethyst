@@ -5,16 +5,29 @@
 sg::ThreadData rootSearch(const ChessBoard board) {
     // Step 1: Initialize thread data
     sg::ThreadData rootThreadData;
+    eval_t score = board.getEval();
 
-    // Step 2: Fixed depth search to depth 3
-    eval_t score = negamax(rootThreadData, board, depth_t(3), depth_t(0));
+    // Step 2: Iterative deepening search
+    for (depth_t depth = 1; depth < 100; depth++) {
+        // Step 2.1: Do the search
+        score = negamax(rootThreadData, board, depth_t(depth), depth_t(0));
 
-    // Step 3: Printout stuff
-    std::string rootBestMove = moveToLAN(rootThreadData.rootBestMove);
-    std::cout << "info depth 3 nodes " << rootThreadData.nodes << " score cp " << score << " pv " << rootBestMove << std::endl;
-    std::cout << "bestmove " << rootBestMove << std::endl;
+        // Step 2.2: Get elapsed time
+        auto currentTime = std::chrono::high_resolution_clock::now();
+        auto msElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(currentTime - rootThreadData.searchStartTime).count();
 
-    // Step 4: Return the thread data
+        // Step 2.3: Print out stuff
+        std::string rootBestMove = moveToLAN(rootThreadData.rootBestMove);
+        std::cout << "info depth " << int(depth) << " nodes " << rootThreadData.nodes << " time " << msElapsed << " score cp " << score << " pv " << rootBestMove << std::endl;
+
+        // Step 2.4: Check for soft time limit
+        if (msElapsed > sg::softTimeLimit) {
+            std::cout << "bestmove " << rootBestMove << std::endl;
+            break;
+        }
+    }
+
+    // Step 3: Return the thread data
     return rootThreadData;
 }
 

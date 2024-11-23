@@ -1,6 +1,8 @@
 #pragma once
 
+#include <chrono>
 #include "typedefs.h"
+
 
 namespace sg {
     constexpr eval_t SCORE_MIN = -32767;
@@ -9,8 +11,10 @@ namespace sg {
     struct ThreadData {
         perft_t nodes = 0;
         move_t rootBestMove = 0;
+        std::chrono::time_point<std::chrono::high_resolution_clock> searchStartTime = std::chrono::high_resolution_clock::now();
     };
 
+    // softTimeLimit and hardTimeLimit are measured in milliseconds
     static int softTimeLimit = 0;
     static int hardTimeLimit = 0;
 
