@@ -43,7 +43,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
             ChessBoard newBoard = board;
             newBoard.makemove(move);
             movesSearched++;
-            eval_t newScore = -negamax(threadData, board, depth - 1, ply);
+            eval_t newScore = -negamax(threadData, board, depth - 1, ply + 1);
             if (newScore > bestScore) {
                 bestScore = newScore;
                 bestMove = move;
