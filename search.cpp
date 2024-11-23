@@ -2,16 +2,16 @@
 
 #include <iostream>
 
-void rootSearch(ChessBoard board) {
+void rootSearch(const ChessBoard board) {
     // Step 1: Initialize thread data
     sg::ThreadData rootThreadData;
 
     // Step 2: Fixed depth search to depth 3
-    eval_t score = negamax(rootThreadData, board, 3, 0);
+    eval_t score = negamax(rootThreadData, board, depth_t(3), depth_t(0));
 
     // Step 3: Printout stuff
     std::string rootBestMove = moveToLAN(rootThreadData.rootBestMove);
-    std::cout << "info depth 3 nodes " << rootThreadData.nodes << " score cp " << " pv " << rootBestMove << std::endl;
+    std::cout << "info depth 3 nodes " << rootThreadData.nodes << " score cp " << score << " pv " << rootBestMove << std::endl;
     std::cout << "bestmove " << rootBestMove << std::endl;
 }
 
@@ -45,7 +45,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
             ChessBoard newBoard = board;
             newBoard.makemove(move);
             movesSearched++;
-            eval_t newScore = -negamax(threadData, board, depth - 1, ply + 1);
+            eval_t newScore = -negamax(threadData, newBoard, depth - 1, ply + 1);
             if (newScore > bestScore) {
                 bestScore = newScore;
                 bestMove = move;
