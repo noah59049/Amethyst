@@ -69,10 +69,10 @@ void uciLoop() {
             int winc = 0;
             int binc = 0;
             int movestogo = 0;
-            int depth = 0;
-            int nodes = 0;
+            sg::depthLimit = -1;
+            sg::nodesLimit = -1;
             int mate = 0;
-            int movetime = 0;
+            int movetime = -1;
             std::stringstream ss(command);
             std::string word;
             while (ss >> word) {
@@ -87,9 +87,9 @@ void uciLoop() {
                 else if (word == "movestogo")
                     ss >> movestogo;
                 else if (word == "depth")
-                    ss >> depth;
+                    ss >> sg::depthLimit;
                 else if (word == "nodes")
-                    ss >> nodes;
+                    ss >> sg::nodesLimit;
                 else if (word == "mate")
                     ss >> mate;
                 else if (word == "movetime")
@@ -98,7 +98,17 @@ void uciLoop() {
                     movetime = 1000000000; // search for 1 million seconds
             } // end while ss >> word
 
-            // TODO: Set time limits here
+            if (movetime >= 0) {
+                sg::softTimeLimit = sg::hardTimeLimit = movetime;
+            }
+            else if (position.getSTM() == sides::WHITE) {
+                sg::softTimeLimit = spsa::calcSoftTimeLimit(wtime, winc);
+                sg::hardTimeLimit = spsa::calcHardTimeLimit(wtime, winc);
+            }
+            else {
+                sg::softTimeLimit = spsa::calcSoftTimeLimit(btime, binc);
+                sg::hardTimeLimit = spsa::calcHardTimeLimit(btime, binc);
+            }
 
             rootSearch(position);
 

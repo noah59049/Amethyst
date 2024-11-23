@@ -17,6 +17,8 @@ namespace sg {
     // softTimeLimit and hardTimeLimit are measured in milliseconds
     static int softTimeLimit = 0;
     static int hardTimeLimit = 0;
+    static depth_t depthLimit = -1;
+    static perft_t nodesLimit = -1;
 
     // Insert TT
 
@@ -32,4 +34,13 @@ namespace uciopt {
     constexpr int THREADS_DEFAULT = 1;
     constexpr int THREADS_MAX = 1;
     static int THREADS = 1;
+}
+
+namespace spsa {
+    inline int calcSoftTimeLimit(int time, int inc) {
+        return time / 20 + inc / 2;
+    }
+    inline int calcHardTimeLimit(int time, int inc) {
+        return time / 3;
+    }
 }
