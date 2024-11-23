@@ -3,7 +3,11 @@
 #include "typedefs.h"
 
 namespace sg {
+    constexpr eval_t SCORE_MIN = -32767;
+    constexpr eval_t SCORE_MATE = 32700;
+
     struct ThreadData {
+        perft_t nodes;
         move_t rootBestMove;
     };
 
