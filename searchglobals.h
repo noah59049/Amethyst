@@ -7,8 +7,8 @@ namespace sg {
     constexpr eval_t SCORE_MATE = 32700;
 
     struct ThreadData {
-        perft_t nodes;
-        move_t rootBestMove;
+        perft_t nodes = 0;
+        move_t rootBestMove = 0;
     };
 
     static int softTimeLimit = 0;
