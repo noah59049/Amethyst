@@ -40,7 +40,7 @@ const std::string BENCH_POSITIONS[] = {
 };
 
 perft_t bench() {
-    sg::depthLimit = 7;
+    sg::depthLimit = 6;
     sg::nodesLimit = INT64_MAX;
     sg::hardTimeLimit = 1000000000;
     sg::softTimeLimit = 1000000000;
@@ -66,6 +66,6 @@ perft_t bench() {
     auto nps = totalNodes / ms * 1000;
 
     std::cout << "-------------BENCH RESULTS-------------" << std::endl;
-    std::cout << totalNodes << " nodes " << nps << " nps" << std::endl;
+    std::cout << totalNodes << " nodes " << ms << " ms " <<  nps << " nps" << std::endl;
     std::cout << "---------------------------------------" << std::endl;
 }
