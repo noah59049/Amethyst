@@ -18,7 +18,7 @@ sg::ThreadData rootSearch(const ChessBoard board) {
     for (depth_t depth = 1; depth <= sg::depthLimit; depth++) {
         // Step 2.1: Do the search
         try {
-            score = negamax(rootThreadData, board, depth_t(depth), depth_t(0));
+            score = negamax(rootThreadData, board, depth_t(depth), depth_t(0), sg::SCORE_MIN, sg::SCORE_MAX);
         }
         catch (const SearchCancelledException& e) {
             break;
@@ -46,7 +46,7 @@ sg::ThreadData rootSearch(const ChessBoard board) {
     return rootThreadData;
 }
 
-eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t depth, depth_t ply) {
+eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t depth, depth_t ply, eval_t alpha, eval_t beta) {
     // Step 1: Increment nodes
     threadData.nodes++;
 
@@ -76,6 +76,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     eval_t bestScore = sg::SCORE_MIN;
     move_t bestMove = 0;
     int movesSearched = 0;
+    bool improvedAlpha = false;
 
     // Step 6: Search all the moves
     for (move_t move : moves) {
@@ -85,12 +86,18 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
             ChessBoard newBoard = board;
             newBoard.makemove(move);
             movesSearched++;
-            eval_t newScore = -negamax(threadData, newBoard, depth - 1, ply + 1);
+            eval_t newScore = -negamax(threadData, newBoard, depth - 1, ply + 1, -beta, -alpha);
             if (newScore > bestScore) {
                 bestScore = newScore;
                 bestMove = move;
-                if (isRoot)
-                    threadData.rootBestMove = move;
+                if (newScore > alpha) {
+                    improvedAlpha = true;
+                    alpha = newScore;
+                    if (isRoot)
+                        threadData.rootBestMove = move;
+                    if (newScore > beta)
+                        break;
+                } // end if newScore > alpha
             } // end if newScore > bestScore
         } // end if move is legal
     } // end for loop over moves
