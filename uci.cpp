@@ -9,6 +9,7 @@
 #include "searchglobals.h"
 #include "chessboard.h"
 #include "search.h"
+#include "bench.h"
 
 
 void uciLoop() {
@@ -126,6 +127,10 @@ void uciLoop() {
 
         else if (command == "staticeval") {
             std::cout << position.getEval() << std::endl;
+        }
+
+        else if (command == "bench") {
+            bench();
         }
 
         else if (command == "quit") {
