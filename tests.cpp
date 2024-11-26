@@ -12,6 +12,7 @@
 #include "chessboard.h"
 #include "perft.h"
 #include "search.h"
+#include "moveorder.h"
 
 // I don't think this is really necessary
 // But why not leave it in
@@ -635,6 +636,10 @@ void printFenMoveOrder(const std::string& fen) {
         if (mvs::isTactical(move))
             moves.push_back(move);
     }
+
+    scoreMovesByMVVLVA(moves);
+    std::sort(moves.begin(), moves.end());
+
     for (move_t move: rawMoves) {
         if (mvs::isQuiet(move))
             moves.push_back(move);
