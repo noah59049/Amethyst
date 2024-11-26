@@ -7,6 +7,7 @@
 #include <random>
 #include <unordered_map>
 #include <utility>
+#include <functional>
 
 #include "flags.h"
 #include "chessboard.h"
@@ -638,7 +639,7 @@ void printFenMoveOrder(const std::string& fen) {
     }
 
     scoreMovesByMVVLVA(moves);
-    std::sort(moves.begin(), moves.end());
+    std::sort(moves.begin(), moves.end(), std::greater<move_t>());
 
     for (move_t move: rawMoves) {
         if (mvs::isQuiet(move))
