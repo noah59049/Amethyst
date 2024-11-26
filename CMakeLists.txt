@@ -12,6 +12,8 @@ add_executable(amethyst_chess3 main.cpp
         search.cpp
         searchglobals.cpp
         bench.cpp
+        moveorder.cpp
+        moveorder.h
 )
 
 add_executable(amethyst_chess3_test tests.cpp
@@ -23,4 +25,6 @@ add_executable(amethyst_chess3_test tests.cpp
         search.cpp
         searchglobals.cpp
         bench.cpp
+        moveorder.cpp
+        moveorder.h
 )

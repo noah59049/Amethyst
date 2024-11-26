@@ -1,5 +1,7 @@
 #include "search.h"
 
+#include "moveorder.h"
+
 #include <iostream>
 #include <exception>
 #include <chrono>
@@ -85,6 +87,10 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         if (mvs::isTactical(move))
             moves.push_back(move);
     }
+
+    scoreMovesByMVVLVA(moves);
+    std::sort(moves.begin(), moves.end());
+
     for (move_t move : rawMoves) {
         if (mvs::isQuiet(move))
             moves.push_back(move);
