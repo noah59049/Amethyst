@@ -627,6 +627,24 @@ void runEasyPuzzleTestSuite(const std::string& bookFilename, const std::string& 
     }
 } // end runEasyPuzzleTestSuite
 
+void printFenMoveOrder(const std::string& fen) {
+    ChessBoard board = ChessBoard::fromFEN(fen);
+    MoveList rawMoves = board.getPseudoLegalMoves();
+    MoveList moves;
+    for (move_t move: rawMoves) {
+        if (mvs::isTactical(move))
+            moves.push_back(move);
+    }
+    for (move_t move: rawMoves) {
+        if (mvs::isQuiet(move))
+            moves.push_back(move);
+    }
+
+    for (move_t move: moves) {
+        std::cout << moveToLAN(move) << std::endl;
+    }
+}
+
 int main() {
     std::cout << "Hello, World!" << std::endl;
 //    runAllMovesTests();
@@ -638,8 +656,9 @@ int main() {
 //    startposPerft(6); // This looks good
 //    runPerftSuite("standard.epd", true);
 //    runZobristPerftSuite("standard.epd", true); // This only works if we stop printing halfmove and fullmove in fens
-    runEvalTestSuite("tiny_tests.txt", "expected_eval.txt");
-    runEasyPuzzleTestSuite("easy_puzzles.txt", "easy_puzzle_answers.txt");
+//    runEvalTestSuite("tiny_tests.txt", "expected_eval.txt");
+//    runEasyPuzzleTestSuite("easy_puzzles.txt", "easy_puzzle_answers.txt");
+    printFenMoveOrder("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"); // kiwipete
 
     return 0;
 }
