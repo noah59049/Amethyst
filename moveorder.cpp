@@ -23,7 +23,7 @@ uint32_t getMVVLVAScore(move_t move) {
 // We assume all the moves in here are captures
 void scoreMovesByMVVLVA(MoveList& moves) {
     for (move_t& move : moves)
-        move |= getMVVLVAScore(move) << 19;
-    // Note that we add mvvlvaScore << 19 because that doesn't affect any of the information we have in a move
+        move |= getMVVLVAScore(move) << 22;
+    // Note that we add mvvlvaScore << 22 because that doesn't affect any of the information we have in a move
     // And using the high bits allows us to sort moves by raw value
 }
