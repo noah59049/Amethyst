@@ -646,7 +646,10 @@ void printFenMoveOrder(const std::string& fen) {
     }
 
     for (move_t move: moves) {
-        std::cout << moveToLAN(move) << std::endl;
+        std::cout << moveToLAN(move);
+        if (mvs::isCapture(move))
+            std::cout << " " << getMVVLVAScore(move);
+        std::cout << std::endl;
     }
 }
 
