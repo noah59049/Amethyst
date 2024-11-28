@@ -14,7 +14,7 @@ namespace sg {
 
     struct SearchStackEntry {
         zobrist_t zobristCode = 0;
-        eval_t stacticEval = 0;
+        eval_t staticEval = 0;
         move_t move = 0; // this is the move that lead to the position
     };
 
