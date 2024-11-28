@@ -74,11 +74,16 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         return board.getEval();
 
     // Step 5: Initialize variables for moves searched through
+    eval_t staticEval = board.getEval();
     MoveList rawMoves = board.getPseudoLegalMoves();
     eval_t bestScore = sg::SCORE_MIN;
     move_t bestMove = 0;
     int movesSearched = 0;
     bool improvedAlpha = false;
+
+    // Step 6: Overwrite the current entry of the search stack
+    threadData.searchStack[ply].zobristCode = board.getZobristCode();
+    threadData.searchStack[ply].staticEval = staticEval;
 
     // Step 6: Sort moves according to: tactical moves, then quiets
     // This could be done more efficiently with staged movegen
