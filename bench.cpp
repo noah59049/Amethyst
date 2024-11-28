@@ -68,4 +68,6 @@ perft_t bench() {
     std::cout << "-------------BENCH RESULTS-------------" << std::endl;
     std::cout << totalNodes << " nodes " << ms << " ms " <<  nps << " nps" << std::endl;
     std::cout << "---------------------------------------" << std::endl;
+
+    return totalNodes;
 }
