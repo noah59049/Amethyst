@@ -2,6 +2,7 @@
 
 #include <chrono>
 #include <climits>
+#include <array>
 
 #include "typedefs.h"
 
@@ -11,10 +12,17 @@ namespace sg {
     constexpr eval_t SCORE_MAX = 32767;
     constexpr eval_t SCORE_MATE = 32700;
 
+    struct SearchStackEntry {
+        zobrist_t zobristCode = 0;
+        eval_t stacticEval = 0;
+        move_t move = 0; // this is the move that lead to the position
+    };
+
     struct ThreadData {
         perft_t nodes = 0;
         move_t rootBestMove = 0;
         std::chrono::time_point<std::chrono::high_resolution_clock> searchStartTime = std::chrono::high_resolution_clock::now();
+        std::array<SearchStackEntry, 128> searchStack;
     };
 
     // softTimeLimit and hardTimeLimit are measured in milliseconds
