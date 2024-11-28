@@ -5,7 +5,6 @@
 #include <iostream>
 #include <exception>
 #include <chrono>
-#include <functional>
 
 class SearchCancelledException : std::exception {
 
@@ -88,10 +87,6 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         if (mvs::isTactical(move))
             moves.push_back(move);
     }
-
-    scoreMovesByMVVLVA(moves);
-    std::sort(moves.begin(), moves.end(), std::greater<move_t>());
-
     for (move_t move : rawMoves) {
         if (mvs::isQuiet(move))
             moves.push_back(move);
