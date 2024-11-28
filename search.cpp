@@ -86,7 +86,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     threadData.searchStack[ply].move = lastMove;
     threadData.searchStack[ply].staticEval = staticEval;
 
-    // Step 6: Sort moves according to: tactical moves, then quiets
+    // Step 7: Sort moves according to: tactical moves, then quiets
     // This could be done more efficiently with staged movegen
     MoveList moves;
     for (move_t move : rawMoves) {
@@ -98,7 +98,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
             moves.push_back(move);
     }
 
-    // Step 7: Search all the moves
+    // Step 8: Search all the moves
     for (move_t move : moves) {
         if (board.isLegal(move)) {
             if (is50mrDraw)
@@ -122,11 +122,11 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         } // end if move is legal
     } // end for loop over moves
 
-    // Step 8: Deal with checkmates and stalemates
+    // Step 9: Deal with checkmates and stalemates
     if (movesSearched == 0) {
         return inCheck ? -sg::SCORE_MATE : 0;
     }
 
-    // Step 9: Return the score
+    // Step 10: Return the score
     return bestScore;
 }
