@@ -67,7 +67,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     const bool inCheck = board.isInCheck();
 
     // Step 4: Check for game end conditions
-    // Annoyingly, if there is have been 50 moves since a capture or pawn move and you are in checkmate, it's not a draw.
+    // Annoyingly, if there have been 50 moves since a capture or pawn move and you are in checkmate, it's not a draw.
     if (is50mrDraw and !inCheck)
         return 0;
     if (depth == 0)
