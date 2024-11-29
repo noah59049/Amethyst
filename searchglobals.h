@@ -5,6 +5,7 @@
 #include <array>
 
 #include "typedefs.h"
+#include "repetitiontable.h"
 
 
 namespace sg {
@@ -30,6 +31,8 @@ namespace sg {
     extern int hardTimeLimit;
     extern int depthLimit;
     extern perft_t nodesLimit;
+
+    extern std::array<RepetitionTable, 2> repetitionTables;
 
     // Insert TT
 

@@ -5,4 +5,6 @@ namespace sg {
     int hardTimeLimit = 0;
     int depthLimit = 100;
     perft_t nodesLimit = INT64_MAX;
+
+    std::array<RepetitionTable, 2> repetitionTables{};
 }

@@ -14,6 +14,8 @@ add_executable(amethyst_chess3 main.cpp
         bench.cpp
         moveorder.cpp
         moveorder.h
+        repetitiontable.cpp
+        repetitiontable.h
 )
 
 add_executable(amethyst_chess3_test tests.cpp
@@ -27,4 +29,6 @@ add_executable(amethyst_chess3_test tests.cpp
         bench.cpp
         moveorder.cpp
         moveorder.h
+        repetitiontable.cpp
+        repetitiontable.h
 )
