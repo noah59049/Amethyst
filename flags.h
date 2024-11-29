@@ -188,6 +188,10 @@ namespace mvs {
         return isShortCastle(move) or isLongCastle(move);
     }
 
+    inline bool isIrreversible(move_t move) {
+        return isCapture(move) or getPiece(move) == pcs::PAWN;
+    }
+
 
 
     inline move_t constructMove(move_t from, move_t to, move_t flag, piece_t piece, piece_t capturedPiece) {
