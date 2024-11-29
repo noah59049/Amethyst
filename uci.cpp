@@ -40,13 +40,28 @@ void uciLoop() {
         }
 
         else if (command.starts_with("position")) {
+            // Step 1: Clear the repetition tables
+            sg::repetitionTables[sides::WHITE].clear();
+            sg::repetitionTables[sides::BLACK].clear();
+
+            // Step 2: Initialize needed variables
             std::stringstream ss(command);
             std::string word;
             position = ChessBoard::startpos();
             bool parsingMoves = false;
+
+            // Step 3: Loop over the words in the string
             while (ss >> word) {
                 if (parsingMoves) {
-                    position.makeLANMove(word); // TODO: Keep track of repetitions
+                    move_t move = position.parseLANMove(word);
+                    if (mvs::isIrreversible(move)) {
+                        sg::repetitionTables[sides::WHITE].clear();
+                        sg::repetitionTables[sides::BLACK].clear();
+                    }
+                    else {
+                        sg::repetitionTables[position.getSTM()].insert(position.getZobristCode());
+                    }
+                    position.makemove(move);
                 }
 
                 else if (word == "fen") {
@@ -64,6 +79,10 @@ void uciLoop() {
                     parsingMoves = true;
                 } // end if word == "moves"
             } // end while ss >> word
+
+            // Step 4: Add the last position to the repetition table
+            // We do this because when parsing moves, the position BEFORE the move was made was added to the repetition table
+            sg::repetitionTables[position.getSTM()].insert(position.getZobristCode());
         } // end if command starts with position
 
         else if (command.starts_with("go")) {
