@@ -72,6 +72,8 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         return 0;
     if (depth == 0)
         return board.getEval();
+    if (!isRoot and sg::repetitionTables[board.getSTM()].isRepeated(board.getZobristCode()))
+        return 0;
 
     // Step 5: Initialize variables for moves searched through
     eval_t staticEval = board.getEval();
