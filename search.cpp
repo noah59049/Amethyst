@@ -5,6 +5,7 @@
 #include <iostream>
 #include <exception>
 #include <chrono>
+#include <functional>
 
 class SearchCancelledException : std::exception {
 
@@ -67,7 +68,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     const bool inCheck = board.isInCheck();
 
     // Step 4: Check for game end conditions
-    // Annoyingly, if there have been 50 moves since a capture or pawn move and you are in checkmate, it's not a draw.
+    // Annoyingly, if there have been 50 moves since a capture or pawn move, and you are in checkmate, it's not a draw.
     if (is50mrDraw and !inCheck)
         return 0;
     if (depth == 0)
@@ -95,6 +96,11 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         if (mvs::isTactical(move))
             moves.push_back(move);
     }
+
+    scoreMovesByMVVLVA(moves);
+    std::sort(moves.begin(), moves.end(), std::greater<move_t>());
+
+
     for (move_t move : rawMoves) {
         if (mvs::isQuiet(move))
             moves.push_back(move);
