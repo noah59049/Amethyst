@@ -117,7 +117,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
                     alpha = newScore;
                     if (isRoot)
                         threadData.rootBestMove = move;
-                    if (newScore > beta)
+                    if (newScore >= beta)
                         break;
                 } // end if newScore > alpha
             } // end if newScore > bestScore
