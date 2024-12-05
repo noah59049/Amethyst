@@ -764,10 +764,10 @@ eval_t ChessBoard::getEval() const {
 
     // Step 2: Loop through all the piece types, adding up their values
     // We don't add the king's material value since every side always has exactly 1 king
-    for (piece_t piece = pcs::PAWN; piece < pcs::KING; piece++) {
+    for (piece_t piece = pcs::PAWN; piece <= pcs::KING; piece++) {
         for (side_t side = 0; side < 2; side++) {
             bitboard_t remainingPieces = pieceTypes[piece] & colors[side];
-            phase += std::popcount(remainingPieces);
+            phase += hce::PHASE_PIECE_VALUES[piece] * std::popcount(remainingPieces);
             bitboard_t squareBB;
             square_t square;
             while (remainingPieces) {
