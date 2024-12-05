@@ -765,12 +765,22 @@ eval_t ChessBoard::getEval() const {
     // Step 2: Loop through all the piece types, adding up their values
     // We don't add the king's material value since every side always has exactly 1 king
     for (piece_t piece = pcs::PAWN; piece < pcs::KING; piece++) {
-        int whitePieceCount = std::popcount(pieceTypes[piece] & colors[sides::WHITE]);
-        int blackPieceCount = std::popcount(pieceTypes[piece] & colors[sides::BLACK]);
-        phase += (whitePieceCount + blackPieceCount) * hce::PHASE_PIECE_VALUES[piece];
-
-        packedEval += hce::material[piece] * (whitePieceCount - blackPieceCount);
-    }
+        for (side_t side = 0; side < 2; side++) {
+            bitboard_t remainingPieces = pieceTypes[piece] & colors[side];
+            phase += std::popcount(remainingPieces);
+            bitboard_t squareBB;
+            square_t square;
+            while (remainingPieces) {
+                squareBB = remainingPieces & -remainingPieces;
+                remainingPieces -= squareBB;
+                square = log2ll(squareBB);
+                if (side == sides::WHITE)
+                    packedEval += hce::real_psts[piece][square];
+                else
+                    packedEval -= hce::real_psts[piece][square ^ 7];
+            } // end while remainingPieces
+        } // end for loop over side
+    } // end for loop over piece type
 
     // Step 3: Unpack the eval
     eval_t whiteRelativeEval = hce::evalFromPacked(packedEval, phase);
