@@ -665,10 +665,10 @@ int main() {
 //    startposPerft(6); // This looks good
 //    runPerftSuite("standard.epd", true);
 //    runZobristPerftSuite("standard.epd", true); // This only works if we stop printing halfmove and fullmove in fens
-//    runEvalTestSuite("tiny_tests.txt", "expected_eval.txt");
+    runEvalTestSuite("tiny_tests.txt", "expected_eval.txt");
 //    runEasyPuzzleTestSuite("easy_puzzles.txt", "easy_puzzle_answers.txt");
 //    printFenMoveOrder("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"); // kiwipete
-    printFenMoveOrder("r1b1k2r/pPpp1p2/8/2b1p1pp/2Qnn1P1/2PP1N2/1qN1PPBP/R1B1K2R w KQkq - 0 14");
+//    printFenMoveOrder("r1b1k2r/pPpp1p2/8/2b1p1pp/2Qnn1P1/2PP1N2/1qN1PPBP/R1B1K2R w KQkq - 0 14");
 
     return 0;
 }
