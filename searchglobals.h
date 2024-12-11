@@ -24,6 +24,7 @@ namespace sg {
         move_t rootBestMove = 0;
         std::chrono::time_point<std::chrono::high_resolution_clock> searchStartTime = std::chrono::high_resolution_clock::now();
         std::array<SearchStackEntry, 128> searchStack{};
+        std::array<std::array<history_t, 4096>, 2> butterflyHistory{};
     };
 
     // softTimeLimit and hardTimeLimit are measured in milliseconds

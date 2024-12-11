@@ -49,7 +49,7 @@ sg::ThreadData rootSearch(const ChessBoard board) {
     return rootThreadData;
 }
 
-eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t depth, depth_t ply, eval_t alpha, eval_t beta, move_t lastMove) {
+eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t depth, const depth_t ply, eval_t alpha, const eval_t beta, const move_t lastMove) {
     // Step 1: Increment nodes
     threadData.nodes++;
 
@@ -66,6 +66,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     const bool isRoot = ply == 0;
     const bool is50mrDraw = board.getHalfmove() >= 100;
     const bool inCheck = board.isInCheck();
+    const side_t stm = board.getSTM();
 
     // Step 4: Check for game end conditions
     // Annoyingly, if there have been 50 moves since a capture or pawn move, and you are in checkmate, it's not a draw.
@@ -77,7 +78,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         return 0;
 
     // Step 5: Initialize variables for moves searched through
-    eval_t staticEval = board.getEval();
+    const eval_t staticEval = board.getEval();
     MoveList rawMoves = board.getPseudoLegalMoves();
     eval_t bestScore = sg::SCORE_MIN;
     move_t bestMove = 0;
@@ -98,13 +99,16 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     }
 
     scoreMovesByMVVLVA(moves);
-    std::sort(moves.begin(), moves.end(), std::greater<move_t>());
+    std::sort(moves.begin(), moves.end(), std::greater<>());
 
-
+    const auto quietBeginning = moves.end();
     for (move_t move : rawMoves) {
-        if (mvs::isQuiet(move))
+        if (mvs::isQuiet(move)) {
+            move |= move_t(threadData.butterflyHistory[stm][mvs::getFromTo(move)]) << 22;
             moves.push_back(move);
+        }
     }
+    std::sort(quietBeginning, moves.end(), std::greater<>());
 
     // Step 8: Search all the moves
     for (move_t move : moves) {
@@ -129,6 +133,12 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
             } // end if newScore > bestScore
         } // end if move is legal
     } // end for loop over moves
+
+    // Step 9: Update history in case of a beta cutoff from a quiet move
+    if (bestScore >= alpha and mvs::isQuiet(bestMove)) {
+        const auto fromTo = mvs::getFromTo(bestMove);
+        threadData.butterflyHistory[stm][fromTo] = std::max(threadData.butterflyHistory[stm][fromTo] + history_t(depth) * history_t(depth), 1023);
+    }
 
     // Step 9: Deal with checkmates and stalemates
     if (movesSearched == 0) {
