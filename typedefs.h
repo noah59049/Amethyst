@@ -14,3 +14,4 @@ using depth_t = int8_t;
 using packed_eval_t = uint32_t;
 using phase_t = int16_t;
 using history_t = int16_t;
+using ttflag_t = uint8_t;

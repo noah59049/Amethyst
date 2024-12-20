@@ -16,6 +16,8 @@ add_executable(amethyst_chess3 main.cpp
         moveorder.h
         repetitiontable.cpp
         repetitiontable.h
+        tt.cpp
+        tt.h
 )
 
 add_executable(amethyst_chess3_test tests.cpp
