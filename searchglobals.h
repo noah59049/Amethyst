@@ -6,7 +6,7 @@
 
 #include "typedefs.h"
 #include "repetitiontable.h"
-
+#include "tt.h"
 
 namespace sg {
     constexpr eval_t SCORE_MIN = -32767;
@@ -35,7 +35,7 @@ namespace sg {
 
     extern std::array<RepetitionTable, 2> repetitionTables;
 
-    // Insert TT
+    extern TT GLOBAL_TT;
 
 }
 

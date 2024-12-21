@@ -7,4 +7,6 @@ namespace sg {
     perft_t nodesLimit = INT64_MAX;
 
     std::array<RepetitionTable, 2> repetitionTables{};
+
+    TT GLOBAL_TT;
 }
