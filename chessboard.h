@@ -74,6 +74,8 @@ public:
     // And weird edge cases for en passant and castling
     // We use this method when fetching moves from the TT
     // To prevent crashes in the case of zobrist collisions
+    // This assumes that the move is either 0 or was pseudolegal in some position
+    // The behavior is undefined if the move is nonzero and isn't pseudolegal in any position
     [[nodiscard]] bool isPseudolegal(move_t move) const;
 
     // Determines if the move is legal
