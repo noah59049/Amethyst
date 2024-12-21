@@ -24,7 +24,7 @@ void uciLoop() {
             std::cout << "id name Amethyst" << std::endl;
             std::cout << "id author Noah Holbrook" << std::endl;
             std::cout << "option name Hash type spin default " << uciopt::HASH_DEFAULT << " min " << uciopt::HASH_MIN << " max " << uciopt::HASH_MAX << std::endl;
-            std::cout << "option name Threads type spin default " << uciopt::HASH_DEFAULT << " min " << uciopt::HASH_MIN << " max " << uciopt::HASH_MAX << std::endl;
+            std::cout << "option name Threads type spin default " << uciopt::THREADS_DEFAULT << " min " << uciopt::THREADS_MIN << " max " << uciopt::THREADS_MAX << std::endl;
             std::cout << "option name SyzygyPath type string default <empty>" << std::endl;
             std::cout << "option name UCI_ShowWDL type check default false" << std::endl;
             std::cout << "option name Move Overhead type spin default 10 min 0 max 5000" << std::endl;
