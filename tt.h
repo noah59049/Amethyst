@@ -35,6 +35,8 @@ private:
 public:
     TT();
 
+    void clear();
+
     [[nodiscard]] TTEntry get(zobrist_t zobristCode) const;
 
     void put(zobrist_t zobristCode, move_t ttMove, eval_t eval, ttflag_t ttFlag, depth_t depth);

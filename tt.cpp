@@ -5,6 +5,10 @@ TT::TT() {
     table = std::vector<TTEntry>((uciopt::HASH << 20) / sizeof(TTEntry));
 }
 
+void TT::clear() {
+    table = std::vector<TTEntry>((uciopt::HASH << 20) / sizeof(TTEntry));
+}
+
 TTEntry TT::get(const zobrist_t zobristCode) const {
     const size_t index = this->getIndex(zobristCode);
     const TTEntry entry = table[index];
