@@ -18,6 +18,6 @@ TTEntry TT::get(const zobrist_t zobristCode) const {
         return {};
 }
 
-void TT::put(zobrist_t zobristCode, move_t ttMove, eval_t eval, ttflag_t ttFlag, depth_t depth) {
-    table[getIndex(zobristCode)] = {zobristCode, ttMove, eval, ttFlag, depth};
+void TT::put(zobrist_t zobristCode, move_t ttMove, eval_t score, ttflag_t ttFlag, depth_t depth) {
+    table[getIndex(zobristCode)] = {zobristCode, ttMove, score, ttFlag, depth};
 }

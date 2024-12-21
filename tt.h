@@ -14,7 +14,7 @@ namespace ttflags {
 struct TTEntry {
     zobrist_t zobristCode = 0;
     move_t ttMove = 0;
-    eval_t eval = 0;
+    eval_t score = 0;
     ttflag_t ttFlag = 0;
     depth_t depth = 0;
 
