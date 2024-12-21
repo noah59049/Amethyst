@@ -579,7 +579,7 @@ bool ChessBoard::isPseudolegal(move_t move) const {
         if (!rights::canSideCastleShort(stm, epCastlingRights))
             return false;
         // Squares in between king and rook must be empty
-        if ((colors[stm] >> 7 * stm & masks::E1_THROUGH_H1) != masks::E1_H1)
+        if ((allPieces >> 7 * stm & masks::E1_THROUGH_H1) != masks::E1_H1)
             return false;
     }
 
@@ -591,7 +591,7 @@ bool ChessBoard::isPseudolegal(move_t move) const {
         if (!rights::canSideCastleLong(stm, epCastlingRights))
             return false;
         // Squares in between king and rook must be empty
-        if ((colors[stm] >> 7 * stm & masks::E1_THROUGH_A1) != masks::E1_A1)
+        if ((allPieces >> 7 * stm & masks::E1_THROUGH_A1) != masks::E1_A1)
             return false;
     }
 
