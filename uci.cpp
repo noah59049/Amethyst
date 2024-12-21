@@ -36,7 +36,7 @@ void uciLoop() {
         }
 
         else if (command == "ucinewgame") {
-            // TODO: do what ucinewgame does
+            sg::GLOBAL_TT.clear();
         }
 
         else if (command.starts_with("position")) {
