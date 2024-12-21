@@ -20,10 +20,10 @@ struct MoveList {
         return moveList[index];
     }
 
-    inline std::array<move_t,218>::iterator begin() {
+    inline std::array<move_t,256>::iterator begin() {
         return moveList.begin();
     }
-    inline std::array<move_t,218>::iterator end() {
+    inline std::array<move_t,256>::iterator end() {
         return moveList.begin() + size;
     }
 };
