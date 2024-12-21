@@ -32,6 +32,8 @@ perft_t perft(const ChessBoard& board, depth_t depth) {
         } // end for loop over all pseudolegal moves
     } // end if constexpr doPseudolegal check
 
+//    std::cout << "all pseudolegal moves is size" << allPseudolegalMoves.size();
+
     perft_t count = 0;
     for (move_t move : moves) {
         if (!board.isPseudolegal(move)) {
