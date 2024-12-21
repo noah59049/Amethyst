@@ -60,6 +60,8 @@ perft_t bench() {
         totalNodes += result.nodes;
     }
 
+    sg::GLOBAL_TT.clear();
+
     auto end = std::chrono::high_resolution_clock::now();
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
     auto ms = duration.count();
