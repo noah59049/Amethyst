@@ -659,8 +659,11 @@ void manualTTTest() {
     TT tt;
     tt.put(1234567890ULL, mvs::constructMove(9,11,flags::DOUBLE_PAWN_PUSH_FLAG, pcs::PAWN, pcs::PAWN), 100, 1, 6);
 
-//    TTEntry e1 = tt.get(1234567890ULL); // tt hit
-    TTEntry e1 = tt.get(1234567891ULL); // index collision
+    tt.put(809765213ULL, mvs::constructMove(squares::e8,squares::c8,flags::LONG_CASTLE_FLAG, pcs::KING, 0), -349, 3, 9); // Index collision
+
+    TTEntry e1 = tt.get(1234567890ULL); // tt hit
+//    TTEntry e1 = tt.get(809765213ULL); // other tt hit
+//    TTEntry e1 = tt.get(1234567891ULL); // index collision
 //    TTEntry e1 = tt.get(0); // other index collision
 //    TTEntry e1 = tt.get(~0ULL); // different (empty) bucket
     std::cout << "zobristCode is " << e1.zobristCode << std::endl;
