@@ -67,6 +67,15 @@ public:
     // This is useful for determining if a pseudolegal move is legal.
     [[nodiscard]] bool canTheKingBeTaken() const;
 
+    // Determines if the move is pseudolegal
+    // This means, is there a piece on the start square that could move to the end square
+    // That doesn't capture a friendly piece
+    // And the flag must be right as well
+    // And weird edge cases for en passant and castling
+    // We use this method when fetching moves from the TT
+    // To prevent crashes in the case of zobrist collisions
+    [[nodiscard]] bool isPseudolegal(move_t move) const;
+
     // Determines if the move is legal
     // Note that this is only determining "does this move not expose my king to check (and the legality check for castling through check)"
     // And this function assumes the move is pseodolegal
@@ -101,10 +110,12 @@ public:
         return pieceGivingCheck != NOT_IN_CHECK_CODE;
     }
 
+    // Gets the side to move.
     [[nodiscard]] inline side_t getSTM() const {
         return stm;
     }
 
+    // Gets the halfmove, or how many moves have been made since a pawn move or a capture.
     [[nodiscard]] inline auto getHalfmove() const {
         return halfmove;
     }

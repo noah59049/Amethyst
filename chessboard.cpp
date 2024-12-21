@@ -541,6 +541,110 @@ bool ChessBoard::canTheKingBeTaken() const {
     return false;
 }
 
+bool ChessBoard::isPseudolegal(move_t move) const {
+    // Step 0: Get info from move
+    const piece_t piece = mvs::getPiece(move);
+    const square_t from = mvs::getFrom(move);
+    const square_t to = mvs::getTo(move);
+    const bitboard_t fromBB = 1ULL << from;
+    const bitboard_t toBB = 1ULL << to;
+    const bitboard_t allPieces = colors[sides::WHITE] | colors[sides::BLACK];
+
+    // Step 1: Check that there is a piece on the start square
+    if ((fromBB & pieceTypes[piece] & colors[stm]) == 0) {
+        return false;
+    }
+
+    // Step 2: Make sure that if the move is a capture, a piece is actually captured
+    // Also make sure that if the move is not a capture, a piece is not captured
+    if (mvs::isCapture(move) and !mvs::isEP(move)) {
+        if ((colors[stm ^ 1] & toBB) == 0)
+            return false;
+    }
+    else {
+        if (allPieces & toBB)
+            return false;
+    }
+
+    // Step 3: Handle castling
+    if (mvs::isShortCastle(move)) {
+        // We must not be in check (isLegal doesn't check this)
+        if (isInCheck())
+            return false;
+        // We must have castling rights
+        if (!rights::canSideCastleShort(stm, epCastlingRights))
+            return false;
+        // Squares in between king and rook must be empty
+        if ((colors[stm] >> 7 * stm & masks::E1_THROUGH_H1) != masks::E1_H1)
+            return false;
+    }
+
+    if (mvs::isLongCastle(move)) {
+        // We must not be in check (isLegal doesn't check this)
+        if (isInCheck())
+            return false;
+        // We must have castling rights
+        if (!rights::canSideCastleLong(stm, epCastlingRights))
+            return false;
+        // Squares in between king and rook must be empty
+        if ((colors[stm] >> 7 * stm & masks::E1_THROUGH_A1) != masks::E1_A1)
+            return false;
+    }
+
+    // Step 4: Handle en passant
+    if (mvs::isEP(move)) {
+        // The destination square must be empty (we already checked this)
+        if (allPieces & toBB)
+            exit(1);
+        // The piece moving must be a pawn (check not needed because all EP moves generated have piece == PAWN)
+        if (piece != pcs::PAWN)
+            exit(1);
+        // The piece moving must be on the fifth rank for white or fourth rank for black
+        if (squares::getRank(from) != 4 - stm)
+            return false;
+        // En passant must be possible
+        if (!rights::isEPPossible(epCastlingRights))
+            return false;
+        // The destination file must be equal to the pawn that last moved two squares
+        if (squares::getFile(to) != rights::extractEPRights(epCastlingRights))
+            return false;
+    }
+
+    // Step 5: Handle promotions
+    if (mvs::isPromotion(move)) {
+        // The piece moving must be a pawn (check not needed because all promotions generated are pawn moves)
+        if (piece != pcs::PAWN)
+            exit(1);
+    }
+
+    // Step 6: Handle double pawn pushes
+    if (mvs::isDoublePawnPush(move)) {
+        // There must be nothing in front of the pawn
+        // The start square must be on the correct rank
+        if (stm == sides::WHITE) {
+            return (fromBB & masks::SECOND_RANK  and ~allPieces & fromBB << 1);
+        }
+        else {
+            return (fromBB & masks::SEVENTH_RANK and ~allPieces & fromBB >> 1);
+        }
+    }
+
+    // Step 7: Handle single pawn pushes
+    else if (piece == pcs::PAWN and !mvs::isCapture(move)) {
+        // The pawn must move forwards one square
+        // This avoids issues where the other side moves a pawn the other direction
+        if (to - from != 1 - 2 * stm)
+            return false;
+    }
+
+    // Step 8: Make sure that the piece attacks the destination square
+    else {
+        return getAttackedSquares(from,piece,allPieces,stm) & toBB;
+    }
+
+    return true;
+}
+
 bool ChessBoard::isLegal(move_t move) const {
     ChessBoard newBoard = *this;
     if (mvs::isCastle(move)) {
