@@ -1,5 +1,9 @@
 #include "perft.h"
 #include <iostream>
+#include <unordered_set>
+
+std::unordered_set<move_t> allPseudolegalMoves; // This is the set of all pseudolegal moves in all positions everywhere
+constexpr bool doPseudolegalCheck = true;
 
 perft_t perft(const ChessBoard& board, depth_t depth) {
     board.areBitboardsCorrect();
@@ -8,11 +12,23 @@ perft_t perft(const ChessBoard& board, depth_t depth) {
         return 1;
     MoveList moves = board.getPseudoLegalMoves();
 
+    if constexpr (doPseudolegalCheck) {
+        // For every move that was pseudolegal in any position
+        for (move_t move : allPseudolegalMoves) {
+            if (!board.isPseudolegal(move)) {
+                for (move_t move : )
+            }
+        }
+    }
+
     perft_t count = 0;
     for (move_t move : moves) {
         if (!board.isPseudolegal(move)) {
             std::cout << "FAILED isPseudolegal test: move " << moveToLAN(move) << "was in move list but failed isPseudolegal test" << std::endl;
             exit(1);
+        }
+        else if constexpr (doPseudolegalCheck) {
+            allPseudolegalMoves.insert(move);
         }
 
         if (board.isLegal(move)) {
