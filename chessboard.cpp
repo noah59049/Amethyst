@@ -638,7 +638,7 @@ bool ChessBoard::isPseudolegal(move_t move) const {
     }
 
     // Step 8: Make sure that the piece attacks the destination square
-    else {
+    else if (!mvs::isCastle(move)){
         return getAttackedSquares(from,piece,allPieces,stm) & toBB;
     }
 
