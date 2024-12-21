@@ -10,6 +10,11 @@ perft_t perft(const ChessBoard& board, depth_t depth) {
 
     perft_t count = 0;
     for (move_t move : moves) {
+        if (!board.isPseudolegal(move)) {
+            std::cout << "FAILED isPseudolegal test: move " << moveToLAN(move) << "was in move list but failed isPseudolegal test" << std::endl;
+            exit(1);
+        }
+
         if (board.isLegal(move)) {
             // Here we do checks that the move is the same when we convert it to LAN and back
             std::string move1 = moveToLAN(move);
