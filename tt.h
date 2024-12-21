@@ -1,14 +1,13 @@
 #pragma once
 #include "typedefs.h"
-#include "searchglobals.h"
 
 #include <vector>
 
 namespace ttflags {
-    ttflag_t EMPTY = 0;
-    ttflag_t UPPER_BOUND = 1;
-    ttflag_t LOWER_BOUND = 2;
-    ttflag_t EXACT = 3;
+    constexpr ttflag_t EMPTY = 0;
+    constexpr ttflag_t UPPER_BOUND = 1;
+    constexpr ttflag_t LOWER_BOUND = 2;
+    constexpr ttflag_t EXACT = 3;
 
 }
 

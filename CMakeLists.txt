@@ -18,6 +18,8 @@ add_executable(amethyst_chess3 main.cpp
         repetitiontable.h
         tt.cpp
         tt.h
+        uciopt.cpp
+        uciopt.h
 )
 
 add_executable(amethyst_chess3_test tests.cpp
@@ -33,4 +35,8 @@ add_executable(amethyst_chess3_test tests.cpp
         moveorder.h
         repetitiontable.cpp
         repetitiontable.h
+        uciopt.cpp
+        uciopt.h
+        tt.h
+        tt.cpp
 )
