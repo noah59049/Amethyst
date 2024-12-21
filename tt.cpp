@@ -8,7 +8,7 @@ TT::TT() {
 TTEntry TT::get(const zobrist_t zobristCode) const {
     const size_t index = this->getIndex(zobristCode);
     const TTEntry entry = table[index];
-    if (entry.isNotNull())
+    if (entry.zobristCode == zobristCode)
         return entry;
     else
         return {};
