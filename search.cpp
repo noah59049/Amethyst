@@ -67,6 +67,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     const bool is50mrDraw = board.getHalfmove() >= 100;
     const bool inCheck = board.isInCheck();
     const side_t stm = board.getSTM();
+    const zobrist_t zobristCode = board.getZobristCode();
 
     // Step 4: Check for game end conditions
     // Annoyingly, if there have been 50 moves since a capture or pawn move, and you are in checkmate, it's not a draw.
@@ -74,7 +75,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         return 0;
     if (depth == 0)
         return board.getEval();
-    if (!isRoot and sg::repetitionTables[board.getSTM()].isRepeated(board.getZobristCode()))
+    if (!isRoot and sg::repetitionTables[stm].isRepeated(zobristCode))
         return 0;
 
     // Step 5: Initialize variables for moves searched through
@@ -86,7 +87,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     bool improvedAlpha = false;
 
     // Step 6: Overwrite the current entry of the search stack
-    threadData.searchStack[ply].zobristCode = board.getZobristCode();
+    threadData.searchStack[ply].zobristCode = zobristCode;
     threadData.searchStack[ply].move = lastMove;
     threadData.searchStack[ply].staticEval = staticEval;
 
@@ -140,11 +141,16 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         threadData.butterflyHistory[stm][fromTo] = std::max(threadData.butterflyHistory[stm][fromTo] + history_t(depth) * history_t(depth), 1023);
     }
 
-    // Step 9: Deal with checkmates and stalemates
+    // Step 10: Put something in the TT
+    const ttflag_t ttFlag = bestScore > beta ? ttflags::LOWER_BOUND : (improvedAlpha ? ttflags::EXACT : ttflags::UPPER_BOUND);
+    const move_t bestMoveForTT = improvedAlpha ? bestMove : 0;
+    sg::GLOBAL_TT.put(zobristCode, bestMoveForTT, bestScore, ttFlag, depth);
+
+    // Step 10: Deal with checkmates and stalemates
     if (movesSearched == 0) {
         return inCheck ? -sg::SCORE_MATE : 0;
     }
 
-    // Step 10: Return the score
+    // Step 11: Return the score
     return bestScore;
 }
