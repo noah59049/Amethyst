@@ -14,6 +14,7 @@
 #include "perft.h"
 #include "search.h"
 #include "moveorder.h"
+#include "tt.h"
 
 // I don't think this is really necessary
 // But why not leave it in
@@ -652,6 +653,21 @@ void printFenMoveOrder(const std::string& fen) {
             std::cout << " " << getMVVLVAScore(move);
         std::cout << std::endl;
     }
+}
+
+void manualTTTest() {
+    TT tt;
+    tt.put(1234567890ULL, mvs::constructMove(9,11,flags::DOUBLE_PAWN_PUSH_FLAG, pcs::PAWN, pcs::PAWN), 100, 1, 6);
+
+    TTEntry e1 = tt.get(1234567890ULL); // tt hit
+//    TTEntry e1 = tt.get(1234567891ULL); // index collision
+//    TTEntry e1 = tt.get(0); // other index collision
+//    TTEntry e1 = tt.get(~0ULL); // different (empty) bucket
+    std::cout << "zobristCode is " << e1.zobristCode << std::endl;
+    std::cout << "eval is " << e1.eval << std::endl;
+    std::cout << "ttMove is " << e1.ttMove << std::endl;
+    std::cout << "ttFlag is " << e1.ttFlag << std::endl;
+    std::cout << "depth is " << e1.depth << std::endl;
 }
 
 int main() {
