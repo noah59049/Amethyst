@@ -39,6 +39,28 @@ void uciLoop() {
             sg::GLOBAL_TT.clear();
         }
 
+        else if (command.starts_with("setoption")) {
+            if (command.starts_with("setoption name Hash value")) {
+                std::stringstream ss(command);
+                std::string word;
+                for (int i = 0; i < 4; i++)
+                    ss >> word;
+                ss >> uciopt::HASH;
+                uciopt::HASH = std::clamp(uciopt::HASH, uciopt::HASH_MIN, uciopt::HASH_MAX);
+                std::cout << "info string uci option Hash has been set to " << uciopt::HASH << std::endl;
+            }
+
+            if (command.starts_with("setoption name Threads value")) {
+                std::stringstream ss(command);
+                std::string word;
+                for (int i = 0; i < 4; i++)
+                    ss >> word;
+                ss >> uciopt::THREADS;
+                uciopt::THREADS = std::clamp(uciopt::THREADS, uciopt::THREADS_MIN, uciopt::THREADS_MAX);
+                std::cout << "info string uci option Threads has been set to " << uciopt::THREADS << std::endl;
+            }
+        }
+
         else if (command.starts_with("position")) {
             // Step 1: Clear the repetition tables
             sg::repetitionTables[sides::WHITE].clear();
