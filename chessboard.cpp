@@ -555,10 +555,11 @@ bool ChessBoard::isPseudolegal(move_t move) const {
         return false;
     }
 
-    // Step 2: Make sure that if the move is a capture, a piece is actually captured
+    // Step 2: Make sure that if the move is a capture, the correct piece is actually captured
     // Also make sure that if the move is not a capture, a piece is not captured
     if (mvs::isCapture(move) and !mvs::isEP(move)) {
-        if ((colors[stm ^ 1] & toBB) == 0)
+        const piece_t capturedPiece = mvs::getCapturedPiece(move);
+        if ((colors[stm ^ 1] & pieceTypes[capturedPiece] & toBB) == 0)
             return false;
     }
     else {
