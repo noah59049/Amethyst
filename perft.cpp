@@ -14,12 +14,23 @@ perft_t perft(const ChessBoard& board, depth_t depth) {
 
     if constexpr (doPseudolegalCheck) {
         // For every move that was pseudolegal in any position
+        // If board.isPseudolegal(move), then make sure it is in the move list
         for (move_t move : allPseudolegalMoves) {
-            if (!board.isPseudolegal(move)) {
-                for (move_t move : )
-            }
-        }
-    }
+            if (board.isPseudolegal(move)) {
+                bool found = false;
+                for (move_t move1 : moves) {
+                    if (move == move1)
+                        found = true;
+                }
+                if (!found) {
+                    std::cout << "FAILED pseudolegal check in perft" << std::endl;
+                    std::cout << "FEN is " << board.toFEN() << std::endl;
+                    std::cout << moveToLAN(move) << " returns true for isPseudolegal but is not in the move list" << std::endl;
+                    exit(1);
+                } // end if !found
+            } // end if move is pseudolegal
+        } // end for loop over all pseudolegal moves
+    } // end if constexpr doPseudolegal check
 
     perft_t count = 0;
     for (move_t move : moves) {
