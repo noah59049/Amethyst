@@ -542,6 +542,9 @@ bool ChessBoard::canTheKingBeTaken() const {
 }
 
 bool ChessBoard::isPseudolegal(move_t move) const {
+    if (move == 0)
+        return false;
+
     // Step 0: Get info from move
     const piece_t piece = mvs::getPiece(move);
     const square_t from = mvs::getFrom(move);
