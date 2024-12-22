@@ -171,7 +171,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     }
 
     // Step 12: Put something in the TT
-    const ttflag_t flagForTT = bestScore > beta ? ttflags::LOWER_BOUND : (improvedAlpha ? ttflags::EXACT : ttflags::UPPER_BOUND);
+    const ttflag_t flagForTT = bestScore >= beta ? ttflags::LOWER_BOUND : (improvedAlpha ? ttflags::EXACT : ttflags::UPPER_BOUND);
     const move_t bestMoveForTT = improvedAlpha ? bestMove : 0;
     sg::GLOBAL_TT.put(zobristCode, bestMoveForTT, bestScore, flagForTT, depth);
 
