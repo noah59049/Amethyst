@@ -159,6 +159,11 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         } // end if move is legal
     } // end for loop over moves
 
+    // Step 13: Deal with checkmates and stalemates
+    if (movesSearched == 0) {
+        bestScore = inCheck ? -sg::SCORE_MATE : 0;
+    }
+
     // Step 11: Update history in case of a beta cutoff from a quiet move
     if (bestScore >= beta and mvs::isQuiet(bestMove)) {
         const auto fromTo = mvs::getFromTo(bestMove);
@@ -169,11 +174,6 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     const ttflag_t flagForTT = bestScore > beta ? ttflags::LOWER_BOUND : (improvedAlpha ? ttflags::EXACT : ttflags::UPPER_BOUND);
     const move_t bestMoveForTT = improvedAlpha ? bestMove : 0;
     sg::GLOBAL_TT.put(zobristCode, bestMoveForTT, bestScore, flagForTT, depth);
-
-    // Step 13: Deal with checkmates and stalemates
-    if (movesSearched == 0) {
-        return inCheck ? -sg::SCORE_MATE : 0;
-    }
 
     // Step 14: Return the score
     return bestScore;
