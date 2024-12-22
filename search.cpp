@@ -73,8 +73,6 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     // Annoyingly, if there have been 50 moves since a capture or pawn move, and you are in checkmate, it's not a draw.
     if (is50mrDraw and !inCheck)
         return 0;
-    if (depth == 0)
-        return board.getEval();
     if (!isRoot and sg::repetitionTables[stm].isRepeated(zobristCode))
         return 0;
 
@@ -85,7 +83,21 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     ttflag_t ttFlag = ttEntry.ttFlag;
     depth_t ttDepth = ttEntry.depth;
 
-    // Step 6: Initialize variables for moves searched through
+    // Step 6: Check for TT cutoffs
+    if (!isRoot and ttDepth >= depth) {
+        if (ttFlag == ttflags::EXACT)
+            return ttScore;
+        if (ttFlag == ttflags::UPPER_BOUND and ttScore <= alpha)
+            return ttScore;
+        if (ttFlag == ttflags::LOWER_BOUND and ttScore >= beta)
+            return ttScore;
+    }
+
+    // Step 7: Check if depth is 0 or less
+    if (depth <= 0)
+        return board.getEval();
+
+    // Step 8: Initialize variables for moves searched through
     const eval_t staticEval = board.getEval();
     MoveList rawMoves = board.getPseudoLegalMoves();
     eval_t bestScore = sg::SCORE_MIN;
@@ -93,12 +105,12 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     int movesSearched = 0;
     bool improvedAlpha = false;
 
-    // Step 7: Overwrite the current entry of the search stack
+    // Step 9: Overwrite the current entry of the search stack
     threadData.searchStack[ply].zobristCode = zobristCode;
     threadData.searchStack[ply].move = lastMove;
     threadData.searchStack[ply].staticEval = staticEval;
 
-    // Step 8: Sort moves according to: tt move, then tactical moves, then quiets
+    // Step 9: Sort moves according to: tt move, then tactical moves, then quiets
     // This could be done more efficiently with staged movegen
     MoveList moves;
     if (board.isPseudolegal(ttMove) and board.isLegal(ttMove)) {
@@ -123,7 +135,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     }
     std::sort(quietBeginning, moves.end(), std::greater<>());
 
-    // Step 9: Search all the moves
+    // Step 10: Search all the moves
     for (move_t move : moves) {
         if (board.isLegal(move)) {
             if (is50mrDraw)
@@ -147,22 +159,22 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         } // end if move is legal
     } // end for loop over moves
 
-    // Step 10: Update history in case of a beta cutoff from a quiet move
+    // Step 11: Update history in case of a beta cutoff from a quiet move
     if (bestScore >= beta and mvs::isQuiet(bestMove)) {
         const auto fromTo = mvs::getFromTo(bestMove);
         threadData.butterflyHistory[stm][fromTo] = std::max(threadData.butterflyHistory[stm][fromTo] + history_t(depth) * history_t(depth), 1023);
     }
 
-    // Step 11: Put something in the TT
+    // Step 12: Put something in the TT
     const ttflag_t flagForTT = bestScore > beta ? ttflags::LOWER_BOUND : (improvedAlpha ? ttflags::EXACT : ttflags::UPPER_BOUND);
     const move_t bestMoveForTT = improvedAlpha ? bestMove : 0;
     sg::GLOBAL_TT.put(zobristCode, bestMoveForTT, bestScore, flagForTT, depth);
 
-    // Step 12: Deal with checkmates and stalemates
+    // Step 13: Deal with checkmates and stalemates
     if (movesSearched == 0) {
         return inCheck ? -sg::SCORE_MATE : 0;
     }
 
-    // Step 13: Return the score
+    // Step 14: Return the score
     return bestScore;
 }
