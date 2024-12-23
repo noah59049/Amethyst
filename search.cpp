@@ -113,7 +113,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
 
     // Step 8: Try RFP
     const eval_t staticEval = board.getEval();
-    if (depth <= 5 and staticEval - 100 * depth >= beta)
+    if (!inCheck and depth <= 5 and staticEval - 100 * depth >= beta)
         return beta;
 
     // Step 9: Initialize variables for moves searched through
