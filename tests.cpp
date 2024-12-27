@@ -679,7 +679,7 @@ void printSEEOfMoves(const std::string& fen) {
     std::cout << std::boolalpha;
 
     for (move_t move : board.getPseudoLegalMoves()) {
-        if (moveToLAN(move) == "c3a4") {
+        if (board.isLegal(move)) {
             std::cout << moveToLAN(move) << " " << board.isGoodSEE(move) << std::endl;
         } // end if move is legal
     } // end for loop over pseudolegal moves
