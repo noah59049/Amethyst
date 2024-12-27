@@ -703,7 +703,7 @@ int main() {
 
 //    manualTTTest();
 
-    printSEEOfMoves("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
+    printSEEOfMoves("rnb1k1nr/4qpp1/2p5/p3p3/2N3PN/1p1Q4/PPP1PPBR/2K4R b kq - 0 16");
 
     return 0;
 }
