@@ -44,7 +44,7 @@ eval_t qsearch(sg::ThreadData& threadData, const ChessBoard& board, const depth_
 
     // Step 5: Search all the moves
     for (move_t move : moves) {
-        if (board.isLegal(move)) {
+        if (board.isLegal(move) and board.isGoodSEE(move)) {
             ChessBoard newBoard = board;
             newBoard.makemove(move);
             eval_t newScore = -qsearch(threadData, newBoard, ply + 1, -beta, -alpha, move);
