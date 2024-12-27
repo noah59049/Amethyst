@@ -689,7 +689,7 @@ bool ChessBoard::isLegal(move_t move) const {
 
         if (nstmAttackers and piece < movingPiece)
             return false;
-        if (diff > 1)
+        if (diff > 1 and piece >= movingPiece)
             return true;
         else if (diff < 0)
             return false;
