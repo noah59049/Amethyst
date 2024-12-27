@@ -683,8 +683,9 @@ bool ChessBoard::isLegal(move_t move) const {
     bitboard_t blockers = colors[0] ^ colors[1] ^ fromBB;
 
     for (piece_t piece = pcs::PAWN; piece <= pcs::KING; piece++) {
-        bitboard_t nstmAttackers = getAttackedSquares(to,piece,blockers,stm) & colors[nstm] & pieceTypes[piece];
-        bitboard_t stmAttackers = getAttackedSquares(to,piece,blockers,nstm) & colors[stm] & pieceTypes[piece] & ~fromBB;
+        bitboard_t realBlockers = ~pieceTypes[piece] & blockers; // Using this instead of blockers is does batteries correctly
+        bitboard_t nstmAttackers = getAttackedSquares(to, piece, realBlockers,stm)  & colors[nstm] & pieceTypes[piece];
+        bitboard_t stmAttackers =  getAttackedSquares(to, piece, realBlockers, nstm) & colors[stm] & pieceTypes[piece] & ~fromBB;
         diff += std::popcount(stmAttackers) - std::popcount(nstmAttackers);
 
         if (nstmAttackers and piece < movingPiece)
