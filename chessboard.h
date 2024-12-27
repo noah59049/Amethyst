@@ -84,6 +84,10 @@ public:
     // The behavior is undefined if the move isn't pseudolegal
     [[nodiscard]] bool isLegal(move_t move) const;
 
+    // Returns true if the move has SEE >= 0, false otherwise
+    // The behavior is undefined if the move isn't pseudolegal
+    [[nodiscard]] bool isGoodSEE(move_t move) const;
+
     // Sets the pieceGivingCheck field to whichever square is the piece giving check (if any)
     void updatePieceGivingCheck();
 

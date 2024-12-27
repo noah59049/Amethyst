@@ -661,6 +661,43 @@ bool ChessBoard::isLegal(move_t move) const {
     return !newBoard.canTheKingBeTaken();
 }
 
+[[nodiscard]] bool ChessBoard::isGoodSEE(move_t move) const {
+    // Step 1: Deal with underpromotions (always bad) and queen promo-captures (always good)
+    if (mvs::isPromotion(move)) {
+        if (mvs::getPromotedPiece(move) != pcs::QUEEN)
+            return false;
+        else if (mvs::isCapture(move))
+            return true;
+    }
+
+    const side_t nstm = stm ^ 1;
+    const square_t to = mvs::getTo(move);
+    const piece_t movingPiece = mvs::getPiece(move);
+    const piece_t capturedPiece = mvs::getCapturedPiece(move); // this is just PAWN if no piece was captured, which is fine
+    if (movingPiece == pcs::KING)
+        return true;
+    if (mvs::isCapture(move) and capturedPiece >= movingPiece)
+        return true;
+    int diff = 1;
+    bitboard_t blockers = colors[0] ^ colors[1] ^ (1ULL << mvs::getFrom(move));
+
+    for (piece_t piece = pcs::PAWN; piece <= pcs::KING; piece++) {
+        bitboard_t nstmAttackers = getAttackedSquares(to,piece,blockers,stm) & colors[nstm];
+        bitboard_t stmAttackers = getAttackedSquares(to,piece,blockers,nstm) & colors[stm];
+        diff += std::popcount(stmAttackers) - std::popcount(nstmAttackers);
+
+        if (nstmAttackers and piece < movingPiece)
+            return false;
+        if (diff > 1)
+            return true;
+        else if (diff < 0)
+            return false;
+
+        blockers ^= nstmAttackers ^ stmAttackers;
+    }
+    return diff;
+}
+
 void ChessBoard::updatePieceGivingCheck() {
     const side_t nstm = stm ^ 1;
     const bitboard_t allPieces = colors[sides::WHITE] ^ colors[sides::BLACK];
