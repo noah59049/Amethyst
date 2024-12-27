@@ -682,8 +682,8 @@ bool ChessBoard::isLegal(move_t move) const {
     bitboard_t blockers = colors[0] ^ colors[1] ^ (1ULL << mvs::getFrom(move));
 
     for (piece_t piece = pcs::PAWN; piece <= pcs::KING; piece++) {
-        bitboard_t nstmAttackers = getAttackedSquares(to,piece,blockers,stm) & colors[nstm];
-        bitboard_t stmAttackers = getAttackedSquares(to,piece,blockers,nstm) & colors[stm];
+        bitboard_t nstmAttackers = getAttackedSquares(to,piece,blockers,stm) & colors[nstm] & pieceTypes[piece];
+        bitboard_t stmAttackers = getAttackedSquares(to,piece,blockers,nstm) & colors[stm] & pieceTypes[piece];
         diff += std::popcount(stmAttackers) - std::popcount(nstmAttackers);
 
         if (nstmAttackers and piece < movingPiece)
