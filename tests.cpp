@@ -667,7 +667,7 @@ void manualTTTest() {
 //    TTEntry e1 = tt.get(0); // other index collision
 //    TTEntry e1 = tt.get(~0ULL); // different (empty) bucket
     std::cout << "zobristCode is " << e1.zobristCode << std::endl;
-    std::cout << "eval is " << e1.eval << std::endl;
+    std::cout << "eval is " << e1.score << std::endl;
     std::cout << "ttMove is " << e1.ttMove << std::endl;
     std::cout << "ttFlag is " << int(e1.ttFlag) << std::endl;
     std::cout << "depth is " << int(e1.depth) << std::endl;
