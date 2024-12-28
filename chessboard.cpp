@@ -453,11 +453,14 @@ void ChessBoard::makemove(move_t move) {
 }
 
 void ChessBoard::makeNullMove() {
+    if (stm == sides::BLACK)
+        fullmove += 1;
     stm ^= 1;
     zobristCode ^= zb::stmZobrist;
     zobristCode ^= zb::getRightsZobrist(epCastlingRights);
     rights::removeEPRights(epCastlingRights);
     zobristCode ^= zb::getRightsZobrist(epCastlingRights);
+    halfmove++;
 }
 
 move_t ChessBoard::parseLANMove(const std::string &move) const {
