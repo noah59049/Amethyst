@@ -685,6 +685,68 @@ void printSEEOfMoves(const std::string& fen) {
     } // end for loop over pseudolegal moves
 } // end printSEEOfMoves function definition
 
+void nullMoveTests() {
+    // Test 1: Null move in normal position
+    // Test 2: Null move when en passant is possible
+    // Test 3: Null move when halfmove is 99
+
+    ChessBoard board1 = ChessBoard::fromFEN("8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 1");
+    board1.makeNullMove();
+    std::cout << board1.toFEN() << std::endl;
+
+    board1 = ChessBoard::fromFEN("8/8/K2p4/1Pp4r/1R3p1k/8/4P1P1/8 w - c6 0 2");
+    board1.makeNullMove();
+    std::cout << board1.toFEN() << std::endl;
+
+    board1 = ChessBoard::fromFEN("8/2p5/K2p4/1P5r/1R2Pp2/6k1/6P1/8 b - e3 0 2");
+    board1.makeNullMove();
+    std::cout << board1.toFEN() << std::endl;
+
+    board1 = ChessBoard::fromFEN("8/2p5/K2p4/1P5r/1R2Pp2/6k1/6P1/8 b - e3 99 2");
+    board1.makeNullMove();
+    std::cout << board1.toFEN() << std::endl;
+}
+
+void canTryNMPTests() {
+    std::cout << std::boolalpha;
+
+    // Test 0: startpos
+    ChessBoard board = ChessBoard::startpos();
+    std::cout << board.canTryNMP() << std::endl; // should be true
+
+    // Test 1: White in check
+    board = ChessBoard::fromFEN("r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1");
+    std::cout << board.canTryNMP() << std::endl; // should be false
+
+    // Test 2: Black in check
+    board = ChessBoard::fromFEN("r2q1rk1/pP1p2pp/Q4n2/bbp1p3/Np6/1B3NBn/pPPP1PPP/R3K2R b KQ - 0 1");
+    std::cout << board.canTryNMP() << std::endl; // should be false
+
+    // Test 3: White to move, both players have only king and pawns
+    board = ChessBoard::fromFEN("4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3 w - - 0 1");
+    std::cout << board.canTryNMP() << std::endl; // should be false
+
+    // Test 4: Black to move, both players have only king and pawns
+    board = ChessBoard::fromFEN("4k3/pppppppp/8/8/8/8/PPPPPPPP/4K3 b - - 0 1");
+    std::cout << board.canTryNMP() << std::endl; // should be false
+
+    // Test 5: White to move, white has king and pawns only, but black has other pieces
+    board = ChessBoard::fromFEN("4k3/pppppppp/3r4/8/8/8/PPPPPPPP/4K3 w - - 0 1");
+    std::cout << board.canTryNMP() << std::endl; // should be false
+
+    // Test 6: Black to move, white has king and pawns only, but black has other pieces
+    board = ChessBoard::fromFEN("4k3/pppppppp/3r4/8/8/8/PPPPPPPP/4K3 b - - 0 1");
+    std::cout << board.canTryNMP() << std::endl; // should be true
+
+    // Test 6: Black to move, black has king and pawns only, but white has other pieces
+    board = ChessBoard::fromFEN("4k3/pppppppp/3R4/8/8/8/PPPPPPPP/4K3 b - - 0 1");
+    std::cout << board.canTryNMP() << std::endl; // should be false
+
+    // Test 7: White to move, black has king and pawns only but white has other pieces
+    board = ChessBoard::fromFEN("4k3/pppppppp/3R4/8/8/8/PPPPPPPP/4K3 w - - 0 1");
+    std::cout << board.canTryNMP() << std::endl; // should be true
+}
+
 int main() {
     std::cout << "Hello, World!" << std::endl;
 //    runAllMovesTests();
@@ -700,10 +762,10 @@ int main() {
 //    runEasyPuzzleTestSuite("easy_puzzles.txt", "easy_puzzle_answers.txt");
 //    printFenMoveOrder("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"); // kiwipete
 //    printFenMoveOrder("r1b1k2r/pPpp1p2/8/2b1p1pp/2Qnn1P1/2PP1N2/1qN1PPBP/R1B1K2R w KQkq - 0 14");
-
 //    manualTTTest();
+//    printSEEOfMoves("rnb1k1nr/4qpp1/2p5/p3p3/2N3PN/1p1Q4/PPP1PPBR/2K4R b kq - 0 16");
+//    nullMoveTests();
 
-    printSEEOfMoves("rnb1k1nr/4qpp1/2p5/p3p3/2N3PN/1p1Q4/PPP1PPBR/2K4R b kq - 0 16");
-
+    canTryNMPTests();
     return 0;
 }
