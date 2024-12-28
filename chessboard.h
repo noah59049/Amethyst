@@ -55,6 +55,10 @@ public:
     // If the move is not a valid move in this position, the behavior is undefined.
     void makemove(move_t move);
 
+    // Makes a null move on the board
+    // Does not update halfmove or fullmove
+    void makeNullMove();
+
     // Translates the given move from long algebraic notation (aka uci notation for moves) into a move_t
     [[nodiscard]] move_t parseLANMove(const std::string& move) const;
 

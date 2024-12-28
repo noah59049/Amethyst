@@ -452,6 +452,14 @@ void ChessBoard::makemove(move_t move) {
     updatePieceGivingCheck();
 }
 
+void ChessBoard::makeNullMove() {
+    stm ^= 1;
+    zobristCode ^= zb::stmZobrist;
+    zobristCode ^= zb::getRightsZobrist(epCastlingRights);
+    rights::removeEPRights(epCastlingRights);
+    zobristCode ^= zb::getRightsZobrist(epCastlingRights);
+}
+
 move_t ChessBoard::parseLANMove(const std::string &move) const {
     // Step 1: Get the from and to squares
     square_t fromFile = move[0] - 'a';
