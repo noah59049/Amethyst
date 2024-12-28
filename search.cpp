@@ -127,19 +127,19 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         }
     }
 
-    // Step 9: Initialize variables for moves searched through
+    // Step 10: Initialize variables for moves searched through
     MoveList rawMoves = board.getPseudoLegalMoves();
     eval_t bestScore = sg::SCORE_MIN;
     move_t bestMove = 0;
     int movesSearched = 0;
     bool improvedAlpha = false;
 
-    // Step 10: Overwrite the current entry of the search stack
+    // Step 11: Overwrite the current entry of the search stack
     threadData.searchStack[ply].zobristCode = zobristCode;
     threadData.searchStack[ply].move = lastMove;
     threadData.searchStack[ply].staticEval = staticEval;
 
-    // Step 11: Sort moves according to: tt move, then tactical moves, then quiets
+    // Step 12: Sort moves according to: tt move, then tactical moves, then quiets
     // This could be done more efficiently with staged movegen
     MoveList moves;
     if (board.isPseudolegal(ttMove) and board.isLegal(ttMove)) {
@@ -164,7 +164,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     }
     std::sort(quietBeginning, moves.end(), std::greater<>());
 
-    // Step 12: Search all the moves
+    // Step 13: Search all the moves
     for (move_t move : moves) {
         if (board.isLegal(move)) {
             if (is50mrDraw)
@@ -188,23 +188,23 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         } // end if move is legal
     } // end for loop over moves
 
-    // Step 13: Deal with checkmates and stalemates
+    // Step 14: Deal with checkmates and stalemates
     if (movesSearched == 0) {
         bestScore = inCheck ? -sg::SCORE_MATE : 0;
     }
 
-    // Step 14: Update history in case of a beta cutoff from a quiet move
+    // Step 15: Update history in case of a beta cutoff from a quiet move
     if (bestScore >= beta and mvs::isQuiet(bestMove)) {
         const auto fromTo = mvs::getFromTo(bestMove);
         threadData.butterflyHistory[stm][fromTo] = std::max(threadData.butterflyHistory[stm][fromTo] + history_t(depth) * history_t(depth), 1023);
     }
 
-    // Step 15: Put something in the TT
+    // Step 16: Put something in the TT
     const ttflag_t flagForTT = bestScore >= beta ? ttflags::LOWER_BOUND : (improvedAlpha ? ttflags::EXACT : ttflags::UPPER_BOUND);
     const move_t bestMoveForTT = improvedAlpha ? bestMove : 0;
     sg::GLOBAL_TT.put(zobristCode, bestMoveForTT, bestScore, flagForTT, depth);
 
-    // Step 16: Return the score
+    // Step 17: Return the score
     return bestScore;
 }
 
