@@ -15,6 +15,10 @@ namespace sg {
     constexpr eval_t SCORE_MAX = 32767;
     constexpr eval_t SCORE_MATE = 32700;
 
+    inline bool isMateScore(eval_t score) {
+        return score > 32000 or score < -32000;
+    }
+
     struct SearchStackEntry {
         zobrist_t zobristCode = 0;
         eval_t staticEval = 0;

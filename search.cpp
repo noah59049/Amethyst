@@ -117,7 +117,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         return beta;
 
     // Step 9: Try NMP
-    if (!isRoot and board.canTryNMP()) {
+    if (!isRoot and !sg::isMateScore(beta) and board.canTryNMP()) {
         const depth_t R = 4 + depth / 5;
         ChessBoard nmBoard = board;
         nmBoard.makeNullMove();
