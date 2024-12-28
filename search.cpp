@@ -116,6 +116,17 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     if (!inCheck and depth <= 5 and staticEval - 100 * depth >= beta)
         return beta;
 
+    // Step 9: Try NMP
+    if (!isRoot and board.canTryNMP()) {
+        const depth_t R = 4 + depth / 5;
+        ChessBoard nmBoard = board;
+        nmBoard.makeNullMove();
+        const eval_t nmScore = -negamax(threadData, nmBoard, depth - R, ply + 1, -beta, -beta + 1, 1);
+        if (nmScore >= beta) {
+            return nmScore;
+        }
+    }
+
     // Step 9: Initialize variables for moves searched through
     MoveList rawMoves = board.getPseudoLegalMoves();
     eval_t bestScore = sg::SCORE_MIN;
