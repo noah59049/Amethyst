@@ -106,6 +106,9 @@ public:
     // This function is fast.
     [[nodiscard]] zobrist_t getZobristCode() const;
 
+    // Returns true if we can attempt null move pruning
+    [[nodiscard]] bool canTryNMP() const;
+
     // Gets the static eval
     // This eval is from the perspective of the side to move
     // So higher eval scores mean the position is better for the side to move.

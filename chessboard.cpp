@@ -904,6 +904,10 @@ zobrist_t ChessBoard::getZobristCode() const {
     return zobristCode;
 }
 
+bool ChessBoard::canTryNMP() const {
+    return !isInCheck() and colors[stm] != (colors[stm] & (pieceTypes[pcs::PAWN] | pieceTypes[pcs::KING]));
+}
+
 eval_t ChessBoard::getEval() const {
     // Step 0: initialize eval and phase
     packed_eval_t packedEval = 0;
