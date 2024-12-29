@@ -923,6 +923,8 @@ eval_t ChessBoard::getEval() const {
     // Step 0: initialize eval and phase
     packed_eval_t packedEval = 0;
     phase_t phase = 0;
+    const bitboard_t allPieces = colors[sides::WHITE] | colors[sides::BLACK];
+    const bitboard_t emptySquares = ~allPieces;
 
     // Step 2: Loop through all the piece types, adding up their values
     // We don't add the king's material value since every side always has exactly 1 king
@@ -936,10 +938,20 @@ eval_t ChessBoard::getEval() const {
                 squareBB = remainingPieces & -remainingPieces;
                 remainingPieces -= squareBB;
                 square = log2ll(squareBB);
-                if (side == sides::WHITE)
+                if (side == sides::WHITE) {
+                    // PSTs
                     packedEval += hce::real_psts[piece][square];
-                else
+                    // Mobility
+                    const bitboard_t attacks = getAttackedSquares(square, piece, allPieces, side);
+                    packedEval += hce::mobility[piece] * std::popcount(attacks & emptySquares);
+                }
+                else {
+                    // PSTs
                     packedEval -= hce::real_psts[piece][square ^ 7];
+                    // Mobility
+                    const bitboard_t attacks = getAttackedSquares(square, piece, allPieces, side);
+                    packedEval -= hce::mobility[piece] * std::popcount(attacks & emptySquares);
+                }
             } // end while remainingPieces
         } // end for loop over side
     } // end for loop over piece type
