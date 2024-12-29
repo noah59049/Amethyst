@@ -6,6 +6,8 @@
 #include <exception>
 #include <chrono>
 #include <functional>
+#include <cmath>
+#include <algorithm>
 
 class SearchCancelledException : std::exception {
 
@@ -173,9 +175,25 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
             ChessBoard newBoard = board;
             newBoard.makemove(move);
             movesSearched++;
+
+            int R = 1;
+            bool doReducedSearch = depth > 2 and movesSearched > 1;
             bool doZWS = movesSearched > 1;
             bool doFullSearch = !doZWS;
+            if (doReducedSearch) {
+                R = 0.75 + std::log(depth) * std::log(movesSearched) / 2.3;
+                R = std::min(R, depth - 1);
+                if (R <= 1)
+                    doReducedSearch = false;
+            }
 
+            if (doReducedSearch) {
+                newScore = -negamax(threadData, newBoard, depth - R, ply + 1, -alpha - 1, -alpha, move);
+                if (newScore <= alpha) {
+                    doZWS = false;
+                    doFullSearch = false;
+                }
+            }
             if (doZWS) {
                 newScore = -negamax(threadData, newBoard, depth - 1, ply + 1, -alpha - 1, -alpha, move);
                 if (alpha < newScore and newScore < beta)
