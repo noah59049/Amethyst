@@ -129,6 +129,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
 
     // Step 10: Initialize variables for moves searched through
     MoveList rawMoves = board.getPseudoLegalMoves();
+    eval_t newScore;
     eval_t bestScore = sg::SCORE_MIN;
     move_t bestMove = 0;
     int movesSearched = 0;
@@ -172,7 +173,18 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
             ChessBoard newBoard = board;
             newBoard.makemove(move);
             movesSearched++;
-            eval_t newScore = -negamax(threadData, newBoard, depth - 1, ply + 1, -beta, -alpha, move);
+            bool doZWS = movesSearched > 1;
+            bool doFullSearch = !doZWS;
+
+            if (doZWS) {
+                newScore = -negamax(threadData, newBoard, depth - 1, ply + 1, -alpha - 1, -alpha, move);
+                if (alpha < newScore and newScore < beta)
+                    doFullSearch = true;
+            }
+            if (doFullSearch) {
+                newScore = -negamax(threadData, newBoard, depth - 1, ply + 1, -beta, -alpha, move);
+            }
+
             if (newScore > bestScore) {
                 bestScore = newScore;
                 bestMove = move;
