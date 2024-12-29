@@ -920,13 +920,12 @@ bool ChessBoard::canTryNMP() const {
 }
 
 eval_t ChessBoard::getEval() const {
-    // Step 0: initialize eval and phase
+    // Step 1: initialize eval and phase
     packed_eval_t packedEval = 0;
     phase_t phase = 0;
     const bitboard_t allPieces = colors[sides::WHITE] | colors[sides::BLACK];
 
-    // Step 2: Loop through all the piece types, adding up their values
-    // We don't add the king's material value since every side always has exactly 1 king
+    // Step 2: Loop through all the piece types, adding up their PSTs and mobility evals
     for (piece_t piece = pcs::PAWN; piece <= pcs::KING; piece++) {
         for (side_t side = 0; side < 2; side++) {
             const bitboard_t notFriendlyPieces = ~colors[side];
