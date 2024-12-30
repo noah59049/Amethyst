@@ -227,21 +227,18 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
 
     // Step 15: Update history in case of a beta cutoff from a quiet move
     if (bestScore >= beta) {
+        const history_t bonus = std::clamp(depth * depth, -512, 511);
         // Step 15A: bonus to cutoff move if it's quiet
         if (mvs::isQuiet(bestMove)) {
             const auto fromTo = mvs::getFromTo(bestMove);
-            threadData.butterflyHistory[stm][fromTo] = std::min(
-                    threadData.butterflyHistory[stm][fromTo] +
-                    history_t(depth) * history_t(depth), 511);
+            threadData.butterflyHistory[stm][fromTo] += bonus - bonus * threadData.butterflyHistory[stm][fromTo] / 511;
         } // end if best move is quiet
         
         // Step 15B: malus to all moves before this that didn't cause a cutoff
         for (move_t move : movesTried) {
             if (mvs::isQuiet(move) and move != bestMove) {
                 const auto fromTo = mvs::getFromTo(move);
-                threadData.butterflyHistory[stm][fromTo] = std::max(
-                        threadData.butterflyHistory[stm][fromTo] -
-                        history_t(depth) * history_t(depth), -512);
+                threadData.butterflyHistory[stm][fromTo] -= bonus + bonus * threadData.butterflyHistory[stm][fromTo] / 512;
             } // end if move is quiet and is not the best move
         } // end for loop over moves tried
     } // end if bestScore >= beta
