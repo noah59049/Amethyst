@@ -42,7 +42,7 @@ namespace sg {
 
     extern TT GLOBAL_TT;
 
-    int getBaseLMR(int depth, int movesSearched);
+    int getBaseLMR(int depth, int moveCount);
 }
 
 namespace spsa {

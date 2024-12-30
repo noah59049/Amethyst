@@ -27,6 +27,6 @@ std::array<std::array<int, 64>, 16> initLMRTable() {
 const static std::array<std::array<int, 64>, 16> LMR_TABLE = initLMRTable();
 
 
-int sg::getBaseLMR(int depth, int movesSearched) {
-    return LMR_TABLE[std::min(depth,15)][std::min(movesSearched,63)];
+int sg::getBaseLMR(int depth, int moveCount) {
+    return LMR_TABLE[std::min(depth,15)][std::min(moveCount,63)];
 }
