@@ -181,7 +181,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
             bool doZWS = movesSearched > 1;
             bool doFullSearch = !doZWS;
             if (doReducedSearch) {
-                R = 0.75 + std::log(depth) * std::log(movesSearched) / 2.3;
+                R = sg::getBaseLMR(depth, movesSearched);
                 R = std::min(R, depth - 1);
                 if (R <= 1)
                     doReducedSearch = false;

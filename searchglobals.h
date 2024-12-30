@@ -9,7 +9,6 @@
 #include "repetitiontable.h"
 #include "tt.h"
 
-
 namespace sg {
     constexpr eval_t SCORE_MIN = -32767;
     constexpr eval_t SCORE_MAX = 32767;
@@ -43,6 +42,7 @@ namespace sg {
 
     extern TT GLOBAL_TT;
 
+    int getBaseLMR(int depth, int movesSearched);
 }
 
 namespace spsa {
