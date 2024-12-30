@@ -242,8 +242,8 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
                 threadData.butterflyHistory[stm][fromTo] = std::max(
                         threadData.butterflyHistory[stm][fromTo] -
                         history_t(depth) * history_t(depth), -512);
-            }
-        }
+            } // end if move is quiet and is not the best move
+        } // end for loop over moves tried
     } // end if bestScore >= beta
 
     // Step 16: Put something in the TT
