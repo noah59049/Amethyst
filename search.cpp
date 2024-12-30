@@ -130,11 +130,12 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     }
 
     // Step 10: Initialize variables for moves searched through
+    MoveList movesTried;
     MoveList rawMoves = board.getPseudoLegalMoves();
     eval_t newScore;
     eval_t bestScore = sg::SCORE_MIN;
     move_t bestMove = 0;
-    int movesSearched = 0;
+    int moveCount = 0;
     bool improvedAlpha = false;
 
     // Step 11: Overwrite the current entry of the search stack
@@ -161,7 +162,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     const auto quietBeginning = moves.end();
     for (move_t move : rawMoves) {
         if (mvs::isQuiet(move) and move != ttMove) {
-            move |= move_t(threadData.butterflyHistory[stm][mvs::getFromTo(move)]) << 22;
+            move |= move_t(512 + threadData.butterflyHistory[stm][mvs::getFromTo(move)]) << 22;
             moves.push_back(move);
         }
     }
@@ -174,14 +175,15 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
                 return 0;
             ChessBoard newBoard = board;
             newBoard.makemove(move);
-            movesSearched++;
+            movesTried.push_back(move);
+            moveCount++;
 
             int R = 1;
-            bool doReducedSearch = depth > 2 and movesSearched > 1;
-            bool doZWS = movesSearched > 1;
+            bool doReducedSearch = depth > 2 and moveCount > 1;
+            bool doZWS = moveCount > 1;
             bool doFullSearch = !doZWS;
             if (doReducedSearch) {
-                R = sg::getBaseLMR(depth, movesSearched);
+                R = sg::getBaseLMR(depth, moveCount);
                 R = std::min(R, depth - 1);
                 if (R <= 1)
                     doReducedSearch = false;
@@ -219,15 +221,30 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     } // end for loop over moves
 
     // Step 14: Deal with checkmates and stalemates
-    if (movesSearched == 0) {
+    if (moveCount == 0) {
         bestScore = inCheck ? -sg::SCORE_MATE : 0;
     }
 
     // Step 15: Update history in case of a beta cutoff from a quiet move
-    if (bestScore >= beta and mvs::isQuiet(bestMove)) {
-        const auto fromTo = mvs::getFromTo(bestMove);
-        threadData.butterflyHistory[stm][fromTo] = std::min(threadData.butterflyHistory[stm][fromTo] + history_t(depth) * history_t(depth), 1023);
-    }
+    if (bestScore >= beta) {
+        // Step 15A: bonus to cutoff move if it's quiet
+        if (mvs::isQuiet(bestMove)) {
+            const auto fromTo = mvs::getFromTo(bestMove);
+            threadData.butterflyHistory[stm][fromTo] = std::min(
+                    threadData.butterflyHistory[stm][fromTo] +
+                    history_t(depth) * history_t(depth), 1023);
+        } // end if best move is quiet
+        
+        // Step 15B: malus to all moves before this that didn't cause a cutoff
+        for (move_t move : movesTried) {
+            if (mvs::isQuiet(move) and move != bestMove) {
+                const auto fromTo = mvs::getFromTo(move);
+                threadData.butterflyHistory[stm][fromTo] = std::max(
+                        threadData.butterflyHistory[stm][fromTo] -
+                        history_t(depth) * history_t(depth), -512);
+            }
+        }
+    } // end if bestScore >= beta
 
     // Step 16: Put something in the TT
     const ttflag_t flagForTT = bestScore >= beta ? ttflags::LOWER_BOUND : (improvedAlpha ? ttflags::EXACT : ttflags::UPPER_BOUND);
