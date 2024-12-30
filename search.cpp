@@ -162,7 +162,14 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     const auto quietBeginning = moves.end();
     for (move_t move : rawMoves) {
         if (mvs::isQuiet(move) and move != ttMove) {
-            move |= move_t(512 + threadData.butterflyHistory[stm][mvs::getFromTo(move)]) << 22;
+            const auto historyScore = threadData.butterflyHistory[stm][mvs::getFromTo(move)];
+            // A move has 32 bits
+            // We use 22 bits for the information of the move (from, to, flag, moving piece, captured piece)
+            // This leaves the highest 10 bits, which we use for history (and MVV-LVA) scores
+            // This allows us to sort by raw values of moves
+            // History scores are in the range [-512, 511]
+            // If we add 512, then we get a value in [0, 1023]
+            move |= move_t(512 + historyScore) << 22;
             moves.push_back(move);
         }
     }
