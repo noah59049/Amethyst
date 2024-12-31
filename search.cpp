@@ -146,19 +146,29 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     // Step 12: Sort moves according to: tt move, then tactical moves, then quiets
     // This could be done more efficiently with staged movegen
     MoveList moves;
+    MoveList badTacticals;
+
+    // Step 12A: TT move
     if (board.isPseudolegal(ttMove) and board.isLegal(ttMove)) {
         moves.push_back(ttMove);
     }
 
+    // Step 12B: Good captures
     const auto tacticalBeginning = moves.end();
     for (move_t move : rawMoves) {
-        if (mvs::isTactical(move) and move != ttMove)
-            moves.push_back(move);
+        if (mvs::isTactical(move) and move != ttMove) {
+            if (board.isGoodSEE(move))
+                moves.push_back(move);
+            else
+                badTacticals.push_back(move);
+        }
     }
 
+    // Step 12C: MVV-LVA sorting
     scoreMovesByMVVLVA(moves); // Will also score the TT move, but that one doesn't get sorted, so it's fine
     std::sort(tacticalBeginning, moves.end(), std::greater<>());
 
+    // Step 12D: Quiets
     const auto quietBeginning = moves.end();
     for (move_t move : rawMoves) {
         if (mvs::isQuiet(move) and move != ttMove) {
@@ -173,7 +183,14 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
             moves.push_back(move);
         }
     }
+
+    // Step 12E: Sort quiets by history
     std::sort(quietBeginning, moves.end(), std::greater<>());
+
+    // Step 12F: Bad tacticals
+    for (move_t move : badTacticals) {
+        moves.push_back(move);
+    }
 
     // Step 13: Search all the moves
     for (move_t move : moves) {
