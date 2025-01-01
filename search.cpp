@@ -1,6 +1,7 @@
 #include "search.h"
 
 #include "moveorder.h"
+#include "movegenerator.h"
 
 #include <iostream>
 #include <exception>
@@ -131,7 +132,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
 
     // Step 10: Initialize variables for moves searched through
     MoveList movesTried;
-    MoveList rawMoves = board.getPseudoLegalMoves();
+    MoveGenerator generator(threadData, board, ttMove);
     eval_t newScore;
     eval_t bestScore = sg::SCORE_MIN;
     move_t bestMove = 0;
@@ -143,57 +144,8 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     threadData.searchStack[ply].move = lastMove;
     threadData.searchStack[ply].staticEval = staticEval;
 
-    // Step 12: Sort moves according to: tt move, then tactical moves, then quiets
-    // This could be done more efficiently with staged movegen
-    MoveList moves;
-    MoveList badTacticals;
-
-    // Step 12A: TT move
-    if (board.isPseudolegal(ttMove) and board.isLegal(ttMove)) {
-        moves.push_back(ttMove);
-    }
-
-    // Step 12B: Good captures
-    const auto tacticalBeginning = moves.end();
-    for (move_t move : rawMoves) {
-        if (mvs::isTactical(move) and move != ttMove) {
-            if (board.isGoodSEE(move))
-                moves.push_back(move);
-            else
-                badTacticals.push_back(move);
-        }
-    }
-
-    // Step 12C: MVV-LVA sorting
-    scoreMovesByMVVLVA(moves); // Will also score the TT move, but that one doesn't get sorted, so it's fine
-    std::sort(tacticalBeginning, moves.end(), std::greater<>());
-
-    // Step 12D: Quiets
-    const auto quietBeginning = moves.end();
-    for (move_t move : rawMoves) {
-        if (mvs::isQuiet(move) and move != ttMove) {
-            const auto historyScore = threadData.butterflyHistory[stm][mvs::getFromTo(move)];
-            // A move has 32 bits
-            // We use 22 bits for the information of the move (from, to, flag, moving piece, captured piece)
-            // This leaves the highest 10 bits, which we use for history (and MVV-LVA) scores
-            // This allows us to sort by raw values of moves
-            // History scores are in the range [-512, 511]
-            // If we add 512, then we get a value in [0, 1023]
-            move |= move_t(512 + historyScore) << 22;
-            moves.push_back(move);
-        }
-    }
-
-    // Step 12E: Sort quiets by history
-    std::sort(quietBeginning, moves.end(), std::greater<>());
-
-    // Step 12F: Bad tacticals
-    for (move_t move : badTacticals) {
-        moves.push_back(move);
-    }
-
     // Step 13: Search all the moves
-    for (move_t move : moves) {
+    while (move_t move = generator.nextMove()) {
         if (board.isLegal(move)) {
             if (is50mrDraw)
                 return 0;
