@@ -9,31 +9,30 @@
 
 class MoveGenerator {
 private:
-    MoveList moves;
+    MoveList goodTacticals;
+    MoveList quiets;
     ChessBoard board;
     size_t nextMoveIndex;
     MovegenStage stage;
+    move_t ttMove;
 
     move_t nextPseudolegalMove() {
-        if (nextMoveIndex == moves.size) {
-            switch (stage) {
-                case TACTICALS: {
-                    nextMoveIndex = 0;
-                    stage = QUIETS;
-                    moves = board.getMoves(stage);
-                    return nextPseudolegalMove();
-                }
-                case QUIETS: {
-                    return 0;
-                } // end case QUIETS
-            } // end switch
-        } // end if nextMoveIndex == moves.size
-        else {
-            return moves.at(nextMoveIndex++);
+        if (stage == TT_MOVE) {
+            stage = GOOD_TACTICALS;
+            if (board.isPseudolegal(ttMove))
+                return ttMove;
+            else
+                return this->nextPseudolegalMove();
+        }
+        else if (stage == GOOD_TACTICALS) {
+            if (nextMoveIndex == 0) {
+
+            }
         }
     } // end nextMove method
 public:
-    explicit MovePicker(const ChessBoard &board1) : board(board1) {
+    explicit MoveGenerator(const ChessBoard &board1, move_t ttMove) : board(board1) {
+        this->ttMove = ttMove;
         nextMoveIndex = 0;
         stage = TACTICALS;
         moves = board.getMoves(stage);

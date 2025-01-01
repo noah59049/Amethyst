@@ -333,8 +333,10 @@ namespace rights {
 }
 
 enum MovegenStage {
-    TACTICALS,
-    QUIETS
+    TT_MOVE,
+    GOOD_TACTICALS,
+    QUIETS,
+    BAD_TACTICALS
 };
 
 namespace outcomes {
