@@ -102,6 +102,10 @@ public:
     // Gets a list of all the pseudolegal moves in the position
     [[nodiscard]] MoveList getPseudoLegalMoves() const;
 
+    // Gets a list of either tactical or quiet moves
+    // We use this for staged movegen
+    [[nodiscard]] MoveList getMoves(BasicMovegenStage stage) const;
+
     // Gets the zobrist code, calculated by adding up all the pieces and rights and stm from scratch.
     // This function is slow.
     [[nodiscard]] zobrist_t calcZobristCode() const;

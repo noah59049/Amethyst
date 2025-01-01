@@ -332,6 +332,11 @@ namespace rights {
     };
 }
 
+enum BasicMovegenStage {
+    TACTICAL_MOVES,
+    QUIET_MOVES
+};
+
 enum MovegenStage {
     TT_MOVE,
     GOOD_TACTICALS,

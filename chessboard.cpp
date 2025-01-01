@@ -881,6 +881,158 @@ MoveList ChessBoard::getPseudoLegalMoves() const {
     return moves;
 }
 
+MoveList ChessBoard::getMoves(const BasicMovegenStage stage) const {
+    MoveList moves;
+
+    const bitboard_t allPieces = colors[sides::WHITE] | colors[sides::BLACK];
+    const side_t nstm = stm ^ 1;
+
+    bitboard_t remainingFrom; // This will be used as the bitboard of all of a type of piece that can move
+    bitboard_t fromBB; // This is the bitboard of the one piece that we are considering moving at this time.
+    // In other words, popcount(fromBB) will always be 1
+    square_t from; // The from square of the move we are considering
+    bitboard_t remainingTo; // This is the bitboard of the remaining squares the pieces can move to
+    bitboard_t toBB; // This is the bitboard of the one square we are considering moving to
+    // In other words, popcount(toBB) will always be 1
+    square_t to; // The to square of the move we are considering
+    piece_t capturedPiece; // The piece that is captued in the specific move we're making
+
+    if (stage == TACTICAL_MOVES) {
+        // Step 1: EP
+        if (rights::isEPPossible(epCastlingRights)) {
+            square_t epFile = rights::extractEPRights(epCastlingRights);
+            to = squares::squareFromFileRank(epFile, 5 - 3 * stm);
+            for (square_t direction = 0; direction < 2; direction++) {
+                // direction = 0 means captures towards the a-file
+                // direction = 1 means captures towards the h-file
+                from = squares::squareFromFileRank(epFile + 1 - 2 * direction, 4 - stm);
+                if (epFile != (7 & direction - 1) and 1ULL << from & colors[stm] & pieceTypes[pcs::PAWN]) {
+                    moves.push_back(mvs::constructMove(from, to, flags::EN_PASSANT_FLAG, pcs::PAWN, 0));
+                } // end if this EP move is pseudolegal
+            } // end for loop over direction
+        } // end if en passant rights exist
+
+        // Step 2: Pawn captures
+        for (square_t direction = 0; direction < 2; direction++) {
+            // direction = 0 means captures towards the a-file
+            // direction = 1 means captures towards the h-file
+            remainingFrom = colors[nstm] & masks::NOT_H_FILE << 8 * direction;
+            if (direction == 0)
+                remainingFrom <<= 7 + stm + stm;
+            else
+                remainingFrom >>= 9 - stm - stm;
+            remainingFrom &= pieceTypes[pcs::PAWN] & colors[stm];
+            while (remainingFrom) {
+                fromBB = remainingFrom & -remainingFrom;
+                remainingFrom -= fromBB;
+                from = log2ll(fromBB);
+                to = from - 7 + direction * 16 - stm - stm;
+                capturedPiece = getPieceAt(to);
+                if (1U << squares::getRank(to) & 0b10000001) { // if getRank(to) is 0 or 7
+                    moves.push_back(mvs::constructMove(from, to, flags::QUEEN_CAP_PROMO_FLAG, pcs::PAWN, capturedPiece));
+                    moves.push_back(mvs::constructMove(from, to, flags::ROOK_CAP_PROMO_FLAG, pcs::PAWN, capturedPiece));
+                    moves.push_back(mvs::constructMove(from, to, flags::BISHOP_CAP_PROMO_FLAG, pcs::PAWN, capturedPiece));
+                    moves.push_back(mvs::constructMove(from, to, flags::KNIGHT_CAP_PROMO_FLAG, pcs::PAWN, capturedPiece));
+                }
+                else {
+                    moves.push_back(mvs::constructMove(from, to, flags::CAPTURE_FLAG, pcs::PAWN, capturedPiece));
+                } // end else (not promotion)
+            } // end while remainingFrom
+        } // End for loop over direction
+    }
+
+    // Step 3: Pawn single pushes
+    remainingFrom = (stm == sides::BLACK) ? ~allPieces << 1 : ~allPieces >> 1;
+    remainingFrom &= pieceTypes[pcs::PAWN] & colors[stm];
+    const bitboard_t promoFrom = (stm == sides::BLACK) ? masks::SECOND_RANK : masks::SEVENTH_RANK;
+    remainingFrom &= (stage == TACTICAL_MOVES) ? promoFrom : ~promoFrom;
+    while (remainingFrom) {
+        fromBB = remainingFrom & -remainingFrom;
+        remainingFrom -= fromBB;
+        from = log2ll(fromBB);
+        to = from + 1 - stm - stm;
+        if (fromBB & promoFrom) {
+            moves.push_back(mvs::constructMove(from, to, flags::QUEEN_PROMO_FLAG, pcs::PAWN, 0));
+            moves.push_back(mvs::constructMove(from, to, flags::ROOK_PROMO_FLAG, pcs::PAWN, 0));
+            moves.push_back(mvs::constructMove(from, to, flags::BISHOP_PROMO_FLAG, pcs::PAWN, 0));
+            moves.push_back(mvs::constructMove(from, to, flags::KNIGHT_PROMO_FLAG, pcs::PAWN, 0));
+        }
+        else {
+            moves.push_back(mvs::constructMove(from, to, flags::QUIET_FLAG, pcs::PAWN, 0));
+        } // end else (not promotion)
+    } // end while remainingFrom
+
+    if (stage == QUIET_MOVES) {
+        // Step 4: Pawn double pushes
+        if (stm == sides::WHITE)
+            remainingFrom = masks::SECOND_RANK & ~allPieces >> 1 & ~allPieces >> 2;
+        else
+            remainingFrom = masks::SEVENTH_RANK & ~allPieces << 1 & ~allPieces << 2;
+        remainingFrom &= pieceTypes[pcs::PAWN] & colors[stm];
+        while (remainingFrom) {
+            fromBB = remainingFrom & -remainingFrom;
+            remainingFrom -= fromBB;
+            from = log2ll(fromBB);
+            to = from + 2 - 4 * stm;
+            moves.push_back(mvs::constructMove(from, to, flags::DOUBLE_PAWN_PUSH_FLAG, pcs::PAWN, 0));
+        } // end while remainingFrom
+    }
+
+    // Step 5: Pieces moving
+    for (piece_t piece = pcs::KNIGHT; piece <= pcs::KING; piece++) {
+        remainingFrom = colors[stm] & pieceTypes[piece];
+        while (remainingFrom) {
+            fromBB = remainingFrom & -remainingFrom;
+            remainingFrom -= fromBB;
+            from = log2ll(fromBB);
+            remainingTo = getAttackedSquares(from, piece, allPieces, stm);
+
+            switch (stage) {
+                case TACTICAL_MOVES: {
+                    remainingTo &= colors[nstm];
+                    break;
+                }
+                case QUIET_MOVES: {
+                    remainingTo &= ~allPieces;
+                    break;
+                }
+            }
+
+            while (remainingTo) {
+                toBB = remainingTo & -remainingTo;
+                remainingTo -= toBB;
+                to = log2ll(toBB);
+                if (toBB & allPieces) {
+                    capturedPiece = getPieceAt(to);
+                    moves.push_back(mvs::constructMove(from, to, flags::CAPTURE_FLAG, piece, capturedPiece));
+                } // end if there is a piece at end square
+                else {
+                    moves.push_back(mvs::constructMove(from, to, flags::QUIET_FLAG, piece, 0));
+                } // end if move is quiet
+            } // end while remainingTo
+        } // end while remainingFrom
+    } // end for loop over pieceType
+
+    // Step 6: Castling
+    // Note: This does assume white = 0, black = 1 to make the code block shorter
+    if (!isInCheck() and stage == QUIET_MOVES) {
+        // Short castle
+        if (rights::canSideCastleShort(stm, epCastlingRights) and
+            (allPieces & masks::E1_THROUGH_H1 << 7 * stm) == masks::E1_H1 << 7 * stm) {
+            moves.push_back(mvs::constructShortCastle(stm));
+        }
+
+        // Long castle
+        if (rights::canSideCastleLong(stm, epCastlingRights) and
+            (allPieces & masks::E1_THROUGH_A1 << 7 * stm) == masks::E1_A1 << 7 * stm) {
+            moves.push_back(mvs::constructLongCastle(stm));
+        } // end if can castle long
+    } // end if not in check
+
+    // Step 7: Return the pseudolegal moves
+    return moves;
+}
+
 zobrist_t ChessBoard::calcZobristCode() const {
     zobrist_t zobrist = 0;
 
