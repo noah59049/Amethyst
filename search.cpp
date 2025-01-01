@@ -146,54 +146,52 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
 
     // Step 13: Search all the moves
     while (move_t move = generator.nextMove()) {
-        if (board.isLegal(move)) {
-            if (is50mrDraw)
-                return 0;
-            ChessBoard newBoard = board;
-            newBoard.makemove(move);
-            movesTried.push_back(move);
-            moveCount++;
+        if (is50mrDraw)
+            return 0;
+        ChessBoard newBoard = board;
+        newBoard.makemove(move);
+        movesTried.push_back(move);
+        moveCount++;
 
-            int R = 1;
-            bool doReducedSearch = depth > 2 and moveCount > 1;
-            bool doZWS = moveCount > 1;
-            bool doFullSearch = !doZWS;
-            if (doReducedSearch) {
-                R = sg::getBaseLMR(depth, moveCount);
-                R = std::min(R, depth - 1);
-                if (R <= 1)
-                    doReducedSearch = false;
-            }
+        int R = 1;
+        bool doReducedSearch = depth > 2 and moveCount > 1;
+        bool doZWS = moveCount > 1;
+        bool doFullSearch = !doZWS;
+        if (doReducedSearch) {
+            R = sg::getBaseLMR(depth, moveCount);
+            R = std::min(R, depth - 1);
+            if (R <= 1)
+                doReducedSearch = false;
+        }
 
-            if (doReducedSearch) {
-                newScore = -negamax(threadData, newBoard, depth - R, ply + 1, -alpha - 1, -alpha, move);
-                if (newScore <= alpha) {
-                    doZWS = false;
-                    doFullSearch = false;
-                }
+        if (doReducedSearch) {
+            newScore = -negamax(threadData, newBoard, depth - R, ply + 1, -alpha - 1, -alpha, move);
+            if (newScore <= alpha) {
+                doZWS = false;
+                doFullSearch = false;
             }
-            if (doZWS) {
-                newScore = -negamax(threadData, newBoard, depth - 1, ply + 1, -alpha - 1, -alpha, move);
-                if (alpha < newScore and newScore < beta)
-                    doFullSearch = true;
-            }
-            if (doFullSearch) {
-                newScore = -negamax(threadData, newBoard, depth - 1, ply + 1, -beta, -alpha, move);
-            }
+        }
+        if (doZWS) {
+            newScore = -negamax(threadData, newBoard, depth - 1, ply + 1, -alpha - 1, -alpha, move);
+            if (alpha < newScore and newScore < beta)
+                doFullSearch = true;
+        }
+        if (doFullSearch) {
+            newScore = -negamax(threadData, newBoard, depth - 1, ply + 1, -beta, -alpha, move);
+        }
 
-            if (newScore > bestScore) {
-                bestScore = newScore;
-                bestMove = move;
-                if (newScore > alpha) {
-                    improvedAlpha = true;
-                    alpha = newScore;
-                    if (isRoot)
-                        threadData.rootBestMove = move;
-                    if (newScore >= beta)
-                        break;
-                } // end if newScore > alpha
-            } // end if newScore > bestScore
-        } // end if move is legal
+        if (newScore > bestScore) {
+            bestScore = newScore;
+            bestMove = move;
+            if (newScore > alpha) {
+                improvedAlpha = true;
+                alpha = newScore;
+                if (isRoot)
+                    threadData.rootBestMove = move;
+                if (newScore >= beta)
+                    break;
+            } // end if newScore > alpha
+        } // end if newScore > bestScore
     } // end for loop over moves
 
     // Step 14: Deal with checkmates and stalemates
