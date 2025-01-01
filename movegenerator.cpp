@@ -24,7 +24,7 @@ move_t MoveGenerator::nextPseudolegalMove()  {
                     quietsBadTacticals.push_back(move);
                 }
                 else {
-                    goodTacticals.moveList[i] = getMVVLVAScore(move);
+                    goodTacticals.moveList[i] |= getMVVLVAScore(move) << 22;
                 } // end else
             } // end for loop over goodTacticals.size
             badTacticalsCount = quietsBadTacticals.size;
