@@ -18,9 +18,11 @@ move_t MoveGenerator::nextPseudolegalMove()  {
                 const move_t move = goodTacticals.at(i);
                 if (move == ttMove) {
                     goodTacticals.moveList[i] = goodTacticals.pop_back();
+                    i--;
                 }
                 else if (!board.isGoodSEE(move)) {
                     goodTacticals.moveList[i] = goodTacticals.pop_back();
+                    i--;
                     quietsBadTacticals.push_back(move);
                 }
                 else {
