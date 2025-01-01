@@ -333,7 +333,8 @@ namespace rights {
 }
 
 enum MovegenStage {
-    ALL_MOVES
+    TACTICALS,
+    QUIETS
 };
 
 namespace outcomes {
