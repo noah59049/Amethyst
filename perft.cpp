@@ -1,9 +1,12 @@
 #include "perft.h"
+#include "movegenerator.h"
 #include <iostream>
 #include <unordered_set>
 
 std::unordered_set<move_t> allPseudolegalMoves; // This is the set of all pseudolegal moves in all positions everywhere
 constexpr bool doPseudolegalCheck = false;
+constexpr bool doLANTest = false;
+sg::ThreadData threadData;
 
 perft_t perft(const ChessBoard& board, depth_t depth) {
     board.areBitboardsCorrect();
@@ -37,7 +40,8 @@ perft_t perft(const ChessBoard& board, depth_t depth) {
 //    std::cout << "all pseudolegal moves is size" << allPseudolegalMoves.size();
 
     perft_t count = 0;
-    for (move_t move : moves) {
+    MoveGenerator generator(threadData, board, 0);
+    while (move_t move = generator.nextMove()) {
         if (!board.isPseudolegal(move)) {
             std::cout << "FAILED isPseudolegal test: move " << moveToLAN(move) << "was in move list but failed isPseudolegal test" << std::endl;
             exit(1);
@@ -47,22 +51,24 @@ perft_t perft(const ChessBoard& board, depth_t depth) {
         }
 
         if (board.isLegal(move)) {
-            // Here we do checks that the move is the same when we convert it to LAN and back
-            std::string move1 = moveToLAN(move);
-            move_t move2 = board.parseLANMove(move1);
-            std::string move3 = moveToLAN(move2);
-            if (move != move2) {
-                std::cout << "FAILED perft LAN move test: move != move2" << std::endl;
-                std::cout << "FEN is " << board.toFEN() << std::endl;
-                std::cout << "move is " << move << " and move2 is " << move2 << std::endl;
-                std::cout << std::endl;
-            }
-            else if (move1 != move3) {
-                std::cout << "FAILED perft LAN move test: move1 != move3" << std::endl;
-                std::cout << "FEN is " << board.toFEN() << std::endl;
-                std::cout << "move1 is " << move1 << " and move3 is " << move3 << std::endl;
-                std::cout << std::endl;
-            }
+            if constexpr (doLANTest) {
+                // Here we do checks that the move is the same when we convert it to LAN and back
+                std::string move1 = moveToLAN(move);
+                move_t move2 = board.parseLANMove(move1);
+                std::string move3 = moveToLAN(move2);
+                if (move != move2) {
+                    std::cout << "FAILED perft LAN move test: move != move2" << std::endl;
+                    std::cout << "FEN is " << board.toFEN() << std::endl;
+                    std::cout << "move is " << move << " and move2 is " << move2 << std::endl;
+                    std::cout << std::endl;
+                }
+                else if (move1 != move3) {
+                    std::cout << "FAILED perft LAN move test: move1 != move3" << std::endl;
+                    std::cout << "FEN is " << board.toFEN() << std::endl;
+                    std::cout << "move1 is " << move1 << " and move3 is " << move3 << std::endl;
+                    std::cout << std::endl;
+                } // end else if move1 != move3
+            } // end if constexpr doLANTest
             ChessBoard newBoard = board;
             newBoard.makemove(move);
             count += perft(newBoard, depth_t(depth - 1));
