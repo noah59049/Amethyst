@@ -16,6 +16,7 @@
 #include "search.h"
 #include "moveorder.h"
 #include "tt.h"
+#include "movegenerator.h"
 
 // I don't think this is really necessary
 // But why not leave it in
@@ -745,6 +746,14 @@ void canTryNMPTests() {
     // Test 7: White to move, black has king and pawns only but white has other pieces
     board = ChessBoard::fromFEN("4k3/pppppppp/3R4/8/8/8/PPPPPPPP/4K3 w - - 0 1");
     std::cout << board.canTryNMP() << std::endl; // should be true
+}
+
+void stagedMovegenStartposTest() {
+    ChessBoard board = ChessBoard::startpos();
+    MoveGenerator generator(sg::ThreadData(), board, 0);
+    while (move_t move = generator.nextMove()) {
+        std::cout << moveToLAN(move) << std::endl;
+    }
 }
 
 int main() {
