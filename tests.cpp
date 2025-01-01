@@ -751,6 +751,7 @@ void canTryNMPTests() {
 void stagedMovegenKiwipeteTest() {
     ChessBoard board = ChessBoard::fromFEN("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1");
     MoveGenerator generator(sg::ThreadData(), board, 0);
+    std::cout << "KIWIPETE STAGED MOVEGEN MOVE ORDER: " << std::endl;
     while (move_t move = generator.nextMove()) {
         std::cout << moveToLAN(move) << std::endl;
     }
