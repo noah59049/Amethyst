@@ -881,9 +881,7 @@ MoveList ChessBoard::getPseudoLegalMoves() const {
     return moves;
 }
 
-MoveList ChessBoard::getMoves(const BasicMovegenStage stage) const {
-    MoveList moves;
-
+void ChessBoard::getMoves(MoveList& moves, const BasicMovegenStage stage) const {
     const bitboard_t allPieces = colors[sides::WHITE] | colors[sides::BLACK];
     const side_t nstm = stm ^ 1;
 
@@ -1028,10 +1026,7 @@ MoveList ChessBoard::getMoves(const BasicMovegenStage stage) const {
             moves.push_back(mvs::constructLongCastle(stm));
         } // end if can castle long
     } // end if not in check
-
-    // Step 7: Return the pseudolegal moves
-    return moves;
-}
+} // end getMoves function
 
 zobrist_t ChessBoard::calcZobristCode() const {
     zobrist_t zobrist = 0;

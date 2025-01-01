@@ -104,7 +104,7 @@ public:
 
     // Gets a list of either tactical or quiet moves
     // We use this for staged movegen
-    [[nodiscard]] MoveList getMoves(BasicMovegenStage stage) const;
+    void getMoves(MoveList& moves, BasicMovegenStage stage) const;
 
     // Gets the zobrist code, calculated by adding up all the pieces and rights and stm from scratch.
     // This function is slow.
