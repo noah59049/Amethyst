@@ -3,14 +3,16 @@
 #include <unordered_set>
 
 std::unordered_set<move_t> allPseudolegalMoves; // This is the set of all pseudolegal moves in all positions everywhere
-constexpr bool doPseudolegalCheck = true;
+constexpr bool doPseudolegalCheck = false;
 
 perft_t perft(const ChessBoard& board, depth_t depth) {
     board.areBitboardsCorrect();
 
     if (depth <= 0)
         return 1;
-    MoveList moves = board.getPseudoLegalMoves();
+    MoveList moves;
+    board.getMoves(moves, TACTICAL_MOVES);
+    board.getMoves(moves, QUIET_MOVES);
 
     if constexpr (doPseudolegalCheck) {
         // For every move that was pseudolegal in any position
