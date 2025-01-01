@@ -55,6 +55,7 @@ move_t MoveGenerator::nextPseudolegalMove()  {
                 } // end else
             } // end for loop over i
             std::sort(quietBegin, quietsBadTacticals.end(), std::greater<>()); // TODO: use lazy selection sort instead
+            hasGenerated = true;
         } // end if !hasGenerated
         if (nextMoveIndex == quietsBadTacticals.size) {
             stage = BAD_TACTICALS;
