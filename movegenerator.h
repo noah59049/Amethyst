@@ -3,6 +3,7 @@
 
 #include "typedefs.h"
 #include "chessboard.h"
+#include "moveorder.h"
 
 
 
