@@ -11,9 +11,10 @@ struct MoveList {
         size++;
     }
 
-    inline void pop_back() {
+    inline move_t pop_back() {
         assert(size > 0);
         size--;
+        return moveList[size];
     }
 
     inline void trimToSize(const unsigned int newSize) {
