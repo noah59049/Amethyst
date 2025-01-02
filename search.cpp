@@ -36,12 +36,8 @@ eval_t qsearch(sg::ThreadData& threadData, const ChessBoard& board, const depth_
         alpha = bestScore;
 
     // Step 4: Get the move list, sorted by MVV-LVA
-    MoveList rawMoves = board.getPseudoLegalMoves();
     MoveList moves;
-    for (move_t move : rawMoves) {
-        if (mvs::isTactical(move))
-            moves.push_back(move);
-    }
+    board.getMoves(moves, TACTICAL_MOVES);
     scoreMovesByMVVLVA(moves);
     std::sort(moves.begin(), moves.end(), std::greater<>());
 
