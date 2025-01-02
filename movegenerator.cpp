@@ -56,7 +56,6 @@ move_t MoveGenerator::nextPseudolegalMove()  {
                     quietsBadTacticals.moveList[i] |= move_t(512 + historyScore) << 22;
                 } // end else
             } // end for loop over i
-            std::sort(quietBegin, quietsBadTacticals.end(), std::greater<>()); // TODO: use lazy selection sort instead
             hasGenerated = true;
         } // end if !hasGenerated
         if (nextMoveIndex == quietsBadTacticals.size) {
@@ -65,7 +64,19 @@ move_t MoveGenerator::nextPseudolegalMove()  {
             nextMoveIndex = 0;
         }
         else {
-            return quietsBadTacticals.at(nextMoveIndex++);
+            // Lazy selection sort :)
+            move_t bestMove = 0;
+            size_t bestMoveIndex;
+            for (size_t i = nextMoveIndex; i < quietsBadTacticals.size; i++) {
+                move_t move = quietsBadTacticals.at(i);
+                if (move > bestMove) {
+                    bestMove = move;
+                    bestMoveIndex = i;
+                } // end if move > bestMove
+            } // end for loop
+            quietsBadTacticals.moveList[bestMoveIndex] = quietsBadTacticals.moveList[nextMoveIndex];
+            nextMoveIndex++;
+            return bestMove;
         } // end else
     } // end if stage == QUIETS
     if (stage == BAD_TACTICALS) {
