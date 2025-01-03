@@ -188,6 +188,10 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
                     break;
             } // end if newScore > alpha
         } // end if newScore > bestScore
+
+        // Late move pruning
+        if (moveCount >= 8 * depth)
+            break;
     } // end for loop over moves
 
     // Step 14: Deal with checkmates and stalemates
