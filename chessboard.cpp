@@ -1075,6 +1075,8 @@ eval_t ChessBoard::getEval() const {
     // Step 2: Loop through all the piece types, adding up their PSTs and mobility evals
     for (piece_t piece = pcs::PAWN; piece <= pcs::KING; piece++) {
         for (side_t side = 0; side < 2; side++) {
+            const square_t kingSquare = log2ll(pieceTypes[pcs::KING] & colors[side]);
+            const auto kingBucket = hce::getFriendlyKingBucket(kingSquare, side);
             const bitboard_t notFriendlyPieces = ~colors[side];
             const eval_t multiplier = side == sides::WHITE ? 1 : -1;
             bitboard_t remainingPieces = pieceTypes[piece] & colors[side];
@@ -1087,7 +1089,7 @@ eval_t ChessBoard::getEval() const {
                 square = log2ll(squareBB);
 
                 // PSTs
-                packedEval += hce::real_psts[piece][square ^ (7 * side)] * multiplier;
+                packedEval += hce::real_psts[kingBucket][piece][square ^ (7 * side)] * multiplier;
                 // Mobility
                 const bitboard_t attacks = getAttackedSquares(square, piece, allPieces, side);
                 packedEval += hce::mobility[piece] * std::popcount(attacks & notFriendlyPieces) * multiplier;
