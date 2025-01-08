@@ -13,6 +13,14 @@ namespace hce {
 
     constexpr packed_eval_t mobility[6] = {S(-13, -25), S(0, 2), S(9, 12), S(8, 6), S(2, 12), S(-17, -3)};
 
+    inline auto getFriendlyKingBucket(square_t kingSquare, side_t side) {
+        return kingSquare / 32;
+    }
+
+    // PSTs are bucketed by the friendly king
+    // There are only two buckets:
+    // queenside and kingside
+
     // Note that these PSTs are not the actual PSTs that we will use
     // They are the PSTs output from python-chess, which uses a1 = 0, h1 = 7, a8 = 56, h8 = 63
     // I use a1 = 0, a8 = 7, h1 = 56, h8 = 63
@@ -21,6 +29,7 @@ namespace hce {
     // And each entry is S(mg, eg) for a black piece on that square
     constexpr std::array<std::array<std::array<packed_eval_t, 64>, 6>, 2> psts = {{
           {{
+                    // Friendly king on the queenside
                    {
                            S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0),
                            S(161,247), S(246,260), S(197,245), S(137,264), S( 93,284), S(101,277), S( 68,305), S(  4,288),
@@ -83,6 +92,7 @@ namespace hce {
                    },
            }},
           {{
+                    // Friendly king on the kingside
                    {
                            S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0),
                            S( 73,267), S(119,287), S(107,266), S(100,276), S(137,293), S(170,260), S(228,247), S(126,204),
