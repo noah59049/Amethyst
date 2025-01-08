@@ -13,6 +13,8 @@ namespace hce {
 
     constexpr packed_eval_t mobility[6] = {S(-13, -25), S(0, 2), S(9, 12), S(8, 6), S(2, 12), S(-17, -3)};
 
+    constexpr auto NUM_KING_BUCKETS = 2;
+
     inline auto getFriendlyKingBucket(square_t kingSquare, side_t side) {
         return kingSquare / 32;
     }
@@ -160,11 +162,13 @@ namespace hce {
         return square >> 3 | (square & 7) << 3;
     }
 
-    constexpr auto transformPSTs(const std::array<std::array<packed_eval_t, 64>, 6>& psts_) {
-        std::array<std::array<packed_eval_t, 64>, 6> result = {};
-        for (piece_t piece = 0; piece <= pcs::KING; piece++) {
-            for (square_t square = 0; square < 64; square++) {
-                result[piece][square] = psts_[piece][flipSquare(square)];
+    constexpr auto transformPSTs(const std::array<std::array<std::array<packed_eval_t, 64>, 6>, NUM_KING_BUCKETS>& psts_) {
+        std::array<std::array<std::array<packed_eval_t, 64>, 6>, NUM_KING_BUCKETS> result = {};
+        for (auto bucket = 0; bucket < NUM_KING_BUCKETS; bucket++) {
+            for (piece_t piece = 0; piece <= pcs::KING; piece++) {
+                for (square_t square = 0; square < 64; square++) {
+                    result[bucket][piece][square] = psts_[bucket][piece][flipSquare(square)];
+                }
             }
         }
 
