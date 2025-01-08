@@ -11,7 +11,7 @@ namespace hce {
         return (uint32_t(uint16_t(mg)) << 16) + eg;
     }
 
-    constexpr packed_eval_t mobility[6] = {S(-14, -25), S(0, -1), S(9, 12), S(8, 6), S(3, 10), S(-30, 1)};
+    constexpr packed_eval_t mobility[6] = {S(-13, -25), S(0, 2), S(9, 12), S(8, 6), S(2, 12), S(-17, -3)};
 
     // Note that these PSTs are not the actual PSTs that we will use
     // They are the PSTs output from python-chess, which uses a1 = 0, h1 = 7, a8 = 56, h8 = 63
