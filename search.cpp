@@ -142,8 +142,12 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
 
     // Step 13: Search all the moves
     while (move_t move = generator.nextMove()) {
+        // We first have to handle some annoying edge cases
+        if (isRoot and depth == 1 and moveCount == 0)
+            threadData.rootBestMove = move; // This is to make sure there is always a root best move
         if (is50mrDraw)
             return 0;
+
         ChessBoard newBoard = board;
         newBoard.makemove(move);
         movesTried.push_back(move);
@@ -231,15 +235,16 @@ sg::ThreadData rootSearch(const ChessBoard board) {
     sg::ThreadData rootThreadData;
     eval_t score = board.getEval();
     std::string rootBestMove;
+    bool cancelled = false;
 
     // Step 2: Iterative deepening search
-    for (depth_t depth = 1; depth <= sg::depthLimit; depth++) {
+    for (depth_t depth = 1; depth <= sg::depthLimit and !cancelled; depth++) {
         // Step 2.1: Do the search
         try {
             score = negamax(rootThreadData, board, depth_t(depth), depth_t(0), sg::SCORE_MIN, sg::SCORE_MAX, 0);
         }
         catch (const SearchCancelledException& e) {
-            break;
+            cancelled = true;
         }
 
         // Step 2.2: Get elapsed time
