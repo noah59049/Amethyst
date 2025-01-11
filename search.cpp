@@ -106,6 +106,10 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
             return ttScore;
     }
 
+    // Internal iterative reductions
+    if (ttMove == 0 and depth > 3)
+        depth--;
+
     // Step 7: Check if depth is 0 or less
     if (depth <= 0)
         return qsearch(threadData, board, ply, alpha, beta, lastMove);
