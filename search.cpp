@@ -62,7 +62,7 @@ eval_t qsearch(sg::ThreadData& threadData, const ChessBoard& board, const depth_
     return bestScore;
 }
 
-eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t depth, const depth_t ply, eval_t alpha, const eval_t beta, const move_t lastMove) {
+eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t depth, const depth_t ply, eval_t alpha, const eval_t beta, const move_t lastMove, bool cutnode) {
     // Step 1: Increment nodes
     threadData.nodes++;
 
@@ -81,6 +81,9 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     const bool inCheck = board.isInCheck();
     const side_t stm = board.getSTM();
     const zobrist_t zobristCode = board.getZobristCode();
+    const bool pvNode = beta - alpha == 1;
+    if (pvNode)
+        cutnode = false;
 
     // Step 4: Check for game end conditions
     // Annoyingly, if there have been 50 moves since a capture or pawn move, and you are in checkmate, it's not a draw.
@@ -124,7 +127,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         const depth_t R = 4 + depth / 5;
         ChessBoard nmBoard = board;
         nmBoard.makeNullMove();
-        const eval_t nmScore = -negamax(threadData, nmBoard, depth - R, ply + 1, -beta, -beta + 1, 1);
+        const eval_t nmScore = -negamax(threadData, nmBoard, depth - R, ply + 1, -beta, -beta + 1, 1, true);
         if (nmScore >= beta) {
             return nmScore;
         }
@@ -169,19 +172,19 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         }
 
         if (doReducedSearch) {
-            newScore = -negamax(threadData, newBoard, depth - R, ply + 1, -alpha - 1, -alpha, move);
+            newScore = -negamax(threadData, newBoard, depth - R, ply + 1, -alpha - 1, -alpha, move, !cutnode);
             if (newScore <= alpha) {
                 doZWS = false;
                 doFullSearch = false;
             }
         }
         if (doZWS) {
-            newScore = -negamax(threadData, newBoard, depth - 1, ply + 1, -alpha - 1, -alpha, move);
+            newScore = -negamax(threadData, newBoard, depth - 1, ply + 1, -alpha - 1, -alpha, move, !cutnode);
             if (alpha < newScore and newScore < beta)
                 doFullSearch = true;
         }
         if (doFullSearch) {
-            newScore = -negamax(threadData, newBoard, depth - 1, ply + 1, -beta, -alpha, move);
+            newScore = -negamax(threadData, newBoard, depth - 1, ply + 1, -beta, -alpha, move, !cutnode);
         }
 
         if (newScore > bestScore) {
@@ -215,7 +218,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
             const auto fromTo = mvs::getFromTo(bestMove);
             threadData.butterflyHistory[stm][fromTo] += bonus - bonus * threadData.butterflyHistory[stm][fromTo] / 511;
         } // end if best move is quiet
-        
+
         // Step 15B: malus to all moves before this that didn't cause a cutoff
         for (move_t move : movesTried) {
             if (mvs::isQuiet(move) and move != bestMove) {
@@ -245,7 +248,7 @@ sg::ThreadData rootSearch(const ChessBoard board) {
     for (depth_t depth = 1; depth <= sg::depthLimit and !cancelled; depth++) {
         // Step 2.1: Do the search
         try {
-            score = negamax(rootThreadData, board, depth_t(depth), depth_t(0), sg::SCORE_MIN, sg::SCORE_MAX, 0);
+            score = negamax(rootThreadData, board, depth_t(depth), depth_t(0), sg::SCORE_MIN, sg::SCORE_MAX, 0, false);
         }
         catch (const SearchCancelledException& e) {
             cancelled = true;
