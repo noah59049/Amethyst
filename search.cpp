@@ -110,7 +110,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     }
 
     // Internal iterative reductions
-    if (!isRoot and ttMove == 0 and depth > 3)
+    if (!isRoot and ttMove == 0 and depth > 3 and (pvNode or cutnode))
         depth--;
 
     // Step 7: Check if depth is 0 or less
