@@ -40,7 +40,7 @@ const std::string BENCH_POSITIONS[] = {
 };
 
 perft_t bench() {
-    sg::depthLimit = 11;
+    sg::depthLimit = 12;
     sg::nodesLimit = INT64_MAX;
     sg::hardTimeLimit = 1000000000;
     sg::softTimeLimit = 1000000000;
