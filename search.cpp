@@ -81,7 +81,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     const bool inCheck = board.isInCheck();
     const side_t stm = board.getSTM();
     const zobrist_t zobristCode = board.getZobristCode();
-    const bool pvNode = beta - alpha == 1;
+    const bool pvNode = beta - alpha > 1;
     if (pvNode)
         cutnode = false;
 
