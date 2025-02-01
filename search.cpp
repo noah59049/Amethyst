@@ -127,7 +127,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         const depth_t R = 4 + depth / 5;
         ChessBoard nmBoard = board;
         nmBoard.makeNullMove();
-        const eval_t nmScore = -negamax(threadData, nmBoard, depth - R, ply + 1, -beta, -beta + 1, 0, true);
+        const eval_t nmScore = -negamax(threadData, nmBoard, depth - R, ply + 1, -beta, -beta + 1, 0, !cutnode);
         if (nmScore >= beta) {
             return nmScore;
         }
