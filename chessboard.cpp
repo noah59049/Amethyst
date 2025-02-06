@@ -333,6 +333,16 @@ void ChessBoard::printAllBitboards() const {
     std::cout << std::endl;
 }
 
+void ChessBoard::printLegalMoves() const {
+    std::cout << "------ LEGAL MOVES ------" << std::endl;
+    std::cout << "--fen " << toFEN() << std::endl;
+    for (move_t move : getPseudoLegalMoves()) {
+        if (isLegal(move))
+            std::cout << moveToLAN(move) << std::endl;
+    }
+    std::cout << "-- END LEGAL MOVES ------" << std::endl;
+}
+
 void ChessBoard::makemove(move_t move) {
     // Step 0: Get info from move
     const piece_t piece = mvs::getPiece(move);

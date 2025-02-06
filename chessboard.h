@@ -51,6 +51,10 @@ public:
     // But it is not used in the main functions of the engine
     void printAllBitboards() const;
 
+    // Prints out all the legal moves in this position
+    // This is useful for debugging purposes
+    void printLegalMoves() const;
+
     // Makes the given move
     // If the move is not a valid move in this position, the behavior is undefined.
     void makemove(move_t move);
