@@ -17,6 +17,7 @@
 #include "moveorder.h"
 #include "tt.h"
 #include "movegenerator.h"
+#include "hce.h"
 
 // I don't think this is really necessary
 // But why not leave it in
@@ -543,7 +544,7 @@ void runEvalTestSuite(const std::string& bookFilename, const std::string& evalsF
     if (passed) {
         for (int i = 0; i < evals.size(); i++) {
             ChessBoard board = boards[i];
-            eval_t eval = board.getEval();
+            eval_t eval = hce::getStaticEval(board);
             eval_t whiteRelativeEval = board.getSTM() == sides::WHITE ? eval : -eval;
 
             if (whiteRelativeEval != evals[i]) {

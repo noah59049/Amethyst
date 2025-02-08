@@ -20,6 +20,7 @@ add_executable(amethyst_chess3 main.cpp
         tt.h
         uciopt.cpp
         uciopt.h
+        hce.cpp
 )
 
 add_executable(amethyst_chess3_test tests.cpp
@@ -39,4 +40,5 @@ add_executable(amethyst_chess3_test tests.cpp
         uciopt.h
         tt.h
         tt.cpp
+        hce.cpp
 )

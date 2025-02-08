@@ -10,6 +10,7 @@
 #include "chessboard.h"
 #include "search.h"
 #include "bench.h"
+#include "hce.h"
 
 
 void uciLoop() {
@@ -167,7 +168,7 @@ void uciLoop() {
         } // end if command starts with go
 
         else if (command == "staticeval") {
-            std::cout << position.getEval() << std::endl;
+            std::cout << hce::getStaticEval(position) << std::endl;
         }
 
         else if (command == "bench") {

@@ -2,6 +2,7 @@
 
 #include "moveorder.h"
 #include "movegenerator.h"
+#include "hce.h"
 
 #include <iostream>
 #include <exception>
@@ -28,7 +29,7 @@ eval_t qsearch(sg::ThreadData& threadData, const ChessBoard& board, const depth_
     }
 
     // Step 3: Check stand-pat
-    const eval_t staticEval = board.getEval();
+    const eval_t staticEval = hce::getStaticEval(board);
     eval_t bestScore = staticEval;
     if (bestScore >= beta)
         return bestScore;
@@ -118,7 +119,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         return qsearch(threadData, board, ply, alpha, beta, lastMove);
 
     // Step 9: Try RFP
-    const eval_t staticEval = board.getEval();
+    const eval_t staticEval = hce::getStaticEval(board);
     if (!inCheck and depth <= 5 and staticEval - 100 * depth >= beta)
         return beta;
 
@@ -240,7 +241,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
 sg::ThreadData rootSearch(const ChessBoard board) {
     // Step 1: Initialize thread data
     sg::ThreadData rootThreadData;
-    eval_t score = board.getEval();
+    eval_t score = hce::getStaticEval(board);
     std::string rootBestMove;
     bool cancelled = false;
 

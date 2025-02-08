@@ -121,11 +121,6 @@ public:
     // Returns true if we can attempt null move pruning
     [[nodiscard]] bool canTryNMP() const;
 
-    // Gets the static eval
-    // This eval is from the perspective of the side to move
-    // So higher eval scores mean the position is better for the side to move.
-    [[nodiscard]] eval_t getEval() const;
-
     // Determines if the position is in check.
     [[nodiscard]] inline bool isInCheck() const {
         return pieceGivingCheck != NOT_IN_CHECK_CODE;
@@ -141,11 +136,11 @@ public:
         return halfmove;
     }
 
-    [[nodiscard]] inline bitboard_t getPieceBB(piece_t piece) {
+    [[nodiscard]] inline bitboard_t getPieceBB(piece_t piece) const {
         return pieceTypes[piece];
     }
 
-    [[nodiscard]] inline bitboard_t getSideBB(side_t side) {
+    [[nodiscard]] inline bitboard_t getSideBB(side_t side) const {
         return colors[side];
     }
 };
