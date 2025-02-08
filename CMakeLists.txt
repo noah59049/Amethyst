@@ -44,7 +44,13 @@ add_executable(amethyst_chess3_test tests.cpp
         hce.cpp
 )
 
-add_executable(tuner hcetuner.cpp
+add_library(amethyst_tuner SHARED hcetuner.cpp)
+
+target_sources(amethyst_tuner PRIVATE
         attacks.cpp
         chessboard.cpp
 )
+# add_executable(tuner hcetuner.cpp
+#         attacks.cpp
+#         chessboard.cpp
+# )
