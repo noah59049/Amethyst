@@ -4,7 +4,7 @@
 #include <iostream>
 #include <fstream>
 
-const std::string bookFilename = "lichess-big3-resolved.book"; // WATCH OUT, THIS HAS EVALS IN THE LINES
+const std::string bookFilename = "Pohl.epd";
 
 std::vector<ChessBoard> readBook(const int length) {
     // Step 1: Initialize stuff
@@ -15,7 +15,10 @@ std::vector<ChessBoard> readBook(const int length) {
     // Step 2: Read in one position for each line in the file
     for (int i = 0; i < length; i++) {
         if (file.peek() == EOF) {
-            std::cout << "Error in readBook: reached end of file before book length limit was reached" << std::endl;
+            if (i == 0)
+                std::cout << "Error in readBook: file is empty";
+            else
+                std::cout << "Error in readBook: reached end of file before book length limit was reached" << std::endl;
             exit(1);
         }
         getline(file, line);
@@ -42,4 +45,16 @@ void add_fifthy (int arr[], int length) {
     for (int i=0; i < length; i++) {
         arr[i] = arr[i] + 50;
     }
+}
+
+int main() {
+    int arr[30]{};
+
+    getKingSquares(sides::WHITE, arr, 30);
+    for (int num : arr) {
+        std::cout << num << std::endl;
+    }
+
+    std::cout << "Hello, World!" << std::endl;
+    return 0;
 }
