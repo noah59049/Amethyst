@@ -140,4 +140,12 @@ public:
     [[nodiscard]] inline auto getHalfmove() const {
         return halfmove;
     }
+
+    [[nodiscard]] inline bitboard_t getPieceBB(piece_t piece) {
+        return pieceTypes[piece];
+    }
+
+    [[nodiscard]] inline bitboard_t getSideBB(side_t side) {
+        return colors[side];
+    }
 };
