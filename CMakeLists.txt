@@ -43,3 +43,8 @@ add_executable(amethyst_chess3_test tests.cpp
         tt.cpp
         hce.cpp
 )
+
+add_executable(tuner hcetuner.cpp
+        attacks.cpp
+        chessboard.cpp
+)
