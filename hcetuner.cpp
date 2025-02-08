@@ -41,7 +41,7 @@ extern "C" void getKingSquares (const side_t side, int arr[], const int length) 
     }
 }
 
-void add_fifthy (int arr[], int length) {
+extern "C" void add_fifthy (int arr[], int length) {
     for (int i=0; i < length; i++) {
         arr[i] = arr[i] + 50;
     }
