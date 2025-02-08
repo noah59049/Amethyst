@@ -109,20 +109,20 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
             return ttScore;
     }
 
-    // Internal iterative reductions
+    // Step 7: Internal iterative reductions
     if (ttMove == 0 and depth > 3 and (pvNode or cutnode))
         depth--;
 
-    // Step 7: Check if depth is 0 or less
+    // Step 8: Check if depth is 0 or less
     if (depth <= 0)
         return qsearch(threadData, board, ply, alpha, beta, lastMove);
 
-    // Step 8: Try RFP
+    // Step 9: Try RFP
     const eval_t staticEval = board.getEval();
     if (!inCheck and depth <= 5 and staticEval - 100 * depth >= beta)
         return beta;
 
-    // Step 9: Try NMP
+    // Step 10: Try NMP
     if (!isRoot and !sg::isMateScore(beta) and board.canTryNMP()) {
         const depth_t R = 4 + depth / 5;
         ChessBoard nmBoard = board;
@@ -133,7 +133,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
         }
     }
 
-    // Step 10: Initialize variables for moves searched through
+    // Step 11: Initialize variables for moves searched through
     MoveList movesTried;
     MoveGenerator generator(threadData, board, ttMove);
     eval_t newScore;
@@ -142,7 +142,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     int moveCount = 0;
     bool improvedAlpha = false;
 
-    // Step 11: Overwrite the current entry of the search stack
+    // Step 12: Overwrite the current entry of the search stack
     threadData.searchStack[ply].zobristCode = zobristCode;
     threadData.searchStack[ply].move = lastMove;
     threadData.searchStack[ply].staticEval = staticEval;
@@ -219,7 +219,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
             threadData.butterflyHistory[stm][fromTo] += bonus - bonus * threadData.butterflyHistory[stm][fromTo] / 511;
         } // end if best move is quiet
 
-        // Step 15B: malus to all moves before this that didn't cause a cutoff
+        // Step 15B: malus to all quiet moves before this that didn't cause a cutoff
         for (move_t move : movesTried) {
             if (mvs::isQuiet(move) and move != bestMove) {
                 const auto fromTo = mvs::getFromTo(move);
