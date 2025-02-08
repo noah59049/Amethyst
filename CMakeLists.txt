@@ -21,6 +21,7 @@ add_executable(amethyst_chess3 main.cpp
         uciopt.cpp
         uciopt.h
         hce.cpp
+        hcetuner.cpp
 )
 
 add_executable(amethyst_chess3_test tests.cpp
