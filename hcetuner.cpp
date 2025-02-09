@@ -1,5 +1,6 @@
 #include "chessboard.h"
 #include "logarithm.h"
+#include "attacks.h"
 
 #include <iostream>
 #include <fstream>
@@ -41,22 +42,27 @@ extern "C" void getKingSquares (const int side, int arr[], const int length) {
     }
 }
 
-extern "C" void add_fifthy (int arr[], int length) {
-    for (int i=0; i < length; i++) {
-        arr[i] = arr[i] + 50;
-    }
-}
-
-/*
-int main() {
-    int arr[30]{};
-
-    getKingSquares(sides::WHITE, arr, 30);
-    for (int num : arr) {
-        std::cout << num << std::endl;
-    }
-
-    std::cout << "Hello, World!" << std::endl;
-    return 0;
-}
- */
+extern "C" void getMobility(const int side, int arr[], const int length) {
+    // NOTE: The array is implicitly 2D
+    // So it is length*6
+    // So arr[] is length 600 if length is 100
+    std::vector<ChessBoard> boards = readBook(length);
+    for (int i = 0; i < length; i++) {
+        const ChessBoard board = boards.at(i);
+        const bitboard_t allPieces = board.getSideBB(sides::WHITE) | board.getSideBB(sides::BLACK);
+        const bitboard_t notFriendlyPieces = ~board.getSideBB(side);
+        for (piece_t piece = pcs::PAWN; piece <= pcs::KING; piece++) {
+            const int index = side * 6 + piece;
+            bitboard_t remainingPieces = board.getPieceBB(piece) & board.getSideBB(side);
+            bitboard_t squareBB;
+            square_t square;
+            while (remainingPieces) {
+                squareBB = remainingPieces & -remainingPieces;
+                remainingPieces -= squareBB;
+                square = log2ll(squareBB);
+                const bitboard_t attacks = getAttackedSquares(square, piece, allPieces, side);
+                arr[index] += std::popcount(attacks & notFriendlyPieces);
+            } // end while remainingPieces
+        } // end for loop over piece
+    } // end for loop over i
+} // end getMobility
