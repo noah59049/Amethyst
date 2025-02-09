@@ -52,7 +52,7 @@ extern "C" void getMobility(const int side, int arr[], const int length) {
         const bitboard_t allPieces = board.getSideBB(sides::WHITE) | board.getSideBB(sides::BLACK);
         const bitboard_t notFriendlyPieces = ~board.getSideBB(side);
         for (piece_t piece = pcs::PAWN; piece <= pcs::KING; piece++) {
-            const int index = side * 6 + piece;
+            const int index = i * 6 + piece;
             bitboard_t remainingPieces = board.getPieceBB(piece) & board.getSideBB(side);
             bitboard_t squareBB;
             square_t square;
