@@ -30,7 +30,7 @@ std::vector<ChessBoard> readBook(const int length) {
     return book;
 }
 
-extern "C" void getKingSquares (const side_t side, int arr[], const int length) {
+extern "C" void getKingSquares (const int side, int arr[], const int length) {
     std::vector<ChessBoard> boards = readBook(length);
 
     for (int i = 0; i < length; i++) {
