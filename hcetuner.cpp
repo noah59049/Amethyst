@@ -95,7 +95,7 @@ extern "C" void getPSTs(const int side, const int piece, const int maxPieces, in
         } // end while remainingPieces
 
         while (index < maxPieces * (i + 1)) {
-            arr[index++] = 64;
+            arr[index++] = 64; // 64 is the code for "this piece is not on the board"
         }
     } // end for loop over i
 }
