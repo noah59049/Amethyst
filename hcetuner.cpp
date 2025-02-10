@@ -66,3 +66,36 @@ extern "C" void getMobility(const int side, int arr[], const int length) {
         } // end for loop over piece
     } // end for loop over i
 } // end getMobility
+
+extern "C" void getPSTs(const int side, const int piece, const int maxPieces, int arr[], const int length) {
+    std::vector<ChessBoard> boards = readBook(length);
+    for (int i = 0; i < length; i++) {
+        const ChessBoard board = boards.at(i);
+        bitboard_t remainingPieces = board.getPieceBB(piece) & board.getSideBB(side);
+        bitboard_t squareBB;
+        square_t square;
+        int index = i * maxPieces;
+        while (remainingPieces) {
+            // Step 1: Find the square
+            squareBB = remainingPieces & -remainingPieces;
+            remainingPieces -= squareBB;
+            square = log2ll(squareBB);
+
+            // Step 2: Annoying processing with the square
+            // We have to flip the square vertically if the side is black
+            square ^= side * 7;
+            // We also have to switch from a8=7 to h1=7
+            // This is done for PST interpretability and compatibility with python-chess
+            const square_t file = squares::getFile(square);
+            const square_t rank = squares::getRank(square);
+            square = squares::squareFromFileRank(rank, file); // Yes this is supposed to pass in arguments "backwards"
+
+            // Step 3: Write the square to the array
+            arr[index++] = square;
+        } // end while remainingPieces
+
+        while (index % maxPieces) {
+            arr[index++] = 64;
+        }
+    } // end for loop over i
+}
