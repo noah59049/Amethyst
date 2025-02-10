@@ -4,7 +4,6 @@
 
 #include <iostream>
 #include <fstream>
-#include <bit>
 
 const std::string bookFilename = "Pohl.epd";
 
@@ -76,7 +75,6 @@ extern "C" void getPSTs(const int side, const int piece, const int maxPieces, in
         bitboard_t squareBB;
         square_t square;
         int index = i * maxPieces;
-        int numNullPieces = maxPieces - std::popcount(remainingPieces);
         while (remainingPieces) {
             // Step 1: Find the square
             squareBB = remainingPieces & -remainingPieces;
@@ -96,7 +94,7 @@ extern "C" void getPSTs(const int side, const int piece, const int maxPieces, in
             arr[index++] = square;
         } // end while remainingPieces
 
-        while (numNullPieces-- > 0) {
+        while (index < maxPieces * (i + 1)) {
             arr[index++] = 64;
         }
     } // end for loop over i
