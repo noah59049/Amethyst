@@ -35,10 +35,22 @@ extern "C" void getKingSquares (const int side, int arr[], const int length) {
     std::vector<ChessBoard> boards = readBook(length);
 
     for (int i = 0; i < length; i++) {
+        // Step 1: Get the square
         const ChessBoard board = boards.at(i);
         const bitboard_t kingBB = board.getSideBB(side) & board.getPieceBB(pcs::KING);
-        const square_t kingSquare = log2ll(kingBB);
-        arr[i] = kingSquare;
+        square_t square = log2ll(kingBB);
+
+        // Step 2: Annoying processing with the square
+        // We have to flip the square vertically if the side is black
+        square ^= side * 7;
+        // We also have to switch from a8=7 to h1=7
+        // This is done for PST interpretability and compatibility with python-chess
+        const square_t file = squares::getFile(square);
+        const square_t rank = squares::getRank(square);
+        square = squares::squareFromFileRank(rank, file); // Yes this is supposed to pass in arguments "backwards"
+
+        // Step 3: Put the square in the array
+        arr[i] = square;
     }
 }
 
