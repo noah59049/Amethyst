@@ -75,6 +75,7 @@ extern "C" void getPSTs(const int side, const int piece, const int maxPieces, in
         bitboard_t squareBB;
         square_t square;
         int index = i * maxPieces;
+        int numNullPieces = maxPieces - std::popcount(remainingPieces);
         while (remainingPieces) {
             // Step 1: Find the square
             squareBB = remainingPieces & -remainingPieces;
@@ -94,7 +95,7 @@ extern "C" void getPSTs(const int side, const int piece, const int maxPieces, in
             arr[index++] = square;
         } // end while remainingPieces
 
-        while (index % maxPieces) {
+        while (numNullPieces-- > 0) {
             arr[index++] = 64;
         }
     } // end for loop over i
