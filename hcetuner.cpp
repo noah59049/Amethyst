@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <bit>
 
 const std::string bookFilename = "Pohl.epd";
 
