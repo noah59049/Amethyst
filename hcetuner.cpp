@@ -157,8 +157,7 @@ int get_phase(const std::string& fen) {
                 stop = true;
                 break;
             default:
-                std::cout << "ERROR: Unrecognized character " << ch << " in FEN" << std::endl;
-                exit(1);
+                break;
         } // end switch
     } // end for loop over characters in fen
     return phase;
