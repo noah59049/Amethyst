@@ -160,7 +160,7 @@ int get_phase(const std::string& fen) {
                 break;
         } // end switch
     } // end for loop over characters in fen
-    return phase;
+    return std::min(phase, 24);
 } // end get_phase method
 
 extern "C" void getPhases(int arr[], const int length) {
