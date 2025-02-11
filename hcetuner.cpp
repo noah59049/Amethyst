@@ -111,3 +111,76 @@ extern "C" void getPSTs(const int side, const int piece, const int maxPieces, in
         }
     } // end for loop over i
 }
+
+int get_phase(const std::string& fen) {
+    // This function is taken from Gedas's texel tuner
+    // https://github.com/GediminasMasaitis/texel-tuner/tree/main
+    // and lightly modified
+
+    int phase = 0;
+    bool stop = false;
+    for (const char ch : fen) {
+        if (stop) {
+            break;
+        }
+
+        switch (ch) {
+            case 'n':
+            case 'N':
+                phase += 1;
+                break;
+            case 'b':
+            case 'B':
+                phase += 1;
+                break;
+            case 'r':
+            case 'R':
+                phase += 2;
+                break;
+            case 'q':
+            case 'Q':
+                phase += 4;
+                break;
+            case 'p':
+            case '/':
+            case '1':
+            case '2':
+            case '3':
+            case '4':
+            case '5':
+            case '6':
+            case '7':
+            case '8':
+                break;
+            case ' ':
+                stop = true;
+                break;
+            default:
+                std::cout << "ERROR: Unrecognized character " << ch << " in FEN" << std::endl;
+                exit(1);
+        } // end switch
+    } // end for loop over characters in fen
+    return phase;
+} // end get_phase method
+
+extern "C" void getPhases(int arr[], const int length) {
+    std::ifstream file(bookFilename);
+    std::string line;
+
+    // Step 2: Read in one position and compute phase for each line in the file
+    // NOTE: We are computing phases from the fens directly, without parsing to a ChessBoard
+    for (int i = 0; i < length; i++) {
+        if (file.peek() == EOF) {
+            if (i == 0)
+                std::cout << "Error in getPhases: file is empty";
+            else
+                std::cout << "Error in getPhases: reached end of file before book length limit was reached" << std::endl;
+            exit(1);
+        }
+        getline(file, line);
+        arr[i] = get_phase(line);
+    }
+
+    // Step 3: Close the file
+    file.close();
+}
