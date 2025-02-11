@@ -4,6 +4,7 @@
 
 #include <iostream>
 #include <fstream>
+#include <sstream>
 
 const std::string bookFilename = "Pohl.epd";
 
@@ -164,6 +165,7 @@ int get_phase(const std::string& fen) {
 } // end get_phase method
 
 extern "C" void getPhases(int arr[], const int length) {
+    // Step 1: Initialize stuff
     std::ifstream file(bookFilename);
     std::string line;
 
@@ -179,6 +181,32 @@ extern "C" void getPhases(int arr[], const int length) {
         }
         getline(file, line);
         arr[i] = get_phase(line);
+    }
+
+    // Step 3: Close the file
+    file.close();
+}
+
+extern "C" void getResults(float arr[], const int length) {
+    // Step 1: Initialize stuff
+    std::ifstream file(bookFilename);
+    std::string line;
+
+    // Step 2: Read in each line
+    for (int i = 0; i < length; i++) {
+        if (file.peek() == EOF) {
+            if (i == 0)
+                std::cout << "Error in getPhases: file is empty";
+            else
+                std::cout << "Error in getPhases: reached end of file before book length limit was reached" << std::endl;
+            exit(1);
+        }
+        getline(file, line);
+        std::stringstream ss(line);
+        getline(ss,line,'[');
+        float result = -100; // If it stays -100 we know we did something wrong
+        ss >> result;
+        arr[i] = result;
     }
 
     // Step 3: Close the file
