@@ -1,3 +1,15 @@
+/*
+ * This file is meant to be compiled into a shared library (.dylib, .so, or .dll, depending on the OS)
+ * It will be called by the python HCE tuner to get tensors of features.
+ * This represents a significant speedup over using the python-chess library to compute features from a file of FENs.
+ *
+ * In order to avoid boilerplate, arrays are allocated in python, and C++ only modifies them.
+ * Also, these C++ functions only deal with 1D arrays, even when the arrays are "actually" 2D
+ * (for example, if you have 10000 fens, mobility is "actually" a tensor of size 10000*6,
+ * but this treats it as a 1D array of size 60000.
+ * It is a simple matter for python to reshape the array.
+ */
+
 #include "chessboard.h"
 #include "logarithm.h"
 #include "attacks.h"
