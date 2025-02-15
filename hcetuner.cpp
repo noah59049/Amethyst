@@ -18,7 +18,7 @@
 #include <fstream>
 #include <sstream>
 
-const std::string bookFilename = "lichess-big3-resolved.book";
+const std::string bookFilename = "Noah.epd";
 
 std::vector<ChessBoard> readBook(const int length) {
     // Step 1: Initialize stuff
