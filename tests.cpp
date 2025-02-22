@@ -523,11 +523,17 @@ void runEvalTestSuite(const std::string& bookFilename, const std::string& evalsF
 
     std::vector<eval_t> evals;
     std::ifstream evalsFile(evalsFilename);
+    std::string line;
     while (evalsFile.peek() != EOF) {
+        getline(evalsFile,line);
+        std::stringstream ss(line);
         eval_t eval = 0;
-        evalsFile >> eval;
+        ss >> eval;
         evals.push_back(eval);
     }
+
+    std::cout << evals.at(evals.size() - 1) << std::endl;
+
 
     bool passed = true;
 
