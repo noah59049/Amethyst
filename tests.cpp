@@ -532,11 +532,7 @@ void runEvalTestSuite(const std::string& bookFilename, const std::string& evalsF
         evals.push_back(eval);
     }
 
-    std::cout << evals.at(evals.size() - 1) << std::endl;
-
-
     bool passed = true;
-
     if (evals.size() != boards.size()) {
         std::cout
                 << "FAILED runEvalTestSuite: boards and expected evals are not the same length. Check that you have the correct files."
@@ -557,11 +553,15 @@ void runEvalTestSuite(const std::string& bookFilename, const std::string& evalsF
             eval_t whiteRelativeEval = board.getSTM() == sides::WHITE ? eval : -eval;
 
             if (whiteRelativeEval != evals[i]) {
-                std::cout << "FAILED eval test suite: evals don't match" << std::endl;
-                std::cout << "FEN is " << board.toFEN() << std::endl;
-                std::cout << "Eval from tuner is " << evals[i] << std::endl;
-                std::cout << "Eval from board is " << whiteRelativeEval << std::endl;
-                std::cout << std::endl;
+                if (i < 10001)
+                    std::cout << i << std::endl;
+                if (false) {
+                    std::cout << "FAILED eval test suite: evals don't match" << std::endl;
+                    std::cout << "FEN is " << board.toFEN() << std::endl;
+                    std::cout << "Eval from tuner is " << evals[i] << std::endl;
+                    std::cout << "Eval from board is " << whiteRelativeEval << std::endl;
+                    std::cout << std::endl;
+                }
                 passed = false;
                 numFailed++;
             }
