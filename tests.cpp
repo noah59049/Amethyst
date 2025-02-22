@@ -535,6 +535,9 @@ void runEvalTestSuite(const std::string& bookFilename, const std::string& evalsF
         std::cout
                 << "FAILED runEvalTestSuite: boards and expected evals are not the same length. Check that you have the correct files."
                 << std::endl;
+
+        std::cout << "length of boards is " << boards.size() << std::endl;
+        std::cout << "length of evals is " << evals.size() << std::endl;
         passed = false;
     }
 
