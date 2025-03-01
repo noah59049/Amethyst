@@ -31,6 +31,7 @@ namespace hce {
     // And each entry is S(mg, eg) for a black piece on that square
     constexpr std::array<std::array<std::array<packed_eval_t, 64>, 6>, 2> psts = {{
           {{
+                   // Friendly king on the queenside
                    {
                            S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0),
                            S(161,248), S(246,261), S(199,244), S(133,270), S( 94,281), S(101,278), S( 68,304), S(  2,289),
@@ -93,6 +94,7 @@ namespace hce {
                    },
            }},
           {{
+                   // Friendly king on the kingside
                    {
                            S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0), S(  0,  0),
                            S( 72,267), S(118,287), S(106,266), S(101,277), S(136,292), S(171,261), S(228,247), S(127,205),
