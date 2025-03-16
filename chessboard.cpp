@@ -162,6 +162,7 @@ ChessBoard::ChessBoard(const std::string &fen) {
 
     // Step 8: Initialize zobrist code
     zobristCode = calcZobristCode();
+    pawnKey = calcPawnKey();
 
     // Step 9: Initialize piece giving check
     updatePieceGivingCheck();
@@ -314,6 +315,14 @@ bool ChessBoard::areBitboardsCorrect() const {
         correct = false;
     }
 
+    // Check #7: Pawn key is correct
+    if (pawnKey != calcPawnKey()) {
+        std::cout << "FAILED bitboards correct test: pawn key is not correct" << std::endl;
+        std::cout << std::hex;
+        std::cout << "incremental pawn key is 0x" << pawnKey << ", calculated pawn key is 0x" << calcPawnKey() << ", and their difference is 0x" << (pawnKey ^ calcPawnKey()) << std::endl;
+        correct = false;
+    }
+
     // Final result: Print out info if the test failed
     if (!correct)
         printAllBitboards();
@@ -356,6 +365,8 @@ void ChessBoard::makemove(move_t move) {
 
     // Step 1.5: zobrist code for moving the piece
     zobristCode ^= zb::getPieceZobrist(from,stm,piece) ^ zb::getPieceZobrist(to,stm,piece);
+    if (piece == pcs::PAWN)
+        pawnKey ^= zb::getPieceZobrist(from,stm,piece) ^ zb::getPieceZobrist(to,stm,piece);
 
     // Step 2: Promotions
     if (mvs::isPromotion(move)) {
@@ -365,6 +376,7 @@ void ChessBoard::makemove(move_t move) {
 
         // Step 2.5: zobrist code for promotion
         zobristCode ^= zb::getPieceZobrist(to,stm,pcs::PAWN) ^ zb::getPieceZobrist(to,stm,promoPiece);
+        pawnKey ^= zb::getPieceZobrist(to,stm,pcs::PAWN);
     }
 
     // Step 3: EP
@@ -376,6 +388,7 @@ void ChessBoard::makemove(move_t move) {
 
         // Step 3.5: zobrist code for EP
         zobristCode ^= zb::getPieceZobrist(epSquare, stm ^ 1, pcs::PAWN);
+        pawnKey ^= zb::getPieceZobrist(epSquare, stm ^ 1, pcs::PAWN);
     }
 
     // Step 4: Regular captures
@@ -386,6 +399,8 @@ void ChessBoard::makemove(move_t move) {
 
         // Step 4.5: zobrist code for regular captures
         zobristCode ^= zb::getPieceZobrist(to, stm ^ 1, capturedPiece);
+        if (capturedPiece == pcs::PAWN)
+            pawnKey ^= zb::getPieceZobrist(to, stm ^ 1, capturedPiece);
     }
 
     // Step 5: Castling
@@ -1070,6 +1085,26 @@ zobrist_t ChessBoard::calcZobristCode() const {
 
 zobrist_t ChessBoard::getZobristCode() const {
     return zobristCode;
+}
+
+zobrist_t ChessBoard::calcPawnKey() const {
+    zobrist_t pawnKey = 0;
+    for (side_t side = 0; side < 2; side++) {
+        bitboard_t remainingPieces = pieceTypes[pcs::PAWN] & colors[side];
+        bitboard_t squareBB;
+        square_t square;
+        while (remainingPieces) {
+            squareBB = remainingPieces & -remainingPieces;
+            remainingPieces -= squareBB;
+            square = log2ll(squareBB);
+            pawnKey ^= zb::getPieceZobrist(square, side, pcs::PAWN);
+        }
+    }
+    return pawnKey;
+}
+
+zobrist_t ChessBoard::getPawnKey() const {
+    return pawnKey;
 }
 
 bool ChessBoard::canTryNMP() const {

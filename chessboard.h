@@ -16,6 +16,7 @@ private:
     std::array<bitboard_t, 6> pieceTypes{};
     std::array<bitboard_t, 2> colors{};
     zobrist_t zobristCode{};
+    zobrist_t pawnKey{};
     uint16_t halfmove;
     uint16_t fullmove;
     uint8_t epCastlingRights;
@@ -117,6 +118,14 @@ public:
     // Gets the incrementally updated zobrist code.
     // This function is fast.
     [[nodiscard]] zobrist_t getZobristCode() const;
+
+    // Gets the pawn key, which is like a zobrist code, but it only tracks pawns.
+    // This function is slow.
+    [[nodiscard]] zobrist_t calcPawnKey() const;
+
+    // Gets the incrementally updated pawn key
+    // This function is fast.
+    [[nodiscard]] zobrist_t getPawnKey() const;
 
     // Returns true if we can attempt null move pruning
     [[nodiscard]] bool canTryNMP() const;
