@@ -15,7 +15,7 @@ void PawnCorrhist::put(const zobrist_t pawnKey, const eval_t score, const eval_t
     table[index] = (int32_t(table[index]) * 255 + diff) / 256;
 }
 
-void PawnCorrhist::getCorrectedEval(const zobrist_t pawnKey, const eval_t staticEval, const side_t stm) {
+eval_t PawnCorrhist::getCorrectedEval(const zobrist_t pawnKey, const eval_t staticEval, const side_t stm) {
     const auto index = getIndex(pawnKey);
     if (stm == sides::WHITE)
         return staticEval + table[index];

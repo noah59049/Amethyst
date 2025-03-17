@@ -19,5 +19,5 @@ public:
 
     void put(zobrist_t pawnKey, eval_t score, eval_t staticEval, side_t stm);
 
-    void getCorrectedEval(zobrist_t pawnKey, eval_t staticEval, side_t stm);
+    eval_t getCorrectedEval(zobrist_t pawnKey, eval_t staticEval, side_t stm);
 };
