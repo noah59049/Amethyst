@@ -234,7 +234,16 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     const move_t bestMoveForTT = improvedAlpha ? bestMove : 0;
     sg::GLOBAL_TT.put(zobristCode, bestMoveForTT, bestScore, flagForTT, depth);
 
-    // Step 17: Return the score
+    // Step 17: Update corrhist
+    if (!inCheck and
+    mvs::isQuiet(bestMove) and
+    (flagForTT == ttflags::EXACT or
+    (flagForTT == ttflags::LOWER_BOUND and bestScore > staticEval) or
+    (flagForTT == ttflags::UPPER_BOUND and bestScore < staticEval))) {
+        threadData.pawnCorrhist.put(board.getPawnKey(), bestScore, staticEval, stm);
+    }
+
+    // Step 18: Return the score
     return bestScore;
 }
 

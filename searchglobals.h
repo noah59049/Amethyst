@@ -8,6 +8,7 @@
 #include "uciopt.h"
 #include "repetitiontable.h"
 #include "tt.h"
+#include "corrhist.h"
 
 namespace sg {
     constexpr eval_t SCORE_MIN = -32767;
@@ -30,6 +31,7 @@ namespace sg {
         std::chrono::time_point<std::chrono::high_resolution_clock> searchStartTime = std::chrono::high_resolution_clock::now();
         std::array<SearchStackEntry, 128> searchStack{};
         std::array<std::array<history_t, 4096>, 2> butterflyHistory{};
+        PawnCorrhist pawnCorrhist{};
     };
 
     // softTimeLimit and hardTimeLimit are measured in milliseconds
