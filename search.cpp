@@ -29,7 +29,9 @@ eval_t qsearch(sg::ThreadData& threadData, const ChessBoard& board, const depth_
     }
 
     // Step 3: Check stand-pat
-    const eval_t staticEval = hce::getStaticEval(board);
+    const eval_t staticEval = threadData.pawnCorrhist.getCorrectedEval(board.calcPawnKey(),
+                                                                       hce::getStaticEval(board),
+                                                                       board.getSTM());
     eval_t bestScore = staticEval;
     if (bestScore >= beta)
         return bestScore;
