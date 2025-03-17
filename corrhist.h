@@ -5,7 +5,7 @@
 
 class PawnCorrhist {
 private:
-    std::vector<eval_t> table;
+    std::vector<int32_t> table;
 
     [[nodiscard]] inline size_t getIndex(zobrist_t pawnKey) const {
         using u128 = unsigned __int128;
