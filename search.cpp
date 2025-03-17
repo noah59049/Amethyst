@@ -254,6 +254,7 @@ sg::ThreadData rootSearch(const ChessBoard board) {
     // Step 1: Initialize thread data
     sg::ThreadData rootThreadData;
     eval_t score = hce::getStaticEval(board);
+    eval_t prevScore = score;
     std::string rootBestMove;
     bool cancelled = false;
 
@@ -261,7 +262,31 @@ sg::ThreadData rootSearch(const ChessBoard board) {
     for (depth_t depth = 1; depth <= sg::depthLimit and !cancelled; depth++) {
         // Step 2.1: Do the search
         try {
-            score = negamax(rootThreadData, board, depth_t(depth), depth_t(0), sg::SCORE_MIN, sg::SCORE_MAX, 0, false);
+            bool inWindow = false;
+            int failsLeft = 3;
+            if (depth < 5 or sg::isMateScore(score))
+                failsLeft = 0;
+            eval_t lowerRadius = 65;
+            eval_t upperRadius = 65;
+            while (failsLeft and !inWindow) {
+                eval_t alpha = prevScore - lowerRadius;
+                eval_t beta = prevScore + upperRadius;
+                score = negamax(rootThreadData, board, depth_t(depth), depth_t(0), alpha, beta, 0, false);
+                if (score < alpha) {
+                    lowerRadius *= 2;
+                    failsLeft--;
+                }
+                else if (score > beta) {
+                    upperRadius *= 2;
+                    failsLeft--;
+                }
+                else {
+                    inWindow = true;
+                } // end else
+            } // end while failsLeft and !inWindow
+            if (failsLeft == 0)
+                score = negamax(rootThreadData, board, depth_t(depth), depth_t(0), sg::SCORE_MIN, sg::SCORE_MAX, 0, false);
+            prevScore = score;
         }
         catch (const SearchCancelledException& e) {
             cancelled = true;
