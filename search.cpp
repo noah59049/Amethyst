@@ -239,7 +239,7 @@ eval_t negamax(sg::ThreadData& threadData, const ChessBoard& board, depth_t dept
     // Step 17: Update corrhist
     if (!inCheck and
     mvs::isQuiet(bestMove) and
-    (flagForTT == ttflags::EXACT or
+    (flagForTT == ttflags::EXACT or // if bestMove is 0, it will be automatically considered quiet
     (flagForTT == ttflags::LOWER_BOUND and bestScore > staticEval) or
     (flagForTT == ttflags::UPPER_BOUND and bestScore < staticEval))) {
         threadData.pawnCorrhist.put(board.getPawnKey(), bestScore, staticEval, stm);
