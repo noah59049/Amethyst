@@ -266,17 +266,17 @@ sg::ThreadData rootSearch(const ChessBoard board) {
             int failsLeft = 3;
             if (depth < 5 or sg::isMateScore(score))
                 failsLeft = 0;
-            eval_t lowerRadius = 65;
-            eval_t upperRadius = 65;
+            eval_t lowerRadius = 50;
+            eval_t upperRadius = 50;
             while (failsLeft and !inWindow) {
                 eval_t alpha = prevScore - lowerRadius;
                 eval_t beta = prevScore + upperRadius;
                 score = negamax(rootThreadData, board, depth_t(depth), depth_t(0), alpha, beta, 0, false);
-                if (score < alpha) {
+                if (score <= alpha) {
                     lowerRadius *= 2;
                     failsLeft--;
                 }
-                else if (score > beta) {
+                else if (score >= beta) {
                     upperRadius *= 2;
                     failsLeft--;
                 }
