@@ -22,6 +22,8 @@ add_executable(amethyst_chess3 main.cpp
         uciopt.h
         hce.cpp
         hcetuner.cpp
+        corrhist.cpp
+        corrhist.h
 )
 
 add_executable(amethyst_chess3_test tests.cpp
@@ -42,6 +44,8 @@ add_executable(amethyst_chess3_test tests.cpp
         tt.h
         tt.cpp
         hce.cpp
+        corrhist.cpp
+        corrhist.h
 )
 
 add_library(amethyst_tuner SHARED hcetuner.cpp)
