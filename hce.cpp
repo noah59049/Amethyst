@@ -3,6 +3,9 @@
 #include "attacks.h"
 
 namespace hce {
+    /********************************\
+    |*** Part 1: Helper functions ***|   
+    \********************************/
     constexpr phase_t PHASE_PIECE_VALUES[6] = {0,1,1,2,4,0};
     constexpr phase_t MAX_PHASE = 24;
 
@@ -10,25 +13,23 @@ namespace hce {
         return (uint32_t(uint16_t(mg)) << 16) + eg;
     }
 
-    constexpr packed_eval_t mobility[6] = {S(-13, -25), S(0, 2), S(9, 12), S(8, 6), S(2, 12), S(-17, -3)};
-    // hash=f3ae68dd2525d5023748828edced78d2831c7b7d8e3f9d64e515787c965511ce
-
+    // PSTs are bucketed by the friendly king
+    // There are only two buckets:
+    // queenside and kingside
     constexpr auto NUM_KING_BUCKETS = 2;
 
     inline auto getFriendlyKingBucket(square_t kingSquare, side_t side) {
         return kingSquare / 32;
     }
 
-    // PSTs are bucketed by the friendly king
-    // There are only two buckets:
-    // queenside and kingside
+    /****************************\
+    |*** Part 2: Eval weights ***|   
+    \****************************/
 
-    // Note that these PSTs are not the actual PSTs that we will use
-    // They are the PSTs output from python-chess, which uses a1 = 0, h1 = 7, a8 = 56, h8 = 63
-    // I use a1 = 0, a8 = 7, h1 = 56, h8 = 63
-    // It would have been better if I used the square numbering system that python-chess uses instead of mine, but oh well
-    // Which is reflected across the a1-h8 diagonal from how python-chess does it
-    // Anyway, you can visualize these PSTs by pretending they are squares on a board
+    constexpr packed_eval_t mobility[6] = {S(-13, -25), S(0, 2), S(9, 12), S(8, 6), S(2, 12), S(-17, -3)};
+    // hash=f3ae68dd2525d5023748828edced78d2831c7b7d8e3f9d64e515787c965511ce
+
+    // You can visualize these PSTs by pretending they are squares on a board
     // And each entry is S(mg, eg) for a black piece on that square
     constexpr std::array<std::array<std::array<packed_eval_t, 64>, 6>, 2> psts = {{
           {{
@@ -157,7 +158,16 @@ namespace hce {
           }},
         }}; // hash=f3ae68dd2525d5023748828edced78d2831c7b7d8e3f9d64e515787c965511ce
 
+    /********************************\
+    |*** Part 3: Flipping squares ***|   
+    \********************************/
+
+    // The PSTs above are designed for readability, so you can see the 8x8 thing and look at the weights as if they are squares on a chessboard
+    // However Amethyst uses a1=0, a8=7, h1=56, h8=63
+    // This means that we need to mirror the PSTs from part 2 across the a1-h8 diagonal before we index them
+    // 
     constexpr square_t flipSquare(square_t square) {
+        // Returns the square reflected across the a1-h8 diagonal
         return square >> 3 | (square & 7) << 3;
     }
 
@@ -176,6 +186,9 @@ namespace hce {
 
     constexpr auto real_psts = transformPSTs(psts);
 
+    /*****************************\
+    |*** Part 4: Eval function ***|   
+    \*****************************/
     inline eval_t evalFromPacked(packed_eval_t packed, phase_t phase) {
         int32_t mg = int32_t(int16_t(uint16_t((packed + (1U << 15)) >> 16)));
         int32_t eg = int32_t(int16_t(uint16_t(packed)));
