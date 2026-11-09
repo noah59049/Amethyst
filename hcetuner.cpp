@@ -18,6 +18,7 @@
 #include <fstream>
 #include <sstream>
 
+// "Baking in" the book name is not ideal, but it is somewhat difficult to pass in strings to a dylib in python.
 const std::string bookFilename = "Noah.epd";
 
 std::vector<ChessBoard> readBook(const int length) {
