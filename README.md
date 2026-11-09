@@ -18,7 +18,7 @@ Amethyst has not been released or tested on CCRL yet. My estimate is around **26
 - Correction history
 
 **Evaluation**
-- Hand-crafted evaluation with its own tuner, currently not published
+- Hand-crafted evaluation with its own tuner at https://github.com/noah59049/amethyst-tuner. That tuner is designed to work with the shared library at `hcetuner.cpp`
 
 ## Building
 
