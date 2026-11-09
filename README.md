@@ -29,12 +29,26 @@ cmake --preset release
 cmake --build --preset release
 ```
 
-This builds two executables in `build/release/`:
+This builds the following in `build/release/`:
 
 - `amethyst_chess3`: the engine
 - `amethyst_chess3_test`: the test suite
+- `libamethyst_tuner.dylib`: the tuner library (see below)
 
 For a debug build, use `--preset debug` in both commands. The output then goes to `build/debug/`.
+
+### Building the tuner library
+
+[hcetuner.cpp](hcetuner.cpp) compiles to a shared library that the Python tuner ([amethyst-tuner](https://github.com/noah59049/amethyst-tuner)) calls to compute features from training positions. The full build above already includes it. To build only the library:
+
+```sh
+cmake --preset release
+cmake --build --preset release --target amethyst_tuner
+```
+
+The output is `build/release/libamethyst_tuner.dylib` on macOS, `libamethyst_tuner.so` on Linux, or `amethyst_tuner.dll` on Windows.
+
+The library reads its training positions from a file named `Noah.epd` in the current working directory of the process that loads it. Each line is a FEN followed by the game result as a number in square brackets. `[1.0]` = white wins, `[0.5]` = draw, `[0.0]` = black wins.
 
 ## Running
 
