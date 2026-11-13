@@ -574,7 +574,7 @@ void runEvalTestSuite(const std::string& bookFilename, const std::string& evalsF
     std::cout << "eval test suite: passed " << numPassed << ", failed " << numFailed << std::endl;
 
     if (numPassed == 0 and numFailed == 0 and evals.size() == boards.size()) {
-        std:: cout << "FAILED eval test suite: could not find file" << std::endl;
+        std:: cout << "FAILED eval test suite: could not find either fens or evals file" << std::endl;
     }
     else if (passed) {
         std::cout << "PASSED eval test suite" << std::endl;
