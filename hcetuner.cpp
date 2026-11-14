@@ -13,10 +13,12 @@
 #include "chessboard.h"
 #include "logarithm.h"
 #include "attacks.h"
+#include "bitmasks.h"
 
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <bit>
 
 // "Baking in" the book name is not ideal, but it is somewhat difficult to pass in strings to a dylib in python.
 const std::string bookFilename = "Noah.epd";
@@ -92,6 +94,32 @@ extern "C" void getMobility(const int side, int arr[], const int length) {
         } // end for loop over piece
     } // end for loop over i
 } // end getMobility
+
+extern "C" void getPawnThreats(const int side, int arr[], const int length) {
+    // NOTE: The array is implicitly 2D
+    // So it is length*6
+    // So arr[] is length 600 if length is 100
+    std::vector<ChessBoard> boards = readBook(length);
+
+    const int forwardDirection = 1 - 2 * side; // 1 for white, -1 for black, as is correct for how we write squares.
+
+    for (int i = 0; i < length; i++) {
+        const ChessBoard board = boards.at(i);
+        // Calculate pawn attacks
+        const bitboard_t pawnSquares = board.getPieceBB(pcs::PAWN) & board.getSideBB(side);
+        const bitboard_t pawnAttacks = 
+            ((pawnSquares & masks::NOT_A_FILE) >> (8 - forwardDirection)) |
+            ((pawnSquares & masks::NOT_H_FILE) << (8 + forwardDirection));
+
+
+        for (piece_t piece = pcs::PAWN; piece <= pcs::KING; piece++) {
+            const int index = i * 6 + piece;
+            const bitboard_t pieceBB = board.getPieceBB(piece) & board.getSideBB(side ^ 1);
+            const bitboard_t pawnThreats = pieceBB & pawnAttacks;
+            arr[index] = std::popcount(pawnThreats);
+        } // end for loop over piece
+    } // end for loop over i
+} // end getPawnThreats
 
 extern "C" void getPSTs(const int side, const int piece, const int maxPieces, int arr[], const int length) {
     std::vector<ChessBoard> boards = readBook(length);
