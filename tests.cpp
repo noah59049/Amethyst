@@ -18,6 +18,7 @@
 #include "tt.h"
 #include "movegenerator.h"
 #include "hce.h"
+#include "bitmasks.h"
 
 // I don't think this is really necessary
 // But why not leave it in
@@ -767,6 +768,26 @@ void stagedMovegenKiwipeteTest() {
     }
 }
 
+void examineThreats() {
+    const ChessBoard board = ChessBoard::fromFEN("8/8/1K2kp2/1P3p1p/3Rb3/4B1P1/r4P2/8 w - - 0 1");
+    const side_t side = sides::BLACK;
+    const int forwardDirection = 1 - 2 * side; // 1 for white, -1 for black, as is correct for how we write squares.
+    // Calculate pawn attacks
+    const bitboard_t pawnSquares = board.getPieceBB(pcs::PAWN) & board.getSideBB(side);
+    const bitboard_t pawnAttacks = 
+        ((pawnSquares & masks::NOT_A_FILE) >> (8 - forwardDirection)) |
+        ((pawnSquares & masks::NOT_H_FILE) << (8 + forwardDirection));
+
+
+    for (piece_t piece = pcs::PAWN; piece <= pcs::KING; piece++) {
+        const bitboard_t pieceBB = board.getPieceBB(piece) & board.getSideBB(side ^ 1);
+        const bitboard_t pawnThreats = pieceBB & pawnAttacks;
+        std::cout << std::popcount(pawnThreats) << std::endl;
+        std::cout << pawnThreats << std::endl;
+        break;
+    } // end for loop over piece
+}
+
 int main() {
     std::cout << "Hello, World!" << std::endl;
 //    runAllMovesTests();
@@ -776,9 +797,9 @@ int main() {
 //    splitperft("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq -",1);
 //    fenTestSuite("lichess-big3-scrubbed.epd"); // This passed
 //    startposPerft(6); // This looks good
-    runPerftSuite("standard.epd", true);
+    // runPerftSuite("standard.epd", true);
 //    runZobristPerftSuite("standard.epd", true); // This only works if we stop printing halfmove and fullmove in fens
-   runEvalTestSuite("Noah.epd", "NoahResults.txt");
+//    runEvalTestSuite("Noah.epd", "NoahResults.txt");
 //    runEasyPuzzleTestSuite("easy_puzzles.txt", "easy_puzzle_answers.txt");
 //    printFenMoveOrder("r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 1"); // kiwipete
 //    printFenMoveOrder("r1b1k2r/pPpp1p2/8/2b1p1pp/2Qnn1P1/2PP1N2/1qN1PPBP/R1B1K2R w KQkq - 0 14");
@@ -787,5 +808,6 @@ int main() {
 //    nullMoveTests();
 //    canTryNMPTests();
 //    stagedMovegenKiwipeteTest();
+    examineThreats();
     return 0;
 }
