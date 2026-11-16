@@ -869,7 +869,7 @@ int main() {
 //    stagedMovegenKiwipeteTest();
     const int side = sides::WHITE;
     const int length = 7153281;
-    int arr[length * 6];
-    getPawnThreats(side, arr, length);
+    std::vector<int> stuff(length * 6);
+    getPawnThreats(side, stuff.data(), length);
     return 0;
 }
