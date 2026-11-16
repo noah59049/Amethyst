@@ -833,9 +833,16 @@ void getPawnThreats(const int side, int arr[], const int length) {
 
         for (piece_t piece = pcs::PAWN; piece <= pcs::KING; piece++) {
             const int index = i * 6 + piece;
+            if (i > 7153281 * 6) {
+                std::cout << "ERROR in getPawnThreats: Index is too high for the array" << std::endl;
+                exit(1);
+            }
             const bitboard_t pieceBB = board.getPieceBB(piece) & board.getSideBB(side ^ 1);
             const bitboard_t pawnThreats = pieceBB & pawnAttacks;
-            arr[index] = std::popcount(pawnThreats);
+            const bool iWantToCauseASegfault = true;
+            if (iWantToCauseASegfault) {
+                arr[index] = std::popcount(pawnThreats);
+            }
         } // end for loop over piece
     } // end for loop over i
 } // end getPawnThreats
@@ -861,8 +868,8 @@ int main() {
 //    canTryNMPTests();
 //    stagedMovegenKiwipeteTest();
     const int side = sides::WHITE;
-    const int length = 7153281 * 6;
-    int arr[length];
+    const int length = 7153281;
+    int arr[length * 6];
     getPawnThreats(side, arr, length);
     return 0;
 }
