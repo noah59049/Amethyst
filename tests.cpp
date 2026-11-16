@@ -788,6 +788,58 @@ void examineThreats() {
     } // end for loop over piece
 }
 
+const std::string bookFilename = "Noah.epd";
+
+std::vector<ChessBoard> readBook(const int length) {
+    // Step 1: Initialize stuff
+    std::vector<ChessBoard> book;
+    std::ifstream file(bookFilename);
+    std::string line;
+
+    // Step 2: Read in one position for each line in the file
+    for (int i = 0; i < length; i++) {
+        if (file.peek() == EOF) {
+            if (i == 0)
+                std::cout << "Error in readBook: file is empty";
+            else
+                std::cout << "Error in readBook: reached end of file before book length limit was reached" << std::endl;
+            exit(1);
+        }
+        getline(file, line);
+        book.push_back(ChessBoard::fromFEN(line));
+    }
+
+    // Step 3: Close the file and return
+    file.close();
+    return book;
+}
+
+void getPawnThreats(const int side, int arr[], const int length) {
+    // NOTE: The array is implicitly 2D
+    // So it is length*6
+    // So arr[] is length 600 if length is 100
+    std::vector<ChessBoard> boards = readBook(length);
+
+    const int forwardDirection = 1 - 2 * side; // 1 for white, -1 for black, as is correct for how we write squares.
+
+    for (int i = 0; i < length; i++) {
+        const ChessBoard board = boards.at(i);
+        // Calculate pawn attacks
+        const bitboard_t pawnSquares = board.getPieceBB(pcs::PAWN) & board.getSideBB(side);
+        const bitboard_t pawnAttacks = 
+            ((pawnSquares & masks::NOT_A_FILE) >> (8 - forwardDirection)) |
+            ((pawnSquares & masks::NOT_H_FILE) << (8 + forwardDirection));
+
+
+        for (piece_t piece = pcs::PAWN; piece <= pcs::KING; piece++) {
+            const int index = i * 6 + piece;
+            const bitboard_t pieceBB = board.getPieceBB(piece) & board.getSideBB(side ^ 1);
+            const bitboard_t pawnThreats = pieceBB & pawnAttacks;
+            arr[index] = std::popcount(pawnThreats);
+        } // end for loop over piece
+    } // end for loop over i
+} // end getPawnThreats
+
 int main() {
     std::cout << "Hello, World!" << std::endl;
 //    runAllMovesTests();
@@ -808,6 +860,9 @@ int main() {
 //    nullMoveTests();
 //    canTryNMPTests();
 //    stagedMovegenKiwipeteTest();
-    examineThreats();
+    const int side = sides::WHITE;
+    const int length = 7153281 * 6;
+    int arr[length];
+    getPawnThreats(side, arr, length);
     return 0;
 }
