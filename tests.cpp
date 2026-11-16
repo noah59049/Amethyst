@@ -833,7 +833,7 @@ void getPawnThreats(const int side, int arr[], const int length) {
 
         for (piece_t piece = pcs::PAWN; piece <= pcs::KING; piece++) {
             const int index = i * 6 + piece;
-            if (i > 7153281 * 6) {
+            if (i >= 7153281 * 6) {
                 std::cout << "ERROR in getPawnThreats: Index is too high for the array" << std::endl;
                 exit(1);
             }
