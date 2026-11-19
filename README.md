@@ -159,6 +159,7 @@ Most of the engine uses **bitboards**. A bitboard is a 64-bit integer with one b
 I used AI for a small part of this project:
 
 - Updating `.gitignore` and adding `CMakePresets.json` when I moved the project from CLion to VSCode (Claude Code)
+- Learning the CMake commands to compile the file (Claude Code)
 - Writing a few of the tests in `tests.cpp` (ChatGPT)
 - Writing this README (Claude Code)
 
