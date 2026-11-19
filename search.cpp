@@ -10,6 +10,7 @@
 #include <functional>
 #include <cmath>
 #include <algorithm>
+#include <string>
 
 class SearchCancelledException : std::exception {
 

@@ -3,6 +3,9 @@
 #include <cassert>
 #include <iostream>
 #include <bit>
+#include <cstdint>
+#include <cstdlib>
+#include <ios>
 
 #include "chessboard.h"
 #include "logarithm.h"

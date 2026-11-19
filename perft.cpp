@@ -2,6 +2,8 @@
 #include "movegenerator.h"
 #include <iostream>
 #include <unordered_set>
+#include <cstdlib>
+#include <string>
 
 std::unordered_set<move_t> allPseudolegalMoves; // This is the set of all pseudolegal moves in all positions everywhere
 constexpr bool doPseudolegalCheck = false;

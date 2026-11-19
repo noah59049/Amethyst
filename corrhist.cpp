@@ -1,5 +1,7 @@
 #include "flags.h"
 #include "corrhist.h"
+#include <cstdint>
+#include <vector>
 
 // Corrections are stored as an exponentially weighted moving average
 // The value stored in the table is 256 times the average diff for that pawn hash

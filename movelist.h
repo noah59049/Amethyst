@@ -1,5 +1,6 @@
 #pragma once
 #include <array>
+#include <cassert>
 #include "typedefs.h"
 struct MoveList {
     std::array<move_t,256> moveList;

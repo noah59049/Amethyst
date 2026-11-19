@@ -1,4 +1,7 @@
 #include "searchglobals.h"
+#include <algorithm>
+#include <array>
+#include <cmath>
 
 namespace sg {
     int softTimeLimit = 0;

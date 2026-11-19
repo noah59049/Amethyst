@@ -5,6 +5,7 @@
 #include <sstream>
 #include <climits>
 #include <algorithm>
+#include <cstdlib>
 
 #include "searchglobals.h"
 #include "chessboard.h"

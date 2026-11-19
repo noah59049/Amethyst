@@ -4,6 +4,7 @@
 #include "movelist.h"
 
 #include <algorithm>
+#include <cstdint>
 
 uint32_t getMVVLVAScore(move_t move) {
     if (mvs::isPromotion(move)) {

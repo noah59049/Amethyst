@@ -9,6 +9,11 @@
 #include <utility>
 #include <functional>
 #include <ios>
+#include <algorithm>
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+#include <limits>
 
 #include "flags.h"
 #include "chessboard.h"

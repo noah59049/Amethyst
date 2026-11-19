@@ -2,6 +2,7 @@
 #include "typedefs.h"
 
 #include <vector>
+#include <cstddef>
 
 namespace ttflags {
     constexpr ttflag_t EMPTY = 0;

@@ -1,5 +1,7 @@
 #include "tt.h"
 #include "uciopt.h"
+#include <cstddef>
+#include <vector>
 
 TT::TT() {
     table = std::vector<TTEntry>((uciopt::HASH << 20) / sizeof(TTEntry));

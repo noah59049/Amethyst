@@ -1,6 +1,9 @@
 #include "hce.h"
 #include "logarithm.h"
 #include "attacks.h"
+#include <array>
+#include <bit>
+#include <cstdint>
 
 namespace hce {
     /********************************\

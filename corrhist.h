@@ -2,6 +2,8 @@
 
 #include "typedefs.h"
 #include <vector>
+#include <cstddef>
+#include <cstdint>
 
 class PawnCorrhist {
 private:

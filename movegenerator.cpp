@@ -1,4 +1,8 @@
 #include "movegenerator.h"
+#include <algorithm>
+#include <cstddef>
+#include <cstdlib>
+#include <functional>
 
 move_t MoveGenerator::nextPseudolegalMove()  {
     if (stage == TT_MOVE) {

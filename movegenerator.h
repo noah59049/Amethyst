@@ -1,6 +1,7 @@
 #pragma once
 #include <array>
 #include <functional>
+#include <cstddef>
 
 #include "typedefs.h"
 #include "chessboard.h"
