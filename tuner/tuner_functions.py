@@ -33,7 +33,7 @@ DATASET_TYPES = ["train", "val", "all"]
 ##################################
 
 # Step 1: Load the library
-lib_path = "libamethyst_tuner.dylib"
+lib_path = "../build/release/libamethyst_tuner.dylib"
 libtuner = ctypes.cdll.LoadLibrary(lib_path)
 
 # Step 2: Set the argtypes of all functions from the library
