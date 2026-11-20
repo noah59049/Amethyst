@@ -3,3 +3,12 @@
 build/
 cmake-build-*/
 .vscode
+tuner/.ipynb_checkpoints
+tuner/ctypes_hashes.txt
+tuner/minirun_hashes.txt
+tuner/graphs
+tuner/*.pyc
+*.epd
+*.dylib
+tuner/NoahResults.txt
+tuner/.python-version
