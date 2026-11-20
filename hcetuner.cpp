@@ -24,7 +24,7 @@
 #include <vector>
 
 // "Baking in" the book name is not ideal, but it is somewhat difficult to pass in strings to a dylib in python.
-const std::string bookFilename = "Noah.epd";
+const std::string bookFilename = "../build/release/Noah.epd";
 
 std::vector<ChessBoard> readBook(const int length) {
     // Step 1: Initialize stuff
