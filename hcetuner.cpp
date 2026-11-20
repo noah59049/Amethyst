@@ -13,6 +13,7 @@
 #include "chessboard.h"
 #include "logarithm.h"
 #include "attacks.h"
+#include "hcetuner.h"
 
 #include <iostream>
 #include <fstream>
@@ -50,7 +51,7 @@ std::vector<ChessBoard> readBook(const int length) {
     return book;
 }
 
-extern "C" void getKingSquares (const int side, int arr[], const int length) {
+void getKingSquares_(const int side, int arr[], const int length) {
     std::vector<ChessBoard> boards = readBook(length);
 
     for (int i = 0; i < length; i++) {
@@ -73,7 +74,7 @@ extern "C" void getKingSquares (const int side, int arr[], const int length) {
     }
 }
 
-extern "C" void getMobility(const int side, int arr[], const int length) {
+void getMobility_(const int side, int arr[], const int length) {
     // NOTE: The array is implicitly 2D
     // So it is length*6
     // So arr[] is length 600 if length is 100
@@ -98,7 +99,7 @@ extern "C" void getMobility(const int side, int arr[], const int length) {
     } // end for loop over i
 } // end getMobility
 
-extern "C" void getPSTs(const int side, const int piece, const int maxPieces, int arr[], const int length) {
+void getPSTs_(const int side, const int piece, const int maxPieces, int arr[], const int length) {
     std::vector<ChessBoard> boards = readBook(length);
     for (int i = 0; i < length; i++) {
         const ChessBoard board = boards.at(i);
@@ -181,7 +182,7 @@ int get_phase(const std::string& fen) {
     return std::min(phase, 24);
 } // end get_phase method
 
-extern "C" void getPhases(int arr[], const int length) {
+void getPhases_(int arr[], const int length) {
     // Step 1: Initialize stuff
     std::ifstream file(bookFilename);
     std::string line;
@@ -204,7 +205,7 @@ extern "C" void getPhases(int arr[], const int length) {
     file.close();
 }
 
-extern "C" void getResults(float arr[], const int length) {
+void getResults_(float arr[], const int length) {
     // Step 1: Initialize stuff
     std::ifstream file(bookFilename);
     std::string line;
