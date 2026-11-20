@@ -7,6 +7,7 @@
  * Also, these C++ functions only deal with 1D arrays, even when the arrays are "actually" 2D
  * (for example, if you have 10000 fens, mobility is "actually" a tensor of size 10000*6,
  * but this treats it as a 1D array of size 60000.
+ * The first 6 elements in the array represent the pawn, knight, bishop, rook, queen, king mobility for the first FEN, and so on.
  * It is a simple matter for python to reshape the array.
  * See hcetuner.cpp for the actual implementations of these functions.
  */
